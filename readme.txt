@@ -1,6 +1,10 @@
 RayMini v0.2
+
 Author: Tamy Boubekeur (tamy.boubekeur@telecom-paristech.fr)
-RayMini is a minimal raytracer implemented in C++/OpenGL/Qt.
+        Axel Schumacher (axel.schumacher@gmail.com)
+        Bertrand Chazot (bertrand.chazot@gmail.com)
+        Samuel Mokrani (samuem.mokrani@gmail.com)
+
 This software package is meants to be distributed to Telecom ParisTech student only.
 
 Compiling
@@ -13,3 +17,4 @@ On linux:
  make
  ./raymini
 
+TODO: features
