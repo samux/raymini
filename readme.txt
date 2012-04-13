@@ -3,7 +3,7 @@ RayMini v0.2
 Author: Tamy Boubekeur (tamy.boubekeur@telecom-paristech.fr)
         Axel Schumacher (axel.schumacher@gmail.com)
         Bertrand Chazot (bertrand.chazot@gmail.com)
-        Samuel Mokrani (samuem.mokrani@gmail.com)
+        Samuel Mokrani (samuel.mokrani@gmail.com)
 
 This software package is meants to be distributed to Telecom ParisTech student only.
 
