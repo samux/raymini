@@ -10,6 +10,8 @@
 #include "Scene.h"
 #include <QProgressDialog>
 
+using namespace std;
+
 static RayTracer * instance = NULL;
 
 RayTracer * RayTracer::getInstance () {
@@ -62,19 +64,33 @@ QImage RayTracer::render (const Vec3Df & camPos,
             Vec3Df intersectionPoint;
             float smallestIntersectionDistance = 1000000.f;
             Vec3Df c (backgroundColor);
+            bool found = false;
             for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
+                if (found)
+                    break;
                 const Object & o = scene->getObjects()[k];
                 Ray ray (camPos-o.getTrans (), dir);
-                bool hasIntersection = ray.intersect (o.getBoundingBox (),
-                                                      intersectionPoint);
-                if (hasIntersection) {
-                    float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans (),
-                                                                          camPos);
-                    if (intersectionDistance < smallestIntersectionDistance) {
-                        c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                        smallestIntersectionDistance = intersectionDistance;
+                for(unsigned int l = 0; l < o.getMesh().getTriangles().size(); l++) {
+                    const Triangle & t = o.getMesh().getTriangles() [l];
+                    const Vertex & v0 = o.getMesh().getVertices() [t.getVertex(0)];
+                    const Vertex & v1 = o.getMesh().getVertices() [t.getVertex(1)];
+                    const Vertex & v2 = o.getMesh().getVertices() [t.getVertex(2)];
+                    bool hasIntersection = ray.intersect(v0, v1, v2);
+                    if (hasIntersection) {
+                        c = Vec3Df(255.0, 255.0, 255.0);
+                        /*float intersectionDistance = Vec3Df::squaredDistance (intersectionPoint + o.getTrans (),
+                                camPos);
+                        if (intersectionDistance < smallestIntersectionDistance) {
+                            c = 255.f * ((intersectionPoint - minBb) / rangeBb);
+                            smallestIntersectionDistance = intersectionDistance;
+                        }*/
+                        //cout << k << " " << l << " BIM" << endl;
+                        found = true;
+                        break;
                     }
+                    //cout << i << " " << j << " " << k << " " << l << endl;
                 }
+                //bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
             }
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
         }

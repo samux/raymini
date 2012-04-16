@@ -20,7 +20,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     unsigned int whichPlane;
     Vec3Df maxT;
     Vec3Df candidatePlane;
-    
+
     for (i=0; i<NUMDIM; i++)
         if (origin[i] < minBb[i]) {
             quadrant[i] = LEFT;
@@ -60,4 +60,20 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
             intersectionPoint[i] = candidatePlane[i];
         }
     return (true);			
+}
+
+bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
+    Vec3Df u = v1.getPos() - v3.getPos();
+    Vec3Df v = v2.getPos() - v3.getPos();
+    Vec3Df nn = Vec3Df::crossProduct(u, v);
+    if(Vec3Df::dotProduct(nn, v1.getNormal()) < 0) {
+        nn = -nn;
+    }
+    Vec3Df Otr = origin - v3.getPos();
+
+    float Ir = -Vec3Df::dotProduct(nn, Otr)/Vec3Df::dotProduct(nn, direction);
+    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/Vec3Df::dotProduct(nn, direction);
+    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/Vec3Df::dotProduct(nn, direction);
+
+    return (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (0<=Ir) && (Iu+Iv<=1);
 }
