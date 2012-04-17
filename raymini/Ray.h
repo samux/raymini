@@ -28,7 +28,7 @@ class Ray {
         inline Vec3Df & getDirection () { return direction; }
 
         bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
-        bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3);
+        bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3, Vertex & intersection);
 
     private:
         Vec3Df origin;

@@ -62,7 +62,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     return (true);			
 }
 
-bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
+bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3, Vertex & intersection) {
     Vec3Df u = v1.getPos() - v3.getPos();
     Vec3Df v = v2.getPos() - v3.getPos();
     Vec3Df nn = Vec3Df::crossProduct(u, v);
@@ -75,5 +75,14 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/Vec3Df::dotProduct(nn, direction);
     float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/Vec3Df::dotProduct(nn, direction);
 
-    return (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (0<=Ir) && (Iu+Iv<=1);
+    if ( (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (0<=Ir) && (Iu+Iv<=1) ) {
+        Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
+        Vec3Df normal = (1 - Iu)*v3.getNormal() + Iu*v1.getNormal() +
+                        (1 - Iv)*v3.getNormal() + Iv*v2.getNormal();
+        normal.normalize();
+        intersection.setPos(pos);
+        intersection.setNormal(normal);
+        return true;
+    }
+    return false;
 }
