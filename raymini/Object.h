@@ -14,14 +14,18 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "BoundingBox.h"
+#include "KDtree.h"
 
 class Object {
 public:
     inline Object () {}
     inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
         updateBoundingBox ();
+        tree = new KDtree(*this);
     }
-    virtual ~Object () {}
+    virtual ~Object () {
+        //delete tree;
+    }
 
     inline const Vec3Df & getTrans () const { return trans;}
     inline void setTrans (const Vec3Df & t) { trans = t; }
@@ -32,6 +36,8 @@ public:
     inline const Material & getMaterial () const { return mat; }
     inline Material & getMaterial () { return mat; }
 
+    inline const KDtree & getKDtree () const { return *tree; }
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
     
@@ -40,6 +46,7 @@ private:
     Material mat;
     BoundingBox bbox;
     Vec3Df trans;
+    KDtree *tree;
 };
 
 

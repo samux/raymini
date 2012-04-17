@@ -133,14 +133,22 @@ public:
         splitBoundingBoxArray[6] = BoundingBox (minBb + Vec3Df (0.0, y_2, z_2), med + Vec3Df (0.0, y_2, z_2));
         splitBoundingBoxArray[7] = BoundingBox (minBb + Vec3Df (x_2, y_2, z_2), med + Vec3Df (x_2, y_2, z_2));
     }
+    inline void split(float cut, unsigned int i, BoundingBox &left, BoundingBox &right) const {
+        left  = BoundingBox(minBb, maxBb);
+        right = BoundingBox(minBb, maxBb);
+
+        left.maxBb[i] = cut;
+        right.minBb[i] = cut;
+    }
     bool intersectRay (const Vec3Df & origin, const Vec3Df & direction, Vec3Df & intersection) const;
+
+    inline float getMiddle (unsigned int i) const {
+        return ((minBb[i] + maxBb[i]) / 2.0);
+    }
 
 private:
     inline float getWHL (unsigned int i) const {
         return (maxBb[i] - minBb[i]);
-    }
-    inline float getMiddle (unsigned int i) const {
-        return ((minBb[i] + maxBb[i]) / 2.0);
     }
     static inline bool isIn (float x, float min, float max) {
         return (x >= min && x <= max);
