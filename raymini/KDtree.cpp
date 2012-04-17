@@ -23,7 +23,7 @@ void KDtree::next() {
     bBox.split(med, splitAxis, lb, rb);
 
     vector<unsigned> lt, rt;
-    splitTriangles(med, lt, rt);
+    splitTriangles(lb, rb, lt, rt);
 
     triangles.clear();//not a leaf
 
@@ -48,17 +48,18 @@ void KDtree::findSplitAxis() {
     }
 }
 
-void KDtree::splitTriangles(float med, std::vector<unsigned> &left, std::vector<unsigned> &right) const {
+void KDtree::splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
+                            std::vector<unsigned> &left, std::vector<unsigned> &right) const {
     for(unsigned t : triangles) {
         bool isInLeft = false;
         bool isInRight = false;
 
         for(unsigned i = 0 ; i<3 ; i++) {
             unsigned v = mesh.getTriangles()[t].getVertex(i);
-            if(mesh.getVertices()[v].getPos()[splitAxis] <= med) {
+            const Vec3Df & p = mesh.getVertices()[v].getPos();
+            if(lb.contains(p))
                 isInLeft = true;
-            }
-            else
+            else if(rb.contains(p))
                 isInRight = true;
         }
 

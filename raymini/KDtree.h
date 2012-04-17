@@ -70,5 +70,6 @@ private:
     void next();
 
     inline void findSplitAxis();
-    inline void splitTriangles(float med, std::vector<unsigned> &left, std::vector<unsigned> &right) const;
+    inline void splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
+                               std::vector<unsigned> &left, std::vector<unsigned> &right) const;
 };
