@@ -81,8 +81,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 if (o.getKDtree().intersect(ray)) {
                     float intersectionDistance = ray.getIntersectionDistance();
                     const Vertex &intersection = ray.getIntersection();
-                    // float noise = perlin(intersection.getPos());
-                    // brdf.colorDif = noise*o.getMaterial().getColor();
+                    float noise = perlin(intersection.getPos());
+                    brdf.colorDif = noise*o.getMaterial().getColor();
                     if(intersectionDistance < smallestIntersectionDistance) {
                         //c = 255.f * ((intersection.getPos() - minBb) / rangeBb);
                         c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
