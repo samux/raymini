@@ -35,6 +35,7 @@ public slots :
     void exportGLImage ();
     void exportRayImage ();
     void about ();
+	void changeAntiAliasingType(int index);
     
 private :
     void initControlWidget ();

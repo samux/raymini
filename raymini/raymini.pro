@@ -18,6 +18,7 @@ HEADERS = Window.h \
           Ray.h \
           KDtree.h \
           Noise.h \
+		  Model.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -36,6 +37,7 @@ SOURCES = Window.cpp \
           KDtree.cpp \
           Brdf.cpp \
           Noise.cpp \
+		  Model.cpp \
           Main.cpp 
           
     DESTDIR=.
