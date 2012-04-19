@@ -54,7 +54,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     for (i = 0; i < NUMDIM; i++)
         if (whichPlane != i) {
             intersectionPoint[i] = origin[i] + maxT[whichPlane] *direction[i];
-            if (intersectionPoint[i] < minBb[i] || intersectionPoint[i] > maxBb[i])
+            if (intersectionPoint[i] < minBb[i] - 0.1 || intersectionPoint[i] > maxBb[i] + 0.1)
                 return (false);
         } else {
             intersectionPoint[i] = candidatePlane[i];

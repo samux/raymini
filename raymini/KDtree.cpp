@@ -106,35 +106,26 @@ bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Vec3Df 
             return false;
 
         if(leftIntersection && rightIntersection) {
-            Vertex lIi, rIi;
+            KDtree * far;
+            KDtree * near;
 
-            leftIntersection = left->intersect(ray, lIi, camPos);
-            rightIntersection = right->intersect(ray, rIi, camPos);
+            float iDistanceL = Vec3Df::squaredDistance (lI + transform, camPos);
+            float iDistanceR = Vec3Df::squaredDistance (rI + transform, camPos);
 
-            if(!leftIntersection) {
-                intersectionPoint = rIi;
-                return rightIntersection;
-            }
-            if(!rightIntersection) {
-                intersectionPoint = lIi;
-                return leftIntersection;
-            }
+            far = (iDistanceR > iDistanceL) ? right : left;
+            near = (iDistanceR > iDistanceL) ? left : right;
 
-            float iDistanceL = Vec3Df::squaredDistance (lIi.getPos() + transform, camPos);
-            float iDistanceR = Vec3Df::squaredDistance (rIi.getPos() + transform, camPos);
-
-            if(iDistanceL < iDistanceR)
-                intersectionPoint = lIi;
-            else
-                intersectionPoint = rIi;
-
-            return true;
+            if(near->intersect(ray, intersectionPoint, camPos))
+                return true;
+            return far->intersect(ray, intersectionPoint, camPos);
         }
 
         if(leftIntersection)
                 return left->intersect(ray, intersectionPoint, camPos);
         else
                 return right->intersect(ray, intersectionPoint, camPos);
+
+
     }
 }
 

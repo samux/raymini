@@ -49,24 +49,37 @@ void Scene::buildDefaultScene () {
     Material groundMat;
     Object ground (groundMesh, groundMat);    
     objects.push_back (ground);
+
     Mesh ramMesh;
-    ramMesh.loadOFF ("models/ram.off");
+    ramMesh.loadOFF ("models/ram1.off");
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
     ram.setTrans (Vec3Df (1.f, 0.5f, 0.f));
     objects.push_back (ram);
+
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
     Material rhinoMat (1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f));
     Object rhino (rhinoMesh, rhinoMat);
-    rhino.setTrans (Vec3Df (-1.f, -1.0f, 0.4f));
+    rhino.setTrans (Vec3Df (-1.f, -0.0f, 0.6f));
     objects.push_back (rhino);
+
     Mesh gargMesh;
     gargMesh.loadOFF ("models/gargoyle.off");
     Material gargMat (0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
     Object garg (gargMesh, gargMat);
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.1f));
     objects.push_back (garg);
+
+
+    /*Mesh sphereMesh;
+    sphereMesh.loadOFF ("models/sphere.off");
+    Material sphereMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    Object sphere (sphereMesh, sphereMat);
+    sphere.setTrans (Vec3Df (0.f, 0.f, 0.f));
+    objects.push_back (sphere);*/
+
+
     Light l (Vec3Df (3.0f, 3.0f, 3.0f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
     lights.push_back (l);
 }
