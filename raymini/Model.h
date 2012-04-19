@@ -16,7 +16,7 @@ enum AntiAliasingType
 {
 	NO_ANTIALIASING,
 	UNIFORM,
-	PENTAGONAL,
+	POLYGONAL,
 	STOCHASTIC
 };
 

@@ -5,12 +5,13 @@
 // All rights reserved.
 // *********************************************************
 
+#include <QProgressDialog>
+
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"
-#include <QProgressDialog>
-
 #include "Brdf.h"
+#include "Model.h"
 
 using namespace std;
 
@@ -27,6 +28,70 @@ void RayTracer::destroyInstance () {
         delete instance;
         instance = NULL;
     }
+}
+
+/** Prepare a list of anti aliasing offsets for both i and j */
+vector<pair<float, float> > prepareAntiAliasingOffsets()
+{
+	// Each ray picking is translated to fill the pixel which bottom left coordinate is i,j
+	Model *model = Model::getInstance();
+	unsigned int rays = model->getAntiAliasingRaysPerPixel();
+	AntiAliasingType type = model->getAntiAliasingType();
+	vector<pair<float, float>> offsets;
+
+	switch (type)
+	{
+		case NO_ANTIALIASING:
+			// One ray on the bottom left of the pixel
+			offsets.push_back(make_pair(0.0, 0.0));
+			break;
+
+		case UNIFORM:
+			{
+				// Fill as well as possible the space (optimal if rays is a square)
+				// Chosen algorithm:
+				// - cut the pixel in ceil(sqrt(rays))^2 cells
+				// - pick each center until rays is reached
+				unsigned int raysSqrt = ceil(sqrt(rays));
+				float cutting = 1.0/(float)(2*raysSqrt);
+				unsigned int count = 0;
+				for (unsigned int i=0; i<raysSqrt && count<rays; i++) {
+					for (unsigned int j=0; j<raysSqrt && count<rays; j++) {
+						offsets.push_back(make_pair(float(2*i+1)*cutting, float(2*j+1)*cutting));
+						count++;
+					}
+				}
+			}
+			break;
+
+		case POLYGONAL:
+			{
+				// Turn around a circle
+				float angleStep = 2.0*M_PI/float(rays);
+				float angle = 0.0;
+				for (unsigned int i=0; i<rays; i++) {
+					float cosAngle = (cos(angle) + 1.0) / 2.0;
+					float sinAngle = (sin(angle) + 1.0) / 2.0;
+					offsets.push_back(make_pair(cosAngle, sinAngle));
+					angle += angleStep;
+				}
+			}
+			break;
+
+		case STOCHASTIC:
+			{
+				// Picked using randomness
+				srand(time(NULL));
+				for (unsigned int i=0; i<rays; i++) {
+					float di = (float)rand() / (float)RAND_MAX;
+					float dj = (float)rand() / (float)RAND_MAX;
+					offsets.push_back(make_pair(di, dj));
+				}
+			}
+			break;
+	}
+
+	return offsets;
 }
 
 inline int clamp (float f, int inf, int sup) {
@@ -51,61 +116,61 @@ QImage RayTracer::render (const Vec3Df & camPos,
     for(const auto &light : scene->getLights())
         posLight.push_back(light.getPos());
     Brdf brdf(posLight, Vec3Df(0,0,0), Vec3Df(1.0,1.0,1.0), Vec3Df(0.5,0.5,0.0), 1.0, 1.0, 0.1, 1.5);
-    const BoundingBox & bbox = scene->getBoundingBox ();
-    const Vec3Df & minBb = bbox.getMin ();
-    const Vec3Df & maxBb = bbox.getMax ();
-    const Vec3Df rangeBb = maxBb - minBb;
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
-    for (unsigned int i = 0; i < screenWidth; i++) {
-        progressDialog.setValue ((100*i)/screenWidth);
-        for (unsigned int j = 0; j < screenHeight; j++) {
+
+	vector<pair<float, float>> offsets = prepareAntiAliasingOffsets();
+
+	// For each pixel
+	for (unsigned int i = 0; i < screenWidth; i++) {
+		progressDialog.setValue ((100*i)/screenWidth);
+		for (unsigned int j = 0; j < screenHeight; j++) {
 
 			Vec3Df c (backgroundColor);
 			bool isColorInit(false);
 
-			for (float di = -0.5; di<=0.5; di+=0.25) {
-				for (float dj = -0.5; dj<=0.5; dj+=0.25) {
+			// For each ray in each pixel
+			for (pair<float, float> offset : offsets) {
+				float tanX = tan (fieldOfView)*aspectRatio;
+				float tanY = tan (fieldOfView);
+				Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
+				Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f)/screenHeight * tanY * upVector;
+				Vec3Df step = stepX + stepY;
+				Vec3Df dir = direction + step;
+				dir.normalize ();
 
-					float tanX = tan (fieldOfView)*aspectRatio;
-					float tanY = tan (fieldOfView);
-					Vec3Df stepX = (float (i) + di - screenWidth/2.f)/screenWidth * tanX * rightVector;
-					Vec3Df stepY = (float (j) + dj - screenHeight/2.f)/screenHeight * tanY * upVector;
-					Vec3Df step = stepX + stepY;
-					Vec3Df dir = direction + step;
-					dir.normalize ();
+				float smallestIntersectionDistance = 1000000.f;
+				Vec3Df addedColor(backgroundColor);
 
-					float smallestIntersectionDistance = 1000000.f;
-					Vec3Df addedColor(backgroundColor);
-					for (Object & o : scene->getObjects()) {
-						brdf.colorDif = o.getMaterial().getColor();
-						brdf.Kd = o.getMaterial().getDiffuse();
-						brdf.Ks = o.getMaterial().getSpecular();
-						Ray ray (camPos-o.getTrans (), dir);
+				// For each object
+				for (Object & o : scene->getObjects()) {
+					brdf.colorDif = o.getMaterial().getColor();
+					brdf.Kd = o.getMaterial().getDiffuse();
+					brdf.Ks = o.getMaterial().getSpecular();
+					Ray ray (camPos-o.getTrans (), dir);
 
-						if (o.getKDtree().intersect(ray)) {
-							float intersectionDistance = ray.getIntersectionDistance();
-							const Vertex &intersection = ray.getIntersection();
-							if(intersectionDistance < smallestIntersectionDistance) {
-								addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+					if (o.getKDtree().intersect(ray)) {
+						float intersectionDistance = ray.getIntersectionDistance();
+						const Vertex &intersection = ray.getIntersection();
+						if(intersectionDistance < smallestIntersectionDistance) {
+							addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
 
-								smallestIntersectionDistance = intersectionDistance;
-							}
+							smallestIntersectionDistance = intersectionDistance;
 						}
 					}
-					if (isColorInit) {
-						c += addedColor;
-					} else {
-						c = addedColor;
-						isColorInit = true;
-					}
-
 				}
+				if (isColorInit) {
+					c += addedColor;
+				} else {
+					c = addedColor;
+					isColorInit = true;
+				}
+
 			}
-			c /= 16;
+			c /= offsets.size();
 			image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
 		}
-    }
+	}
     progressDialog.setValue (100);
     return image;
 }

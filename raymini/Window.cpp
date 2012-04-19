@@ -149,7 +149,7 @@ void Window::changeAntiAliasingType(int index)
 			break;
 		case 3:
 			rays = 5;
-			type = PENTAGONAL;
+			type = POLYGONAL;
 			break;
 		case 4:
 			rays = 5;
