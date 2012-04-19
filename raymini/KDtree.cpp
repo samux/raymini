@@ -70,3 +70,69 @@ void KDtree::splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
     }
 }
 
+bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Object & o, const Vec3Df & camPos) const {
+    const Mesh & mesh = o.getMesh();
+    const Vec3Df & transform = o.getTrans();
+
+    if(splitAxis ==  Axis::NONE) {
+        float smallestIntersectionDistance = 1000000.f;
+        bool hasIntersection = false;
+        for(unsigned idT : triangles) {
+            const Triangle & t = mesh.getTriangles()[idT];
+            const Vertex & v0 = mesh.getVertices() [t.getVertex(0)];
+            const Vertex & v1 = mesh.getVertices() [t.getVertex(1)];
+            const Vertex & v2 = mesh.getVertices() [t.getVertex(2)];
+            Vertex intersection;
+            bool testIntersection = ray.intersect(v0, v1, v2, intersection);
+            if (testIntersection) {
+                hasIntersection = true;
+                float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + transform, camPos);
+                if(intersectionDistance < smallestIntersectionDistance) {
+                    smallestIntersectionDistance = intersectionDistance;
+                    intersectionPoint = intersection;
+                }
+            }
+        }
+        return hasIntersection;
+    }
+    else {
+        Vec3Df lI, rI;
+        bool leftIntersection = ray.intersect(left->bBox, lI);
+        bool rightIntersection = ray.intersect(right->bBox, rI);
+
+        if(!rightIntersection &&  !leftIntersection)
+            return false;
+
+        if(leftIntersection && rightIntersection) {
+            Vertex lIi, rIi;
+
+            leftIntersection = left->intersect(ray, lIi, o, camPos);
+            rightIntersection = right->intersect(ray, rIi, o, camPos);
+
+            if(!leftIntersection) {
+                intersectionPoint = rIi;
+                return rightIntersection;
+            }
+            if(!rightIntersection) {
+                intersectionPoint = lIi;
+                return leftIntersection;
+            }
+
+            float iDistanceL = Vec3Df::squaredDistance (lIi.getPos() + transform, camPos);
+            float iDistanceR = Vec3Df::squaredDistance (rIi.getPos() + transform, camPos);
+
+            if(iDistanceL < iDistanceR)
+                intersectionPoint = lIi;
+            else
+                intersectionPoint = rIi;
+
+            return true;
+        }
+
+        if(leftIntersection)
+                return left->intersect(ray, intersectionPoint, o, camPos);
+        else
+                return right->intersect(ray, intersectionPoint, o, camPos);
+    }
+}
+

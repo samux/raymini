@@ -48,8 +48,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
     vector<Vec3Df> posLight;
-    for(unsigned int i = 0; i < scene->getLights().size(); i++)
-        posLight.push_back(scene->getLights()[i].getPos());
+    for(const auto &light : scene->getLights())
+        posLight.push_back(light.getPos());
     Brdf brdf(posLight, Vec3Df(0,0,0), Vec3Df(1.0,1.0,1.0), Vec3Df(0.5,0.5,0.0), 1.0, 1.0, 0.1, 1.5);
     const BoundingBox & bbox = scene->getBoundingBox ();
     const Vec3Df & minBb = bbox.getMin ();
@@ -67,30 +67,22 @@ QImage RayTracer::render (const Vec3Df & camPos,
             Vec3Df step = stepX + stepY;
             Vec3Df dir = direction + step;
             dir.normalize ();
-            Vec3Df intersectionPoint;
-            Vertex intersection;
+
             float smallestIntersectionDistance = 1000000.f;
             Vec3Df c (backgroundColor);
-            for (unsigned int k = 0; k < scene->getObjects().size (); k++) {
-                const Object & o = scene->getObjects()[k];
+            for (const Object & o : scene->getObjects()) {
                 brdf.colorDif = o.getMaterial().getColor();
                 brdf.Kd = o.getMaterial().getDiffuse();
                 brdf.Ks = o.getMaterial().getSpecular();
                 Ray ray (camPos-o.getTrans (), dir);
-                //bool hasIntersection = ray.intersect (o.getBoundingBox (), intersectionPoint);
-                for(unsigned int l = 0; l < o.getMesh().getTriangles().size(); l++) {
-                    const Triangle & t = o.getMesh().getTriangles() [l];
-                    const Vertex & v0 = o.getMesh().getVertices() [t.getVertex(0)];
-                    const Vertex & v1 = o.getMesh().getVertices() [t.getVertex(1)];
-                    const Vertex & v2 = o.getMesh().getVertices() [t.getVertex(2)];
-                    bool hasIntersection = ray.intersect(v0, v1, v2, intersection);
-                    if (hasIntersection) {
-                        float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + o.getTrans (), camPos);
-                        if(intersectionDistance < smallestIntersectionDistance) {
-                            //c = 255.f * ((intersectionPoint - minBb) / rangeBb);
-                            c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-                            smallestIntersectionDistance = intersectionDistance;
-                        }
+                Vertex intersection;
+                bool hasIntersection = o.getKDtree().intersect(ray, intersection, o, camPos);
+                if (hasIntersection) {
+                    float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + o.getTrans (), camPos);
+                    if(intersectionDistance < smallestIntersectionDistance) {
+                        c = 255.f * ((intersection.getPos() - minBb) / rangeBb);
+                        //c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+                        smallestIntersectionDistance = intersectionDistance;
                     }
                 }
             }

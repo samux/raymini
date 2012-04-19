@@ -6,6 +6,8 @@
 #include "Vec3D.h"
 #include "BoundingBox.h"
 
+#include "Ray.h"
+
 class Object;
 
 enum Axis {X = 0, Y = 1, Z = 2, NONE = -1};
@@ -57,6 +59,8 @@ public:
             f(this);
     }
 
+    bool intersect(const Ray &ray, Vertex & intersection,
+                   const Object & o, const Vec3Df & camPos) const;
 private:
     KDtree(const Mesh &mesh, const std::vector<unsigned> &triangles,
            const BoundingBox &boundingBox):
