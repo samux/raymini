@@ -54,15 +54,16 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     for (i = 0; i < NUMDIM; i++)
         if (whichPlane != i) {
             intersectionPoint[i] = origin[i] + maxT[whichPlane] *direction[i];
-            if (intersectionPoint[i] < minBb[i] - 0.1 || intersectionPoint[i] > maxBb[i] + 0.1)
+            if (intersectionPoint[i] < minBb[i] - BBOX_INTERSEC_DELTA ||
+                intersectionPoint[i] > maxBb[i] + BBOX_INTERSEC_DELTA)
                 return (false);
         } else {
             intersectionPoint[i] = candidatePlane[i];
         }
-    return (true);			
+    return (true);
 }
 
-bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3, Vertex & intersection) const{
+bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     Vec3Df u = v1.getPos() - v3.getPos();
     Vec3Df v = v2.getPos() - v3.getPos();
     Vec3Df nn = Vec3Df::crossProduct(u, v);
@@ -80,7 +81,12 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3, Ver
         Vec3Df normal = (1 - Iu)*v3.getNormal() + Iu*v1.getNormal() +
                         (1 - Iv)*v3.getNormal() + Iv*v2.getNormal();
         normal.normalize();
-        intersection = {pos, normal};
+        float distance = Vec3Df::squaredDistance (pos, origin);
+        if(!hasIntersection || distance < intersectionDistance) {
+            hasIntersection = true;
+            intersectionDistance = distance;
+            intersection = {pos, normal};
+        }
         return true;
     }
     return false;

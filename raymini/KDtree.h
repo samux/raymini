@@ -57,8 +57,8 @@ public:
             f(this);
     }
 
-    bool intersect(const Ray &ray, Vertex & intersection,
-                   const Vec3Df & camPos) const;
+    bool intersect(Ray &ray) const;
+
 private:
     KDtree(const Object &o, const std::vector<unsigned> &triangles,
            const BoundingBox &boundingBox):

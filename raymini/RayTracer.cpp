@@ -38,13 +38,13 @@ inline int clamp (float f, int inf, int sup) {
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
 QImage RayTracer::render (const Vec3Df & camPos,
-        const Vec3Df & direction,
-        const Vec3Df & upVector,
-        const Vec3Df & rightVector,
-        float fieldOfView,
-        float aspectRatio,
-        unsigned int screenWidth,
-        unsigned int screenHeight) {
+                          const Vec3Df & direction,
+                          const Vec3Df & upVector,
+                          const Vec3Df & rightVector,
+                          float fieldOfView,
+                          float aspectRatio,
+                          unsigned int screenWidth,
+                          unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
     vector<Vec3Df> posLight;
@@ -67,7 +67,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
             Vec3Df step = stepX + stepY;
             Vec3Df dir = direction + step;
             dir.normalize ();
-            Vertex intersection;
 
             float smallestIntersectionDistance = 1000000.f;
             Vec3Df c (backgroundColor);
@@ -76,9 +75,10 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 brdf.Kd = o.getMaterial().getDiffuse();
                 brdf.Ks = o.getMaterial().getSpecular();
                 Ray ray (camPos-o.getTrans (), dir);
-                bool hasIntersection = o.getKDtree().intersect(ray, intersection, camPos);
-                if (hasIntersection) {
-                    float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + o.getTrans (), camPos);
+
+                if (o.getKDtree().intersect(ray)) {
+                    float intersectionDistance = ray.getIntersectionDistance();
+                    const Vertex &intersection = ray.getIntersection();
                     if(intersectionDistance < smallestIntersectionDistance) {
                         //c = 255.f * ((intersection.getPos() - minBb) / rangeBb);
                         c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;

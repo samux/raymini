@@ -72,28 +72,18 @@ void KDtree::splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
     }
 }
 
-bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Vec3Df & camPos) const {
+bool KDtree::intersect(Ray &ray) const {
     const Mesh & mesh = o.getMesh();
-    const Vec3Df & transform = o.getTrans();
 
     if(splitAxis ==  Axis::NONE) {
-        float smallestIntersectionDistance = 1000000.f;
         bool hasIntersection = false;
         for(unsigned idT : triangles) {
             const Triangle & t = mesh.getTriangles()[idT];
             const Vertex & v0 = mesh.getVertices() [t.getVertex(0)];
             const Vertex & v1 = mesh.getVertices() [t.getVertex(1)];
             const Vertex & v2 = mesh.getVertices() [t.getVertex(2)];
-            Vertex intersection;
-            bool testIntersection = ray.intersect(v0, v1, v2, intersection);
-            if (testIntersection) {
-                hasIntersection = true;
-                float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + transform, camPos);
-                if(intersectionDistance < smallestIntersectionDistance) {
-                    smallestIntersectionDistance = intersectionDistance;
-                    intersectionPoint = intersection;
-                }
-            }
+
+            hasIntersection |= ray.intersect(v0, v1, v2);
         }
         return hasIntersection;
     }
@@ -102,30 +92,20 @@ bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Vec3Df 
         bool leftIntersection = ray.intersect(left->bBox, lI);
         bool rightIntersection = ray.intersect(right->bBox, rI);
 
-        if(!rightIntersection &&  !leftIntersection)
-            return false;
-
         if(leftIntersection && rightIntersection) {
             KDtree * far;
             KDtree * near;
 
-            float iDistanceL = Vec3Df::squaredDistance (lI + transform, camPos);
-            float iDistanceR = Vec3Df::squaredDistance (rI + transform, camPos);
+            float iDistanceL = Vec3Df::squaredDistance (lI, ray.getOrigin());
+            float iDistanceR = Vec3Df::squaredDistance (rI, ray.getOrigin());
 
             far = (iDistanceR > iDistanceL) ? right : left;
             near = (iDistanceR > iDistanceL) ? left : right;
 
-            if(near->intersect(ray, intersectionPoint, camPos))
-                return true;
-            return far->intersect(ray, intersectionPoint, camPos);
+            return near->intersect(ray) || far->intersect(ray);
         }
 
-        if(leftIntersection)
-                return left->intersect(ray, intersectionPoint, camPos);
-        else
-                return right->intersect(ray, intersectionPoint, camPos);
-
-
+        return (leftIntersection && left->intersect(ray)) || (rightIntersection && right->intersect(ray));
     }
 }
 

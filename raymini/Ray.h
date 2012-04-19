@@ -16,23 +16,31 @@
 #include "Vertex.h"
 
 class Ray {
-    public:
-        inline Ray () {}
-        inline Ray (const Vec3Df & origin, const Vec3Df & direction)
-            : origin (origin), direction (direction) {}
-        inline virtual ~Ray () {}
+public:
+    inline Ray () : hasIntersection(false) , intersectionDistance(1000000.f){}
+    inline Ray (const Vec3Df & origin, const Vec3Df & direction)
+        : origin (origin), direction (direction),
+          hasIntersection(false) , intersectionDistance(1000000.f){}
+    inline virtual ~Ray () {}
 
-        inline const Vec3Df & getOrigin () const { return origin; }
-        inline Vec3Df & getOrigin () { return origin; }
-        inline const Vec3Df & getDirection () const { return direction; }
-        inline Vec3Df & getDirection () { return direction; }
+    inline const Vec3Df & getOrigin () const { return origin; }
+    inline Vec3Df & getOrigin () { return origin; }
+    inline const Vec3Df & getDirection () const { return direction; }
+    inline Vec3Df & getDirection () { return direction; }
+    inline const Vertex& getIntersection() const { return intersection; }
+    inline float getIntersectionDistance() const { return intersectionDistance; }
 
-        bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
-        bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3, Vertex & intersection) const;
+    bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
+    bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3);
 
-    private:
-        Vec3Df origin;
-        Vec3Df direction;
+private:
+    static constexpr float BBOX_INTERSEC_DELTA = 0.1f;
+    Vec3Df origin;
+    Vec3Df direction;
+
+    bool hasIntersection;
+    Vertex intersection;
+    float intersectionDistance;
 };
 
 
