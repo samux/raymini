@@ -17,6 +17,7 @@ HEADERS = Window.h \
           RayTracer.h \
           Ray.h \
           KDtree.h \
+		  Model.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -34,6 +35,7 @@ SOURCES = Window.cpp \
           Ray.cpp \
           KDtree.cpp \
           Brdf.cpp \
+		  Model.cpp \
           Main.cpp 
           
     DESTDIR=.

@@ -36,6 +36,7 @@
 #include <QComboBox>
 
 #include "RayTracer.h"
+#include "Model.h"
 
 using namespace std;
 
@@ -123,6 +124,43 @@ void Window::about () {
                         "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
 }
 
+void Window::changeAntiAliasingType(int index)
+{
+	Model *model;
+	AntiAliasingType type;
+	unsigned int rays;
+
+	model = Model::getInstance();
+
+	switch (index)
+	{
+		default:
+		case 0:
+			type = NO_ANTIALIASING;
+			rays = 1;
+			break;
+		case 1:
+			rays = 4;
+			type = UNIFORM;
+			break;
+		case 2:
+			rays = 9;
+			type = UNIFORM;
+			break;
+		case 3:
+			rays = 5;
+			type = PENTAGONAL;
+			break;
+		case 4:
+			rays = 5;
+			type = STOCHASTIC;
+			break;
+	}
+
+	model->setAntiAliasingRaysPerPixel(rays);
+	model->setAntiAliasingType(type);
+}
+
 void Window::initControlWidget () {
     controlWidget = new QGroupBox ();
     QVBoxLayout * layout = new QVBoxLayout (controlWidget);
@@ -151,17 +189,17 @@ void Window::initControlWidget () {
     layout->addWidget (previewGroupBox);
     
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
-
-    QGroupBox * AAGroupBox = new QGroupBox ("Antialiasing", rayGroupBox);
-    QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
-	QComboBox *AAList = new QComboBox(AAGroupBox);
-    AAList->addItem("No antialiasing");
-    AAList->addItem("Uniform 4");
-    AAList->addItem("Uniform 9");
-    AAList->addItem("Pentagonal");
-    AAList->addItem("Stochastic 5");
-
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
+
+	QComboBox *antiAliasingList = new QComboBox(rayGroupBox);
+    antiAliasingList->addItem("No antialiasing");
+    antiAliasingList->addItem("Uniform 4");
+    antiAliasingList->addItem("Uniform 9");
+    antiAliasingList->addItem("Pentagonal");
+    antiAliasingList->addItem("Stochastic 5");
+	rayLayout->addWidget(antiAliasingList);
+	connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
+
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);
     connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));

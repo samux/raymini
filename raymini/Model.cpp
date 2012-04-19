@@ -1,14 +1,16 @@
 // *********************************************************
 // Model Class
 // Author: Axel Schumacher (axelschumacherberry@gmail.com).
-//
-// Description:
-// Provide current model state information, such as AA settings and others...
 // *********************************************************
 
 #include "Model.h"
 
 static Model *instance = NULL;
+
+Model::Model():
+	antiAliasingType(NO_ANTIALIASING),
+	antiAliasingRaysPerPixel(1)
+{}
 
 Model *Model::getInstance()
 {
@@ -19,22 +21,22 @@ Model *Model::getInstance()
 	return instance;
 }
 
-void setAntiAliasingType(AntiAliasingType type)
+void Model::setAntiAliasingType(AntiAliasingType type)
 {
 	antiAliasingType = type;
 }
 
-AntiAliasingType getAntiAliasingType() const
+AntiAliasingType Model::getAntiAliasingType() const
 {
 	return antiAliasingType;
 }
 
-void setAntiAliasingRaysPerPixel(unsigned int raysPerPixel)
+void Model::setAntiAliasingRaysPerPixel(unsigned int raysPerPixel)
 {
 	antiAliasingRaysPerPixel = raysPerPixel;
 }
 
-unsigned int getAntiAliasingRaysPerPixel() const
+unsigned int Model::getAntiAliasingRaysPerPixel() const
 {
 	return antiAliasingRaysPerPixel;
 }

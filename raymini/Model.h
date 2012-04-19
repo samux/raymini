@@ -4,9 +4,13 @@
 //
 // Description:
 // Provide current model state information, such as AA settings and others...
+//
+// May be useful for future Observable/Observer design pattern...
 // *********************************************************
 
 #pragma once
+
+#include <iostream>
 
 enum AntiAliasingType
 {
@@ -19,6 +23,9 @@ enum AntiAliasingType
 class Model
 {
 	public:
+		/** Default constructor */
+		Model();
+
 		/** Return the model instance of the program */
 		static Model *getInstance();
 
@@ -36,8 +43,8 @@ class Model
 
 	private:
 		/** AntiAliasing to be used*/
-		AntiAliasingType antiAliasingType(NO_ANTIALIASING);
+		AntiAliasingType antiAliasingType;
 
 		/** Number of rays used for each pixel */
-		unsigned int antiAliasingRaysPerPixel(1);
+		unsigned int antiAliasingRaysPerPixel;
 };
