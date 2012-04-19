@@ -33,6 +33,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStatusBar>
+#include <QComboBox>
 
 #include "RayTracer.h"
 
@@ -150,6 +151,16 @@ void Window::initControlWidget () {
     layout->addWidget (previewGroupBox);
     
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
+
+    QGroupBox * AAGroupBox = new QGroupBox ("Antialiasing", rayGroupBox);
+    QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
+	QComboBox *AAList = new QComboBox(AAGroupBox);
+    AAList->addItem("No antialiasing");
+    AAList->addItem("Uniform 4");
+    AAList->addItem("Uniform 9");
+    AAList->addItem("Pentagonal");
+    AAList->addItem("Stochastic 5");
+
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);

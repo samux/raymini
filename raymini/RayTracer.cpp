@@ -60,35 +60,51 @@ QImage RayTracer::render (const Vec3Df & camPos,
     for (unsigned int i = 0; i < screenWidth; i++) {
         progressDialog.setValue ((100*i)/screenWidth);
         for (unsigned int j = 0; j < screenHeight; j++) {
-            float tanX = tan (fieldOfView)*aspectRatio;
-            float tanY = tan (fieldOfView);
-            Vec3Df stepX = (float (i) - screenWidth/2.f)/screenWidth * tanX * rightVector;
-            Vec3Df stepY = (float (j) - screenHeight/2.f)/screenHeight * tanY * upVector;
-            Vec3Df step = stepX + stepY;
-            Vec3Df dir = direction + step;
-            dir.normalize ();
 
-            float smallestIntersectionDistance = 1000000.f;
-            Vec3Df c (backgroundColor);
-            for (Object & o : scene->getObjects()) {
-                brdf.colorDif = o.getMaterial().getColor();
-                brdf.Kd = o.getMaterial().getDiffuse();
-                brdf.Ks = o.getMaterial().getSpecular();
-                Ray ray (camPos-o.getTrans (), dir);
+			Vec3Df c (backgroundColor);
+			bool isColorInit(false);
 
-                if (o.getKDtree().intersect(ray)) {
-                    float intersectionDistance = ray.getIntersectionDistance();
-                    const Vertex &intersection = ray.getIntersection();
-                    if(intersectionDistance < smallestIntersectionDistance) {
-                        //c = 255.f * ((intersection.getPos() - minBb) / rangeBb);
-                        c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-                        smallestIntersectionDistance = intersectionDistance;
-                    }
-                }
-            }
+			for (float di = -0.5; di<=0.5; di+=0.25) {
+				for (float dj = -0.5; dj<=0.5; dj+=0.25) {
 
-            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
-        }
+					float tanX = tan (fieldOfView)*aspectRatio;
+					float tanY = tan (fieldOfView);
+					Vec3Df stepX = (float (i) + di - screenWidth/2.f)/screenWidth * tanX * rightVector;
+					Vec3Df stepY = (float (j) + dj - screenHeight/2.f)/screenHeight * tanY * upVector;
+					Vec3Df step = stepX + stepY;
+					Vec3Df dir = direction + step;
+					dir.normalize ();
+
+					float smallestIntersectionDistance = 1000000.f;
+					Vec3Df addedColor(backgroundColor);
+					for (Object & o : scene->getObjects()) {
+						brdf.colorDif = o.getMaterial().getColor();
+						brdf.Kd = o.getMaterial().getDiffuse();
+						brdf.Ks = o.getMaterial().getSpecular();
+						Ray ray (camPos-o.getTrans (), dir);
+
+						if (o.getKDtree().intersect(ray)) {
+							float intersectionDistance = ray.getIntersectionDistance();
+							const Vertex &intersection = ray.getIntersection();
+							if(intersectionDistance < smallestIntersectionDistance) {
+								addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+
+								smallestIntersectionDistance = intersectionDistance;
+							}
+						}
+					}
+					if (isColorInit) {
+						c += addedColor;
+					} else {
+						c = addedColor;
+						isColorInit = true;
+					}
+
+				}
+			}
+			c /= 16;
+			image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
+		}
     }
     progressDialog.setValue (100);
     return image;
