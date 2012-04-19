@@ -70,13 +70,13 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
             float smallestIntersectionDistance = 1000000.f;
             Vec3Df c (backgroundColor);
-            for (const Object & o : scene->getObjects()) {
+            for (Object & o : scene->getObjects()) {
                 brdf.colorDif = o.getMaterial().getColor();
                 brdf.Kd = o.getMaterial().getDiffuse();
                 brdf.Ks = o.getMaterial().getSpecular();
                 Ray ray (camPos-o.getTrans (), dir);
                 Vertex intersection;
-                bool hasIntersection = o.getKDtree().intersect(ray, intersection, o, camPos);
+                bool hasIntersection = o.getKDtree().intersect(ray, intersection, camPos);
                 if (hasIntersection) {
                     float intersectionDistance = Vec3Df::squaredDistance (intersection.getPos() + o.getTrans (), camPos);
                     if(intersectionDistance < smallestIntersectionDistance) {

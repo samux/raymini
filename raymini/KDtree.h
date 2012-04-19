@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <array>
-#include "Mesh.h"
 #include "Vec3D.h"
 #include "BoundingBox.h"
 
@@ -14,7 +13,7 @@ enum Axis {X = 0, Y = 1, Z = 2, NONE = -1};
 
 class KDtree {
 protected:
-    const Mesh &mesh;
+    const Object &o;
     std::vector<unsigned> triangles;// sth only if leaf;
     KDtree *left, *right;
     Axis splitAxis;
@@ -23,7 +22,6 @@ public:
     static const unsigned MIN_TRIANGLES = 20;
     const BoundingBox bBox;
 
-    KDtree() : mesh(Mesh()), left(nullptr), right(nullptr), splitAxis(Axis::NONE) {}
     KDtree(const Object &o);
 
     ~KDtree() {
@@ -60,16 +58,18 @@ public:
     }
 
     bool intersect(const Ray &ray, Vertex & intersection,
-                   const Object & o, const Vec3Df & camPos) const;
+                   const Vec3Df & camPos) const;
 private:
-    KDtree(const Mesh &mesh, const std::vector<unsigned> &triangles,
+    KDtree(const Object &o, const std::vector<unsigned> &triangles,
            const BoundingBox &boundingBox):
-        mesh(mesh), triangles(triangles),
+        o(o), triangles(triangles),
         left(nullptr), right(nullptr),
         splitAxis(Axis::NONE),
         bBox(boundingBox) {
         next();
     }
+
+    KDtree & operator=(const KDtree &t) = delete;
 
     void next();
 

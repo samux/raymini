@@ -3,10 +3,11 @@
 
 using namespace std;
 
-KDtree::KDtree(const Object &o):mesh(o.getMesh()),
+KDtree::KDtree(const Object &o):o(o),
                                 left(nullptr), right(nullptr),
                                 splitAxis(Axis::NONE),
                                 bBox(o.getBoundingBox()) {
+    const Mesh & mesh = o.getMesh();
     triangles.resize(mesh.getTriangles().size());
     for(unsigned int i = 0 ; i < mesh.getTriangles().size() ; i++)
         triangles[i] = i;
@@ -27,8 +28,8 @@ void KDtree::next() {
 
     triangles.clear();//not a leaf
 
-    left = new KDtree(mesh, lt, lb);
-    right = new KDtree(mesh, rt, rb);
+    left = new KDtree(o, lt, lb);
+    right = new KDtree(o, rt, rb);
 }
 
 void KDtree::findSplitAxis() {
@@ -50,6 +51,7 @@ void KDtree::findSplitAxis() {
 
 void KDtree::splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
                             std::vector<unsigned> &left, std::vector<unsigned> &right) const {
+    const Mesh & mesh = o.getMesh();
     for(unsigned t : triangles) {
         bool isInLeft = false;
         bool isInRight = false;
@@ -70,7 +72,7 @@ void KDtree::splitTriangles(const BoundingBox & lb, const BoundingBox & rb,
     }
 }
 
-bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Object & o, const Vec3Df & camPos) const {
+bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Vec3Df & camPos) const {
     const Mesh & mesh = o.getMesh();
     const Vec3Df & transform = o.getTrans();
 
@@ -106,8 +108,8 @@ bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Object 
         if(leftIntersection && rightIntersection) {
             Vertex lIi, rIi;
 
-            leftIntersection = left->intersect(ray, lIi, o, camPos);
-            rightIntersection = right->intersect(ray, rIi, o, camPos);
+            leftIntersection = left->intersect(ray, lIi, camPos);
+            rightIntersection = right->intersect(ray, rIi, camPos);
 
             if(!leftIntersection) {
                 intersectionPoint = rIi;
@@ -130,9 +132,9 @@ bool KDtree::intersect(const Ray &ray, Vertex & intersectionPoint, const Object 
         }
 
         if(leftIntersection)
-                return left->intersect(ray, intersectionPoint, o, camPos);
+                return left->intersect(ray, intersectionPoint, camPos);
         else
-                return right->intersect(ray, intersectionPoint, o, camPos);
+                return right->intersect(ray, intersectionPoint, camPos);
     }
 }
 

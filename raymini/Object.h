@@ -18,13 +18,22 @@
 
 class Object {
 public:
-    inline Object () {}
-    inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat) {
+    inline Object () : tree(nullptr){}
+    inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat), tree(nullptr) {
         updateBoundingBox ();
-        tree = new KDtree(*this);
     }
+    inline Object (const Object & o) : mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr) {}
     virtual ~Object () {
-        //delete tree;
+        delete tree;
+    }
+
+    inline Object & operator= (const Object & o) {
+        mesh = o.mesh;
+        mat = o.mat;
+        bbox = o.bbox;
+        trans = o.trans;
+        tree = nullptr;
+        return (*this);
     }
 
     inline const Vec3Df & getTrans () const { return trans;}
@@ -36,7 +45,11 @@ public:
     inline const Material & getMaterial () const { return mat; }
     inline Material & getMaterial () { return mat; }
 
-    inline const KDtree & getKDtree () const { return *tree; }
+    inline const KDtree & getKDtree () {
+        if(!tree)
+            tree = new KDtree(*this);
+        return *tree;
+    }
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
