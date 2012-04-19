@@ -11,6 +11,7 @@
 #include <QProgressDialog>
 
 #include "Brdf.h"
+#include "Noise.h"
 
 using namespace std;
 
@@ -71,6 +72,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             float smallestIntersectionDistance = 1000000.f;
             Vec3Df c (backgroundColor);
             for (Object & o : scene->getObjects()) {
+                static const Perlin perlin(0.5f, 4, 10);
                 brdf.colorDif = o.getMaterial().getColor();
                 brdf.Kd = o.getMaterial().getDiffuse();
                 brdf.Ks = o.getMaterial().getSpecular();
@@ -79,6 +81,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 if (o.getKDtree().intersect(ray)) {
                     float intersectionDistance = ray.getIntersectionDistance();
                     const Vertex &intersection = ray.getIntersection();
+                    // float noise = perlin(intersection.getPos());
+                    // brdf.colorDif = noise*o.getMaterial().getColor();
                     if(intersectionDistance < smallestIntersectionDistance) {
                         //c = 255.f * ((intersection.getPos() - minBb) / rangeBb);
                         c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
