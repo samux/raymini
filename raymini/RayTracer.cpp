@@ -130,7 +130,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
 			Vec3Df c (backgroundColor);
 			bool isColorInit(false);
       bool inter(false);
-      Vec3Df dir, inter_nearest;
+      Vec3Df dir;
+      Vertex inter_nearest;
 
 			// For each ray in each pixel
 			for (pair<float, float> offset : offsets) {
@@ -161,7 +162,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
 						if(intersectionDistance < smallestIntersectionDistance) {
 							addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
 							smallestIntersectionDistance = intersectionDistance;
-              inter_nearest = intersection.getPos();
+              inter_nearest = intersection;
               inter = true;
 						}
 					}
@@ -177,12 +178,12 @@ QImage RayTracer::render (const Vec3Df & camPos,
 			c /= offsets.size();
 
       if(inter) {
-          dir = posLight[0] - inter_nearest;
-          dir.normalize();
           for(Object & o : scene->getObjects()) {
-              Ray ray_light(inter_nearest - o.getTrans(), dir);
+              dir = posLight[0] - inter_nearest.getPos() - o.getTrans();
+              dir.normalize();
+              Ray ray_light(inter_nearest.getPos() - o.getTrans() + 0.000001*dir, dir);
               if(o.getKDtree().intersect(ray_light)) {
-                  if(ray_light.getIntersectionDistance() > 0.000000000001) {
+                  if(ray_light.getIntersectionDistance() > 0.0001) {
                       c = Vec3Df(0, 0, 0);
                       break;
                   }
