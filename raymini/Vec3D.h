@@ -242,6 +242,17 @@ public:
     static inline Vec3D interpolate (const Vec3D & u, const Vec3D & v, T alpha) {
         return (u * (1.0f - alpha) + v * alpha);
     }
+    static T getSurface(const Vec3D & A, const Vec3D & B, const Vec3D & C) {
+        Vec3D a = C - B;
+        Vec3D b = A - C;
+        Vec3D c = A - B;
+        float a_l = a.getLength();
+        float b_l = b.getLength();
+        float c_l = c.getLength();
+
+        float s = (a_l + b_l + c_l) / 2.0;
+        return (T)sqrt(s * (s - a_l) * (s - b_l) * (s - c_l));
+    }
 
     // cartesion to polar coordinates
     // result:

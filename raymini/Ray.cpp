@@ -63,6 +63,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
     return (true);
 }
 
+
 bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     Vec3Df u = v1.getPos() - v3.getPos();
     Vec3Df v = v2.getPos() - v3.getPos();
@@ -79,13 +80,16 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     if ( (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (0<=Ir) && (Iu+Iv<=1) ) {
         Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
 
-        Vec3Df n1 = (1-Iu)*v3.getNormal() + Iu*v1.getNormal();
-        n1.normalize();
+        float surf_v1 = Vec3Df::getSurface(v3.getPos(), v2.getPos(), pos);
+        float surf_v2 = Vec3Df::getSurface(v3.getPos(), v1.getPos(), pos);
+        float surf_v3 = Vec3Df::getSurface(v1.getPos(), v2.getPos(), pos);
 
-        Vec3Df n2 = (1 - Iv)*v3.getNormal() + Iv*v2.getNormal();
-        n2.normalize();
+        float surf_total = Vec3Df::getSurface(v1.getPos(), v2.getPos(), v3.getPos());
 
-        Vec3Df normal = n1 + n2;
+        Vec3Df normal = (surf_v3/surf_total)*v3.getNormal() +
+                        (surf_v2/surf_total)*v2.getNormal() +
+                        (surf_v1/surf_total)*v1.getNormal();
+
         normal.normalize();
 
         float distance = Vec3Df::squaredDistance (pos, origin);
