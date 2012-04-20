@@ -100,6 +100,7 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
+
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -126,6 +127,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
 	for (unsigned int i = 0; i < screenWidth; i++) {
 		progressDialog.setValue ((100*i)/screenWidth);
 		for (unsigned int j = 0; j < screenHeight; j++) {
+
 
 			Vec3Df c (backgroundColor);
 			bool isColorInit(false);
@@ -179,20 +181,28 @@ QImage RayTracer::render (const Vec3Df & camPos,
 			}
 			c /= offsets.size();
 
+      // TODO: do it for every light sources in the scene
+      unsigned int nb_impact = 0;
+      float visibilite = 1.0;
       if(inter) {
-          for(Object & o : scene->getObjects()) {
-              dir = posLight[0] - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
-              dir.normalize();
-              Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
-              if(o.getKDtree().intersect(ray_light)) {
-                  if(ray_light.getIntersectionDistance() > 0.000001) {
-                      c = Vec3Df(0, 0, 0);
-                      break;
+          vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
+          for(Vec3Df & impulse_l : pulse_light) {
+              for(Object & o : scene->getObjects()) {
+                  dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
+                  dir.normalize();
+                  Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
+                  if(o.getKDtree().intersect(ray_light)) {
+                      if(ray_light.getIntersectionDistance() > 0.000001) {
+                          nb_impact++;
+                          break;
+                      }
                   }
               }
           }
+          visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
       }
 
+      c = c*visibilite;
 
 			image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
 		}

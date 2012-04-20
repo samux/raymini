@@ -15,9 +15,9 @@
 
 class Light {
 public:
-    inline Light () : color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f) {}
-    inline Light (const Vec3Df & pos, const Vec3Df & color, float intensity)
-        : pos (pos), color (color), intensity (intensity) {}
+    inline Light () : color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f){}
+    inline Light (const Vec3Df & pos, float radius, const Vec3Df & normal, const Vec3Df & color, float intensity)
+        : pos (pos), radius (radius), normal(normal), color (color), intensity (intensity) {}
     virtual ~Light () {}
 
     inline const Vec3Df & getPos () const { return pos; }
@@ -28,11 +28,17 @@ public:
     inline void setColor (const Vec3Df & c) { color = c; }
     inline void setIntensity (float i) { intensity = i; }
 
+    std::vector<Vec3Df> generateImpulsion();
+
+    static unsigned int NB_IMPULSE;
     
 private:
     Vec3Df pos;
+    float radius;
+    Vec3Df normal;
     Vec3Df color;
     float intensity;
+    std::vector<Vec3Df> impulsion;
 };
 
 

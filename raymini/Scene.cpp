@@ -80,6 +80,6 @@ void Scene::buildDefaultScene () {
     objects.push_back (sphere);*/
 
 
-    Light l (Vec3Df (2.5f, .0f, 3.5f), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
+    Light l (Vec3Df (3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);
     lights.push_back (l);
 }
