@@ -30,12 +30,13 @@ public:
     
 public slots :
     void renderRayImage ();
+    void setRayEffect (int);
     void setBGColor ();
     void showRayImage ();
     void exportGLImage ();
     void exportRayImage ();
     void about ();
-	void changeAntiAliasingType(int index);
+    void changeAntiAliasingType(int index);
     
 private :
     void initControlWidget ();

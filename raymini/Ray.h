@@ -34,7 +34,7 @@ public:
     bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3);
 
 private:
-    static constexpr float BBOX_INTERSEC_DELTA = 0.05f;
+    static constexpr float BBOX_INTERSEC_DELTA = 0.1f;
     Vec3Df origin;
     Vec3Df direction;
 

@@ -17,6 +17,8 @@
 
 class RayTracer {
 public:
+    typedef enum {NoLight=0, Shadow=1, Mirror=2} rayEffect;
+    rayEffect rayMode;
     static RayTracer * getInstance ();
     static void destroyInstance ();
 

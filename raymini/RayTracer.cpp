@@ -134,7 +134,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
       bool inter(false);
       Vec3Df dir;
       Vertex inter_nearest;
-      Object * ob;
+      Object * ob = NULL;
+      static const Perlin perlin(0.5f, 4, 10);
 
 			// For each ray in each pixel
 			for (pair<float, float> offset : offsets) {
@@ -151,7 +152,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
 				// For each object
 				for (Object & o : scene->getObjects()) {
-					static const Perlin perlin(0.5f, 4, 10);
 					brdf.colorDif = o.getMaterial().getColor();
 					brdf.Kd = o.getMaterial().getDiffuse();
 					brdf.Ks = o.getMaterial().getSpecular();
@@ -182,27 +182,51 @@ QImage RayTracer::render (const Vec3Df & camPos,
 			c /= offsets.size();
 
       // TODO: do it for every light sources in the scene
-      unsigned int nb_impact = 0;
-      float visibilite = 1.0;
-      if(inter) {
-          vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
-          for(Vec3Df & impulse_l : pulse_light) {
-              for(Object & o : scene->getObjects()) {
-                  dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
-                  dir.normalize();
-                  Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
-                  if(o.getKDtree().intersect(ray_light)) {
-                      if(ray_light.getIntersectionDistance() > 0.000001) {
-                          nb_impact++;
-                          break;
+
+      if(rayMode != NoLight) {
+          unsigned int nb_impact = 0;
+          float visibilite = 1.0;
+          if(inter) {
+
+              vector<Vec3Df> pulse_light;
+              if(rayMode == Shadow)
+                  pulse_light = scene->getLights()[0].generateImpulsion();
+              if(rayMode == Mirror)
+                  pulse_light.push_back(scene->getLights()[0].getPos());
+
+              for(Vec3Df & impulse_l : pulse_light) {
+                  for(Object & o : scene->getObjects()) {
+                      brdf.colorDif = o.getMaterial().getColor();
+                      brdf.Kd = o.getMaterial().getDiffuse();
+                      brdf.Ks = o.getMaterial().getSpecular();
+
+                      dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
+                      dir.normalize();
+                      Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
+                      if(o.getKDtree().intersect(ray_light)) {
+                          const Vertex &intersection = ray_light.getIntersection();
+                          if(ray_light.getIntersectionDistance() > 0.000001) {
+                              switch(rayMode) {
+                                  case Shadow:
+                                      nb_impact++;
+                                      break;
+                                  case Mirror:
+                                      if(&o == ob) break;
+                                      c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+                                      break;
+                                  default:
+                                      break;
+                              }
+                              break;
+                          }
                       }
                   }
               }
+              visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
           }
-          visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
-      }
 
-      c = c*visibilite;
+          c = c*visibilite;
+      }
 
 			image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
 		}
