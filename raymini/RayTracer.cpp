@@ -114,9 +114,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     Scene * scene = Scene::getInstance ();
-    vector<Vec3Df> posLight;
-    for(const auto &light : scene->getLights())
-        posLight.push_back(light.getPos());
+
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
@@ -162,7 +160,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     }
                 }
                 if(hasIntersection)
-                    c += getColor(intersectedObject, closestIntersection, camPos, posLight);
+                    c += getColor(intersectedObject, closestIntersection, camPos);
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
@@ -174,13 +172,12 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
 Color RayTracer::getColor(const Object *intersectedObject,
                           const Vertex & closestIntersection,
-                          const Vec3Df & camPos,
-                          const std::vector<Vec3Df> &posLight) const {
+                          const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
     static const Perlin perlin(0.5f, 4, 10);
     float noise = perlin(closestIntersection.getPos());
 
-    Brdf brdf(posLight,
+    Brdf brdf(scene->getLights(),
               noise*intersectedObject->getMaterial().getColor(),
               Vec3Df(1.0,1.0,1.0),
               Vec3Df(0.5,0.5,0.0),
@@ -222,6 +219,7 @@ Color RayTracer::getColor(const Object *intersectedObject,
                ray_light.getIntersectionDistance() > 0.000001 &&
                &o !=intersectedObject) {
                 const Vertex &intersection = ray_light.getIntersection();
+                brdf.lights = {scene->getLights()[0]};
                 brdf.colorDif = o.getMaterial().getColor();
                 brdf.Kd = o.getMaterial().getDiffuse();
                 brdf.Ks = o.getMaterial().getSpecular();

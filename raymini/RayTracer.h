@@ -48,8 +48,7 @@ private:
 
     inline Color getColor(const Object * intersectedObject,
                           const Vertex & closestIntersection,
-                          const Vec3Df & camPos,
-                          const std::vector<Vec3Df> &posLight) const;
+                          const Vec3Df & camPos) const;
 };
 
 

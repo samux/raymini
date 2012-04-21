@@ -25,16 +25,21 @@ Vec3Df Brdf::getColor(const Vec3Df &p, const Vec3Df &n,
     Vec3Df ra=(posCam-p);
     ra.normalize();
 
-    for(const auto light : posLights) {
-        Vec3Df ir=(light - p);
+    for(const auto light : lights) {
+        Vec3Df currentColor;
+        Vec3Df ir=(light.getPos() - p);
         ir.normalize();
 
-        if(type&Ambient)
-            color += ambient();
         if(type&Lambert)
-            color += lambert(ir, n);
+            currentColor += lambert(ir, n);
         if(type&Phong)
-            color += phong(ra, ir, n);
+            currentColor += phong(ra, ir, n);
+
+        color += light.getIntensity()*light.getColor()*currentColor;
     }
+
+    if(type&Ambient)
+        color += ambient();
+
     return color;
 }

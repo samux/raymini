@@ -3,26 +3,25 @@
 #include <vector>
 
 #include "Vec3D.h"
+#include "Light.h"
 
 class Brdf {
-private:
-    std::vector<Vec3Df> posLights;
-
 public:
     typedef enum {
         Ambient = 1,
         Lambert = 1<<1,
         Phong   = 1<<2,
     } Type;
+    std::vector<Light> lights;
     Vec3Df colorDif, colorSpec, colorAmbient;
     float Kd, Ks, Ka;
     float alpha; // Phong
 
-    Brdf(std::vector<Vec3Df> posLights,
+    Brdf(std::vector<Light> lights,
          Vec3Df colorDif, Vec3Df colorSpec, Vec3Df colorAmbient,
          float Kd, float Ks, float Ka,
          float alpha):
-        posLights(posLights),
+        lights(lights),
         colorDif(colorDif), colorSpec(colorSpec), colorAmbient(colorAmbient),
         Kd(Kd), Ks(Ks), Ka(Ka),
         alpha(alpha) {};
