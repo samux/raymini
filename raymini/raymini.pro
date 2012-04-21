@@ -19,6 +19,7 @@ HEADERS = Window.h \
           KDtree.h \
           Noise.h \
           Model.h \
+          AntiAliasing.h \
           Color.h \
           Brdf.h
 
@@ -39,6 +40,7 @@ SOURCES = Window.cpp \
           Brdf.cpp \
           Noise.cpp \
           Model.cpp \
+          AntiAliasing.cpp \
           Color.cpp \
           Main.cpp
 
