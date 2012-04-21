@@ -28,10 +28,10 @@ public:
         alpha(alpha) {};
 
 
-    Vec3Df getColor(const Vec3Df &p, const Vec3Df &n, const Vec3Df posCam, int type = Ambient|Lambert|Phong);
+    Vec3Df getColor(const Vec3Df &p, const Vec3Df &n, const Vec3Df posCam, int type = Ambient|Lambert|Phong) const;
 
 private:
-    inline Vec3Df ambient();
-    inline Vec3Df lambert(Vec3Df i, Vec3Df n);
-    inline Vec3Df phong(Vec3Df r, Vec3Df i, Vec3Df n);
+    inline Vec3Df ambient() const;
+    inline Vec3Df lambert(Vec3Df i, Vec3Df n) const;
+    inline Vec3Df phong(Vec3Df r, Vec3Df i, Vec3Df n) const;
 };

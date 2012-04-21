@@ -101,7 +101,6 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
-
 // POINT D'ENTREE DU PROJET.
 // Le code suivant ray trace uniquement la boite englobante de la scene.
 // Il faut remplacer ce code par une veritable raytracer
@@ -118,7 +117,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     vector<Vec3Df> posLight;
     for(const auto &light : scene->getLights())
         posLight.push_back(light.getPos());
-    Brdf brdf(posLight, Vec3Df(0,0,0), Vec3Df(1.0,1.0,1.0), Vec3Df(0.5,0.5,0.0), 1.0, 1.0, 0.1, 1.5);
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
@@ -129,13 +127,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
         progressDialog.setValue ((100*i)/screenWidth);
         for (unsigned int j = 0; j < screenHeight; j++) {
 
-
             Color c (backgroundColor);
-            bool inter(false);
-            Vec3Df dir;
-            Vertex inter_nearest;
-            Object * ob = NULL;
-            static const Perlin perlin(0.5f, 4, 10);
 
             // For each ray in each pixel
             for (const pair<float, float> &offset : offsets) {
@@ -144,81 +136,33 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
                 Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f)/screenHeight * tanY * upVector;
                 Vec3Df step = stepX + stepY;
-                dir = direction + step;
+                Vec3Df dir = direction + step;
                 dir.normalize ();
 
+                bool hasIntersection = false;
+                Object *intersectedObject;
+                Vertex closestIntersection;
                 float smallestIntersectionDistance = 1000000.f;
-                Vec3Df addedColor(backgroundColor);
 
                 // For each object
                 for (Object & o : scene->getObjects()) {
-                    brdf.colorDif = o.getMaterial().getColor();
-                    brdf.Kd = o.getMaterial().getDiffuse();
-                    brdf.Ks = o.getMaterial().getSpecular();
                     Ray ray (camPos-o.getTrans (), dir);
 
                     if (o.getKDtree().intersect(ray)) {
                         float intersectionDistance = ray.getIntersectionDistance();
                         const Vertex &intersection = ray.getIntersection();
-                        float noise = perlin(intersection.getPos());
-                        brdf.colorDif = noise*o.getMaterial().getColor();
+
                         if(intersectionDistance < smallestIntersectionDistance) {
-                            addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
                             smallestIntersectionDistance = intersectionDistance;
-                            inter_nearest = intersection;
-                            inter = true;
-                            ob = &o;
+
+                            hasIntersection = true;
+                            intersectedObject = &o;
+                            closestIntersection = intersection;
                         }
                     }
                 }
-                c += addedColor;
-            }
-
-            // TODO: do it for every light sources in the scene
-
-            if(rayMode != NoLight) {
-                unsigned int nb_impact = 0;
-                float visibilite = 1.0;
-                if(inter) {
-
-                    vector<Vec3Df> pulse_light;
-                    if(rayMode == Shadow)
-                        pulse_light = scene->getLights()[0].generateImpulsion();
-                    if(rayMode == Mirror)
-                        pulse_light.push_back(scene->getLights()[0].getPos());
-
-                    for(Vec3Df & impulse_l : pulse_light) {
-                        for(Object & o : scene->getObjects()) {
-                            brdf.colorDif = o.getMaterial().getColor();
-                            brdf.Kd = o.getMaterial().getDiffuse();
-                            brdf.Ks = o.getMaterial().getSpecular();
-
-                            dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
-                            dir.normalize();
-                            Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
-                            if(o.getKDtree().intersect(ray_light)) {
-                                const Vertex &intersection = ray_light.getIntersection();
-                                if(ray_light.getIntersectionDistance() > 0.000001) {
-                                    switch(rayMode) {
-                                    case Shadow:
-                                        nb_impact++;
-                                        break;
-                                    case Mirror:
-                                        if(&o == ob) break;
-                                        c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-                                        break;
-                                    default:
-                                        break;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
-                }
-
-                c *= visibilite;
+                if(hasIntersection)
+                    c += getColor(intersectedObject, closestIntersection, camPos, posLight);
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
@@ -226,4 +170,66 @@ QImage RayTracer::render (const Vec3Df & camPos,
     }
     progressDialog.setValue (100);
     return image;
+}
+
+Color RayTracer::getColor(const Object *intersectedObject,
+                          const Vertex & closestIntersection,
+                          const Vec3Df & camPos,
+                          const std::vector<Vec3Df> &posLight) const {
+    Scene * scene = Scene::getInstance ();
+    static const Perlin perlin(0.5f, 4, 10);
+    float noise = perlin(closestIntersection.getPos());
+
+    Brdf brdf(posLight,
+              noise*intersectedObject->getMaterial().getColor(),
+              Vec3Df(1.0,1.0,1.0),
+              Vec3Df(0.5,0.5,0.0),
+              intersectedObject->getMaterial().getDiffuse(),
+              intersectedObject->getMaterial().getSpecular(),
+              0.1,
+              1.5);
+
+    Vec3Df color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    float visibilite = 1.f;
+
+    // TODO: do it for every light sources in the scene
+    if(rayMode == Shadow) {
+        unsigned int nb_impact = 0;
+        vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
+
+        for(const Vec3Df & impulse_l : pulse_light) {
+            for(Object & o : scene->getObjects()) {
+                Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans() + o.getTrans();
+                dir.normalize();
+                Ray ray_light(closestIntersection.getPos() + intersectedObject->getTrans() - o.getTrans() + 0.000001*dir, dir);
+                if(o.getKDtree().intersect(ray_light) &&
+                   ray_light.getIntersectionDistance() > 0.000001) {
+                    nb_impact++;
+                }
+            }
+        }
+        visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
+    }
+
+    if(rayMode == Mirror) {
+        const Vec3Df & impulse_l = scene->getLights()[0].getPos();
+        for(Object & o : scene->getObjects()) {
+
+            Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans() + o.getTrans();
+            dir.normalize();
+            Ray ray_light(closestIntersection.getPos() + intersectedObject->getTrans() - o.getTrans() + 0.000001*dir, dir);
+            if(o.getKDtree().intersect(ray_light) &&
+               ray_light.getIntersectionDistance() > 0.000001 &&
+               &o !=intersectedObject) {
+                const Vertex &intersection = ray_light.getIntersection();
+                brdf.colorDif = o.getMaterial().getColor();
+                brdf.Kd = o.getMaterial().getDiffuse();
+                brdf.Ks = o.getMaterial().getSpecular();
+
+                color = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+            }
+        }
+    }
+
+    return visibilite*color;
 }

@@ -12,13 +12,18 @@
 #include <vector>
 #include <QImage>
 #include <utility>
+#include <vector>
 
 #include "Vec3D.h"
 
+class Color;
+class Object;
+class Vertex;
+
 class RayTracer {
 public:
-    typedef enum {NoLight=0, Shadow=1, Mirror=2} rayEffect;
-    rayEffect rayMode;
+    enum RayEffect {NoLight=0, Shadow=1, Mirror=2};
+    RayEffect rayMode;
     static RayTracer * getInstance ();
     static void destroyInstance ();
 
@@ -40,6 +45,11 @@ protected:
 
 private:
     Vec3Df backgroundColor;
+
+    inline Color getColor(const Object * intersectedObject,
+                          const Vertex & closestIntersection,
+                          const Vec3Df & camPos,
+                          const std::vector<Vec3Df> &posLight) const;
 };
 
 
