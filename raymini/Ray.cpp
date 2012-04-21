@@ -73,22 +73,26 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     }
     Vec3Df Otr = origin - v3.getPos();
 
-    float Ir = -Vec3Df::dotProduct(nn, Otr)/Vec3Df::dotProduct(nn, direction);
-    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/Vec3Df::dotProduct(nn, direction);
-    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/Vec3Df::dotProduct(nn, direction);
+    float norm = Vec3Df::dotProduct(nn, direction);
 
-    if ( (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (0<=Ir) && (Iu+Iv<=1) ) {
+    float Ir = -Vec3Df::dotProduct(nn, Otr)/norm;
+    if(Ir<0)
+        return false;
+
+    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/norm;
+    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/norm;
+
+    if ( (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (Iu+Iv<=1) ) {
         Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
 
         float surf_v1 = Vec3Df::getSurface(v3.getPos(), v2.getPos(), pos);
         float surf_v2 = Vec3Df::getSurface(v3.getPos(), v1.getPos(), pos);
         float surf_v3 = Vec3Df::getSurface(v1.getPos(), v2.getPos(), pos);
 
-        float surf_total = Vec3Df::getSurface(v1.getPos(), v2.getPos(), v3.getPos());
-
-        Vec3Df normal = (surf_v3/surf_total)*v3.getNormal() +
-            (surf_v2/surf_total)*v2.getNormal() +
-            (surf_v1/surf_total)*v1.getNormal();
+        Vec3Df normal =
+            surf_v3*v3.getNormal() +
+            surf_v2*v2.getNormal() +
+            surf_v1*v1.getNormal();
 
         normal.normalize();
 
