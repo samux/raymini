@@ -49,10 +49,10 @@ Window::Window () : QMainWindow (NULL) {
         exit (1);
     }
     setCentralWidget (viewer);
-    
+
     QDockWidget * controlDockWidget = new QDockWidget (this);
     initControlWidget ();
-    
+
     controlDockWidget->setWidget (controlWidget);
     controlDockWidget->adjustSize ();
     addDockWidget (Qt::RightDockWidgetArea, controlDockWidget);
@@ -97,12 +97,12 @@ void Window::renderRayImage () {
     QTime timer;
     timer.start ();
     viewer->setRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
-                        fieldOfView, aspectRatio, screenWidth, screenHeight));
+                fieldOfView, aspectRatio, screenWidth, screenHeight));
     statusBar()->showMessage(QString ("Raytracing performed in ") +
-                             QString::number (timer.elapsed ()) +
-                             QString ("ms at ") +
-                             QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-                             QString (" screen resolution"));
+            QString::number (timer.elapsed ()) +
+            QString ("ms at ") +
+            QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
+            QString (" screen resolution"));
     viewer->setDisplayMode (GLViewer::RayDisplayMode);
 }
 
@@ -126,67 +126,67 @@ void Window::exportGLImage () {
 
 void Window::exportRayImage () {
     QString filename = QFileDialog::getSaveFileName (this,
-                                                     "Save ray-traced image",
-                                                     ".",
-                                                     "*.jpg *.bmp *.png");
+            "Save ray-traced image",
+            ".",
+            "*.jpg *.bmp *.png");
     if (!filename.isNull () && !filename.isEmpty ())
         viewer->getRayImage().save (filename);
 }
 
 void Window::about () {
     QMessageBox::about (this, 
-                        "About This Program", 
-                        "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
+            "About This Program", 
+            "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
 }
 
 void Window::changeAntiAliasingType(int index)
 {
-	Model *model;
-	AntiAliasingType type;
-	unsigned int rays;
+    Model *model;
+    AntiAliasingType type;
+    unsigned int rays;
 
-	model = Model::getInstance();
+    model = Model::getInstance();
 
-	switch (index)
-	{
-		default:
-		case 0:
-			type = NO_ANTIALIASING;
-			rays = 1;
-			break;
-		case 1:
-			rays = 4;
-			type = UNIFORM;
-			break;
-		case 2:
-			rays = 9;
-			type = UNIFORM;
-			break;
-		case 3:
-			rays = 5;
-			type = POLYGONAL;
-			break;
-		case 4:
-			rays = 5;
-			type = STOCHASTIC;
-			break;
-	}
+    switch (index)
+    {
+        default:
+        case 0:
+            type = NO_ANTIALIASING;
+            rays = 1;
+            break;
+        case 1:
+            rays = 4;
+            type = UNIFORM;
+            break;
+        case 2:
+            rays = 9;
+            type = UNIFORM;
+            break;
+        case 3:
+            rays = 5;
+            type = POLYGONAL;
+            break;
+        case 4:
+            rays = 5;
+            type = STOCHASTIC;
+            break;
+    }
 
-	model->setAntiAliasingRaysPerPixel(rays);
-	model->setAntiAliasingType(type);
+    model->setAntiAliasingRaysPerPixel(rays);
+    model->setAntiAliasingType(type);
 }
 
 void Window::initControlWidget () {
     controlWidget = new QGroupBox ();
     QVBoxLayout * layout = new QVBoxLayout (controlWidget);
-    
+
     QGroupBox * previewGroupBox = new QGroupBox ("Preview", controlWidget);
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
-    
+
     QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
     connect (wireframeCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setWireframe (bool)));
     previewLayout->addWidget (wireframeCheckBox);
-   
+
     QButtonGroup * modeButtonGroup = new QButtonGroup (previewGroupBox);
     modeButtonGroup->setExclusive (true);
     QRadioButton * flatButton = new QRadioButton ("Flat", previewGroupBox);
@@ -196,13 +196,13 @@ void Window::initControlWidget () {
     connect (modeButtonGroup, SIGNAL (buttonClicked (int)), viewer, SLOT (setRenderingMode (int)));
     previewLayout->addWidget (flatButton);
     previewLayout->addWidget (smoothButton);
-    
+
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
     connect (snapshotButton, SIGNAL (clicked ()) , this, SLOT (exportGLImage ()));
     previewLayout->addWidget (snapshotButton);
 
     layout->addWidget (previewGroupBox);
-    
+
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
 
@@ -240,18 +240,18 @@ void Window::initControlWidget () {
     rayLayout->addWidget (saveButton);
 
     layout->addWidget (rayGroupBox);
-    
+
     QGroupBox * globalGroupBox = new QGroupBox ("Global Settings", controlWidget);
     QVBoxLayout * globalLayout = new QVBoxLayout (globalGroupBox);
-    
+
     QPushButton * bgColorButton  = new QPushButton ("Background Color", globalGroupBox);
     connect (bgColorButton, SIGNAL (clicked()) , this, SLOT (setBGColor()));
     globalLayout->addWidget (bgColorButton);
-    
+
     QPushButton * aboutButton  = new QPushButton ("About", globalGroupBox);
     connect (aboutButton, SIGNAL (clicked()) , this, SLOT (about()));
     globalLayout->addWidget (aboutButton);
-    
+
     QPushButton * quitButton  = new QPushButton ("Quit", globalGroupBox);
     connect (quitButton, SIGNAL (clicked()) , qApp, SLOT (closeAllWindows()));
     globalLayout->addWidget (quitButton);

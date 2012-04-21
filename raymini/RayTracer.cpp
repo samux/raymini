@@ -34,65 +34,65 @@ void RayTracer::destroyInstance () {
 /** Prepare a list of anti aliasing offsets for both i and j */
 vector<pair<float, float> > prepareAntiAliasingOffsets()
 {
-	// Each ray picking is translated to fill the pixel which bottom left coordinate is i,j
-	Model *model = Model::getInstance();
-	unsigned int rays = model->getAntiAliasingRaysPerPixel();
-	AntiAliasingType type = model->getAntiAliasingType();
-	vector<pair<float, float>> offsets;
+    // Each ray picking is translated to fill the pixel which bottom left coordinate is i,j
+    Model *model = Model::getInstance();
+    unsigned int rays = model->getAntiAliasingRaysPerPixel();
+    AntiAliasingType type = model->getAntiAliasingType();
+    vector<pair<float, float>> offsets;
 
-	switch (type)
-	{
-		case NO_ANTIALIASING:
-			// One ray on the bottom left of the pixel
-			offsets.push_back(make_pair(0.0, 0.0));
-			break;
+    switch (type)
+    {
+        case NO_ANTIALIASING:
+            // One ray on the bottom left of the pixel
+            offsets.push_back(make_pair(0.0, 0.0));
+            break;
 
-		case UNIFORM:
-			{
-				// Fill as well as possible the space (optimal if rays is a square)
-				// Chosen algorithm:
-				// - cut the pixel in ceil(sqrt(rays))^2 cells
-				// - pick each center until rays is reached
-				unsigned int raysSqrt = ceil(sqrt(rays));
-				float cutting = 1.0/(float)(2*raysSqrt);
-				unsigned int count = 0;
-				for (unsigned int i=0; i<raysSqrt && count<rays; i++) {
-					for (unsigned int j=0; j<raysSqrt && count<rays; j++) {
-						offsets.push_back(make_pair(float(2*i+1)*cutting, float(2*j+1)*cutting));
-						count++;
-					}
-				}
-			}
-			break;
+        case UNIFORM:
+            {
+                // Fill as well as possible the space (optimal if rays is a square)
+                // Chosen algorithm:
+                // - cut the pixel in ceil(sqrt(rays))^2 cells
+                // - pick each center until rays is reached
+                unsigned int raysSqrt = ceil(sqrt(rays));
+                float cutting = 1.0/(float)(2*raysSqrt);
+                unsigned int count = 0;
+                for (unsigned int i=0; i<raysSqrt && count<rays; i++) {
+                    for (unsigned int j=0; j<raysSqrt && count<rays; j++) {
+                        offsets.push_back(make_pair(float(2*i+1)*cutting, float(2*j+1)*cutting));
+                        count++;
+                    }
+                }
+            }
+            break;
 
-		case POLYGONAL:
-			{
-				// Turn around a circle
-				float angleStep = 2.0*M_PI/float(rays);
-				float angle = 0.0;
-				for (unsigned int i=0; i<rays; i++) {
-					float cosAngle = (cos(angle) + 1.0) / 2.0;
-					float sinAngle = (sin(angle) + 1.0) / 2.0;
-					offsets.push_back(make_pair(cosAngle, sinAngle));
-					angle += angleStep;
-				}
-			}
-			break;
+        case POLYGONAL:
+            {
+                // Turn around a circle
+                float angleStep = 2.0*M_PI/float(rays);
+                float angle = 0.0;
+                for (unsigned int i=0; i<rays; i++) {
+                    float cosAngle = (cos(angle) + 1.0) / 2.0;
+                    float sinAngle = (sin(angle) + 1.0) / 2.0;
+                    offsets.push_back(make_pair(cosAngle, sinAngle));
+                    angle += angleStep;
+                }
+            }
+            break;
 
-		case STOCHASTIC:
-			{
-				// Picked using randomness
-				srand(time(NULL));
-				for (unsigned int i=0; i<rays; i++) {
-					float di = (float)rand() / (float)RAND_MAX;
-					float dj = (float)rand() / (float)RAND_MAX;
-					offsets.push_back(make_pair(di, dj));
-				}
-			}
-			break;
-	}
+        case STOCHASTIC:
+            {
+                // Picked using randomness
+                srand(time(NULL));
+                for (unsigned int i=0; i<rays; i++) {
+                    float di = (float)rand() / (float)RAND_MAX;
+                    float dj = (float)rand() / (float)RAND_MAX;
+                    offsets.push_back(make_pair(di, dj));
+                }
+            }
+            break;
+    }
 
-	return offsets;
+    return offsets;
 }
 
 inline int clamp (float f, int inf, int sup) {
@@ -121,116 +121,116 @@ QImage RayTracer::render (const Vec3Df & camPos,
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
-	vector<pair<float, float>> offsets = prepareAntiAliasingOffsets();
+    vector<pair<float, float>> offsets = prepareAntiAliasingOffsets();
 
-	// For each pixel
-	for (unsigned int i = 0; i < screenWidth; i++) {
-		progressDialog.setValue ((100*i)/screenWidth);
-		for (unsigned int j = 0; j < screenHeight; j++) {
+    // For each pixel
+    for (unsigned int i = 0; i < screenWidth; i++) {
+        progressDialog.setValue ((100*i)/screenWidth);
+        for (unsigned int j = 0; j < screenHeight; j++) {
 
 
-			Vec3Df c (backgroundColor);
-			bool isColorInit(false);
-      bool inter(false);
-      Vec3Df dir;
-      Vertex inter_nearest;
-      Object * ob = NULL;
-      static const Perlin perlin(0.5f, 4, 10);
+            Vec3Df c (backgroundColor);
+            bool isColorInit(false);
+            bool inter(false);
+            Vec3Df dir;
+            Vertex inter_nearest;
+            Object * ob = NULL;
+            static const Perlin perlin(0.5f, 4, 10);
 
-			// For each ray in each pixel
-			for (pair<float, float> offset : offsets) {
-				float tanX = tan (fieldOfView)*aspectRatio;
-				float tanY = tan (fieldOfView);
-				Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
-				Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f)/screenHeight * tanY * upVector;
-				Vec3Df step = stepX + stepY;
-				dir = direction + step;
-				dir.normalize ();
+            // For each ray in each pixel
+            for (pair<float, float> offset : offsets) {
+                float tanX = tan (fieldOfView)*aspectRatio;
+                float tanY = tan (fieldOfView);
+                Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
+                Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f)/screenHeight * tanY * upVector;
+                Vec3Df step = stepX + stepY;
+                dir = direction + step;
+                dir.normalize ();
 
-				float smallestIntersectionDistance = 1000000.f;
-				Vec3Df addedColor(backgroundColor);
+                float smallestIntersectionDistance = 1000000.f;
+                Vec3Df addedColor(backgroundColor);
 
-				// For each object
-				for (Object & o : scene->getObjects()) {
-					brdf.colorDif = o.getMaterial().getColor();
-					brdf.Kd = o.getMaterial().getDiffuse();
-					brdf.Ks = o.getMaterial().getSpecular();
-					Ray ray (camPos-o.getTrans (), dir);
+                // For each object
+                for (Object & o : scene->getObjects()) {
+                    brdf.colorDif = o.getMaterial().getColor();
+                    brdf.Kd = o.getMaterial().getDiffuse();
+                    brdf.Ks = o.getMaterial().getSpecular();
+                    Ray ray (camPos-o.getTrans (), dir);
 
-					if (o.getKDtree().intersect(ray)) {
-						float intersectionDistance = ray.getIntersectionDistance();
-						const Vertex &intersection = ray.getIntersection();
-						float noise = perlin(intersection.getPos());
-						brdf.colorDif = noise*o.getMaterial().getColor();
-						if(intersectionDistance < smallestIntersectionDistance) {
-							addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-							smallestIntersectionDistance = intersectionDistance;
-              inter_nearest = intersection;
-              inter = true;
-              ob = &o;
-						}
-					}
-				}
-				if (isColorInit) {
-					c += addedColor;
-				} else {
-					c = addedColor;
-					isColorInit = true;
-				}
+                    if (o.getKDtree().intersect(ray)) {
+                        float intersectionDistance = ray.getIntersectionDistance();
+                        const Vertex &intersection = ray.getIntersection();
+                        float noise = perlin(intersection.getPos());
+                        brdf.colorDif = noise*o.getMaterial().getColor();
+                        if(intersectionDistance < smallestIntersectionDistance) {
+                            addedColor = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+                            smallestIntersectionDistance = intersectionDistance;
+                            inter_nearest = intersection;
+                            inter = true;
+                            ob = &o;
+                        }
+                    }
+                }
+                if (isColorInit) {
+                    c += addedColor;
+                } else {
+                    c = addedColor;
+                    isColorInit = true;
+                }
 
-			}
-			c /= offsets.size();
+            }
+            c /= offsets.size();
 
-      // TODO: do it for every light sources in the scene
+            // TODO: do it for every light sources in the scene
 
-      if(rayMode != NoLight) {
-          unsigned int nb_impact = 0;
-          float visibilite = 1.0;
-          if(inter) {
+            if(rayMode != NoLight) {
+                unsigned int nb_impact = 0;
+                float visibilite = 1.0;
+                if(inter) {
 
-              vector<Vec3Df> pulse_light;
-              if(rayMode == Shadow)
-                  pulse_light = scene->getLights()[0].generateImpulsion();
-              if(rayMode == Mirror)
-                  pulse_light.push_back(scene->getLights()[0].getPos());
+                    vector<Vec3Df> pulse_light;
+                    if(rayMode == Shadow)
+                        pulse_light = scene->getLights()[0].generateImpulsion();
+                    if(rayMode == Mirror)
+                        pulse_light.push_back(scene->getLights()[0].getPos());
 
-              for(Vec3Df & impulse_l : pulse_light) {
-                  for(Object & o : scene->getObjects()) {
-                      brdf.colorDif = o.getMaterial().getColor();
-                      brdf.Kd = o.getMaterial().getDiffuse();
-                      brdf.Ks = o.getMaterial().getSpecular();
+                    for(Vec3Df & impulse_l : pulse_light) {
+                        for(Object & o : scene->getObjects()) {
+                            brdf.colorDif = o.getMaterial().getColor();
+                            brdf.Kd = o.getMaterial().getDiffuse();
+                            brdf.Ks = o.getMaterial().getSpecular();
 
-                      dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
-                      dir.normalize();
-                      Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
-                      if(o.getKDtree().intersect(ray_light)) {
-                          const Vertex &intersection = ray_light.getIntersection();
-                          if(ray_light.getIntersectionDistance() > 0.000001) {
-                              switch(rayMode) {
-                                  case Shadow:
-                                      nb_impact++;
-                                      break;
-                                  case Mirror:
-                                      if(&o == ob) break;
-                                      c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-                                      break;
-                                  default:
-                                      break;
-                              }
-                              break;
-                          }
-                      }
-                  }
-              }
-              visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
-          }
+                            dir = impulse_l - inter_nearest.getPos() - ob->getTrans() + o.getTrans();
+                            dir.normalize();
+                            Ray ray_light(inter_nearest.getPos() + ob->getTrans() - o.getTrans() + 0.000001*dir, dir);
+                            if(o.getKDtree().intersect(ray_light)) {
+                                const Vertex &intersection = ray_light.getIntersection();
+                                if(ray_light.getIntersectionDistance() > 0.000001) {
+                                    switch(rayMode) {
+                                        case Shadow:
+                                            nb_impact++;
+                                            break;
+                                        case Mirror:
+                                            if(&o == ob) break;
+                                            c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
+                }
 
-          c = c*visibilite;
-      }
+                c = c*visibilite;
+            }
 
-			image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
-		}
-	}
+            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
+        }
+    }
     progressDialog.setValue (100);
     return image;
 }
