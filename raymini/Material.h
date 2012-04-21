@@ -29,7 +29,7 @@ public:
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
     inline void setColor (const Vec3Df & c) { color = c; }
-    
+
 private:
     float diffuse;
     float specular;

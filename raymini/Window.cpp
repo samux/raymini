@@ -67,15 +67,15 @@ Window::~Window () {
 void Window::setRayEffect(int i) {
     RayTracer * rayTracer = RayTracer::getInstance ();
     switch(i) {
-        case 0:
-            rayTracer->rayMode = RayTracer::NoLight;
-            break;
-        case 1:
-            rayTracer->rayMode = RayTracer::Shadow;
-            break;
-        case 2:
-            rayTracer->rayMode = RayTracer::Mirror;
-            break;
+    case 0:
+        rayTracer->rayMode = RayTracer::NoLight;
+        break;
+    case 1:
+        rayTracer->rayMode = RayTracer::Shadow;
+        break;
+    case 2:
+        rayTracer->rayMode = RayTracer::Mirror;
+        break;
     }
 }
 
@@ -97,12 +97,12 @@ void Window::renderRayImage () {
     QTime timer;
     timer.start ();
     viewer->setRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
-                fieldOfView, aspectRatio, screenWidth, screenHeight));
+                                           fieldOfView, aspectRatio, screenWidth, screenHeight));
     statusBar()->showMessage(QString ("Raytracing performed in ") +
-            QString::number (timer.elapsed ()) +
-            QString ("ms at ") +
-            QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-            QString (" screen resolution"));
+                             QString::number (timer.elapsed ()) +
+                             QString ("ms at ") +
+                             QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
+                             QString (" screen resolution"));
     viewer->setDisplayMode (GLViewer::RayDisplayMode);
 }
 
@@ -126,17 +126,17 @@ void Window::exportGLImage () {
 
 void Window::exportRayImage () {
     QString filename = QFileDialog::getSaveFileName (this,
-            "Save ray-traced image",
-            ".",
-            "*.jpg *.bmp *.png");
+                                                     "Save ray-traced image",
+                                                     ".",
+                                                     "*.jpg *.bmp *.png");
     if (!filename.isNull () && !filename.isEmpty ())
         viewer->getRayImage().save (filename);
 }
 
 void Window::about () {
-    QMessageBox::about (this, 
-            "About This Program", 
-            "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
+    QMessageBox::about (this,
+                        "About This Program",
+                        "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
 }
 
 void Window::changeAntiAliasingType(int index)
@@ -148,7 +148,7 @@ void Window::changeAntiAliasingType(int index)
     model = Model::getInstance();
 
     switch (index)
-    {
+        {
         default:
         case 0:
             type = NO_ANTIALIASING;
@@ -170,7 +170,7 @@ void Window::changeAntiAliasingType(int index)
             rays = 5;
             type = STOCHASTIC;
             break;
-    }
+        }
 
     model->setAntiAliasingRaysPerPixel(rays);
     model->setAntiAliasingType(type);

@@ -41,7 +41,7 @@ public:
 
     inline const Mesh & getMesh () const { return mesh; }
     inline Mesh & getMesh () { return mesh; }
-    
+
     inline const Material & getMaterial () const { return mat; }
     inline Material & getMaterial () { return mat; }
 
@@ -53,7 +53,7 @@ public:
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
-    
+
 private:
     Mesh mesh;
     Material mat;

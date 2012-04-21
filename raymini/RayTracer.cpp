@@ -41,7 +41,7 @@ vector<pair<float, float> > prepareAntiAliasingOffsets()
     vector<pair<float, float>> offsets;
 
     switch (type)
-    {
+        {
         case NO_ANTIALIASING:
             // One ray on the bottom left of the pixel
             offsets.push_back(make_pair(0.0, 0.0));
@@ -90,7 +90,7 @@ vector<pair<float, float> > prepareAntiAliasingOffsets()
                 }
             }
             break;
-    }
+        }
 
     return offsets;
 }
@@ -207,15 +207,15 @@ QImage RayTracer::render (const Vec3Df & camPos,
                                 const Vertex &intersection = ray_light.getIntersection();
                                 if(ray_light.getIntersectionDistance() > 0.000001) {
                                     switch(rayMode) {
-                                        case Shadow:
-                                            nb_impact++;
-                                            break;
-                                        case Mirror:
-                                            if(&o == ob) break;
-                                            c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-                                            break;
-                                        default:
-                                            break;
+                                    case Shadow:
+                                        nb_impact++;
+                                        break;
+                                    case Mirror:
+                                        if(&o == ob) break;
+                                        c = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
+                                        break;
+                                    default:
+                                        break;
                                     }
                                     break;
                                 }

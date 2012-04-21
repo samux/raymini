@@ -188,8 +188,8 @@ void Wavelet::generateNoiseTile() {
         for (iy=0; iy<n; iy++)
             for (iz=0; iz<n; iz++)
                 temp1[i++] = noise[mod(ix+offset,n) +
-                    mod(iy+offset,n)*n +
-                    mod(iz+offset,n)*n*n];
+                                   mod(iy+offset,n)*n +
+                                   mod(iz+offset,n)*n*n];
 
     for (i=0; i<n*n*n; i++) {
         noise[i]+=temp1[i];
@@ -239,24 +239,24 @@ float Perlin::smoothNoise(float x, float y) {
 // float Perlin::smoothNoise(float x, float y, float z, float t) {//add t, edge...
 //   float corners = 0;
 //   for (int i=-1; i<=1; i+=2) {
-// 	for (int j=-1; j<=1; j+=2) {
-// 	  for (int k=-1; k<=1; k+=2) {
-// 		corners += noise(x+i, y+j, z+k, t);
-// 	  }
-// 	}
+//      for (int j=-1; j<=1; j+=2) {
+//        for (int k=-1; k<=1; k+=2) {
+//          corners += noise(x+i, y+j, z+k, t);
+//        }
+//      }
 //   }
 //   corners /= 32.0;
 
 //   float sides = 0;
 //   for (int i=-1; i<=1; i++) {
-// 	for (int j=-1; j<=1; j++) {
-// 	  for (int k=-1; k<=1; k++) {
-// 		int sum = abs(i)+abs(j)+abs(k);
-// 		if (sum != 3 && sum != 0) {
-// 		  sides += noise(x+i, y+j, z+k, t);
-// 		}
-// 	  }
-// 	}
+//      for (int j=-1; j<=1; j++) {
+//        for (int k=-1; k<=1; k++) {
+//          int sum = abs(i)+abs(j)+abs(k);
+//          if (sum != 3 && sum != 0) {
+//            sides += noise(x+i, y+j, z+k, t);
+//          }
+//        }
+//      }
 //   }
 //   sides /= 36.0f;
 
@@ -330,15 +330,15 @@ float Perlin::compute(Dimension dim, float x, float y, float z, float t) const{
     for(int i=0 ; i<=n ; i++) {
         float noise = 0.f;
         switch(dim) {
-            case Dimension::D2:
-                noise = interpolatedNoise_smooth(x * frequency, y * frequency);
-                break;
-            case Dimension::D3:
-                noise = interpolatedNoise(x * frequency, y * frequency, z*frequency);
-                break;
-            case Dimension::D4:
-                noise = interpolatedNoise(x * frequency, y * frequency, z*frequency, t*frequency);
-                break;
+        case Dimension::D2:
+            noise = interpolatedNoise_smooth(x * frequency, y * frequency);
+            break;
+        case Dimension::D3:
+            noise = interpolatedNoise(x * frequency, y * frequency, z*frequency);
+            break;
+        case Dimension::D4:
+            noise = interpolatedNoise(x * frequency, y * frequency, z*frequency, t*frequency);
+            break;
         }
         total += noise*amplitude;
         frequency*=2.f;
@@ -365,12 +365,12 @@ unsigned int Gabor::morton(unsigned x, unsigned y) {
 }
 
 Gabor::Gabor(float K, float a, float f0, float omega0,
-        float nb, unsigned randomOffset, float varCoeff, bool isotropic):
+             float nb, unsigned randomOffset, float varCoeff, bool isotropic):
     K(K), a(a), f0(f0), nbImpulsesPerKernel(nb),
     randomOffset(randomOffset), omega0(omega0),
     varCoeff(varCoeff), isotropic(isotropic) {
-        computeKRadius();
-    }
+    computeKRadius();
+}
 
 float Gabor::operator()(float x, float y) {
     x /= kernelRadius, y /= kernelRadius;

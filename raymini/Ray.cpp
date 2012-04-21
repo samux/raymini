@@ -87,8 +87,8 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
         float surf_total = Vec3Df::getSurface(v1.getPos(), v2.getPos(), v3.getPos());
 
         Vec3Df normal = (surf_v3/surf_total)*v3.getNormal() +
-                        (surf_v2/surf_total)*v2.getNormal() +
-                        (surf_v1/surf_total)*v1.getNormal();
+            (surf_v2/surf_total)*v2.getNormal() +
+            (surf_v1/surf_total)*v1.getNormal();
 
         normal.normalize();
 

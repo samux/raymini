@@ -51,7 +51,7 @@ void Mesh::recomputeSmoothVertexNormals (unsigned int normWeight) {
         it->setNormal (Vec3Df (0.0, 0.0, 0.0));
     vector<Vec3Df>::const_iterator itNormal = triangleNormals.begin ();
     vector<Triangle>::const_iterator it = triangles.begin ();
-    for ( ; it != triangles.end (); it++, itNormal++) 
+    for ( ; it != triangles.end (); it++, itNormal++)
         for (unsigned int  j = 0; j < 3; j++) {
             Vertex & vj = vertices[it->getVertex (j)];
             float w = 1.0; // uniform weights
@@ -63,7 +63,7 @@ void Mesh::recomputeSmoothVertexNormals (unsigned int normWeight) {
                 e0.normalize ();
                 e1.normalize ();
                 w = (2.0 - (Vec3Df::dotProduct (e0, e1) + 1.0)) / 2.0;
-            } 
+            }
             if (w <= 0.0)
                 continue;
             vj.setNormal (vj.getNormal () + (*itNormal) * w);
@@ -104,7 +104,7 @@ void Mesh::collectOrderedOneRing (vector<vector<unsigned int> > & oneRing) const
                     nj = end;
                 nj--;
                 oneRingVi.insert (nj, vk);
-            } else if (nj == end && nk != end) 
+            } else if (nj == end && nk != end)
                 oneRingVi.insert (nk, vj);
             else if (nj == end && nk == end) {
                 oneRingVi.push_back (vk);
@@ -118,13 +118,13 @@ void Mesh::computeDualEdgeMap (EdgeMapIndex & dualVMap1, EdgeMapIndex & dualVMap
     for (vector<Triangle>::iterator it = triangles.begin ();
          it != triangles.end (); it++) {
         for (unsigned int i = 0; i < 3; i++) {
-            Edge eij (it->getVertex (i), it->getVertex ((i+1)%3)); 
+            Edge eij (it->getVertex (i), it->getVertex ((i+1)%3));
             if (dualVMap1.find (eij) == dualVMap1.end ())
                 dualVMap1[eij] = it->getVertex ((i+2)%3);
             else
                 dualVMap2[eij] = it->getVertex ((i+2)%3);
         }
-    } 
+    }
 }
 
 void Mesh::markBorderEdges (EdgeMapIndex & edgeMap) {
@@ -132,13 +132,13 @@ void Mesh::markBorderEdges (EdgeMapIndex & edgeMap) {
          it != triangles.end (); it++) {
         for (unsigned int i = 0; i < 3; i++) {
             unsigned int j = (i+1)%3;
-            Edge eij (it->getVertex (i), it->getVertex (j)); 
+            Edge eij (it->getVertex (i), it->getVertex (j));
             if (edgeMap.find (eij) == edgeMap.end ())
                 edgeMap[eij] = 0;
-            else 
+            else
                 edgeMap[eij] += 1;
         }
-    } 
+    }
 }
 
 inline void glVertexVec3Df (const Vec3Df & v) {
@@ -148,14 +148,14 @@ inline void glVertexVec3Df (const Vec3Df & v) {
 inline void glNormalVec3Df (const Vec3Df & n) {
     glNormal3f (n[0], n[1], n[2]);
 }
- 
+
 inline void glDrawPoint (const Vec3Df & pos, const Vec3Df & normal) {
     glNormalVec3Df (normal);
     glVertexVec3Df (pos);
 }
 
-inline void glDrawPoint (const Vertex & v) { 
-    glDrawPoint (v.getPos (), v.getNormal ()); 
+inline void glDrawPoint (const Vertex & v) {
+    glDrawPoint (v.getPos (), v.getNormal ());
 }
 
 void Mesh::renderGL (bool flat) const {
@@ -171,7 +171,7 @@ void Mesh::renderGL (bool flat) const {
             normal.normalize ();
             glNormalVec3Df (normal);
         }
-        for (unsigned int j = 0; j < 3; j++) 
+        for (unsigned int j = 0; j < 3; j++)
             if (!flat)
                 glDrawPoint (v[j]);
             else

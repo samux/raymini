@@ -17,16 +17,16 @@
 
 class Mesh {
 public:
-    inline Mesh () {} 
-    inline Mesh (const std::vector<Vertex> & v) 
+    inline Mesh () {}
+    inline Mesh (const std::vector<Vertex> & v)
         : vertices (v) {}
-    inline Mesh (const std::vector<Vertex> & v, 
-                 const std::vector<Triangle> & t) 
+    inline Mesh (const std::vector<Vertex> & v,
+                 const std::vector<Triangle> & t)
         : vertices (v), triangles (t)  {}
-    inline Mesh (const Mesh & mesh) 
-        : vertices (mesh.vertices), 
+    inline Mesh (const Mesh & mesh)
+        : vertices (mesh.vertices),
           triangles (mesh.triangles) {}
-        
+
     inline virtual ~Mesh () {}
     std::vector<Vertex> & getVertices () { return vertices; }
     const std::vector<Vertex> & getVertices () const { return vertices; }
@@ -37,18 +37,18 @@ public:
     void clearTopology ();
     void unmarkAllVertices ();
     void recomputeSmoothVertexNormals (unsigned int weight);
-    void computeTriangleNormals (std::vector<Vec3Df> & triangleNormals);  
+    void computeTriangleNormals (std::vector<Vec3Df> & triangleNormals);
     void collectOneRing (std::vector<std::vector<unsigned int> > & oneRing) const;
     void collectOrderedOneRing (std::vector<std::vector<unsigned int> > & oneRing) const;
     void computeDualEdgeMap (EdgeMapIndex & dualVMap1, EdgeMapIndex & dualVMap2);
     void markBorderEdges (EdgeMapIndex & edgeMap);
-    
+
     void renderGL (bool flat) const;
-    
+
     void loadOFF (const std::string & filename);
-  
+
     class Exception {
-    private: 
+    private:
         std::string msg;
     public:
         Exception (const std::string & msg) : msg ("[Mesh Exception]" + msg) {}

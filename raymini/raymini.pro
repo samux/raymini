@@ -18,7 +18,7 @@ HEADERS = Window.h \
           Ray.h \
           KDtree.h \
           Noise.h \
-		  Model.h \
+          Model.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -31,15 +31,15 @@ SOURCES = Window.cpp \
           Material.cpp \
           Object.cpp \
           Light.cpp \
-          Scene.cpp \ 
+          Scene.cpp \
           RayTracer.cpp \
           Ray.cpp \
           KDtree.cpp \
           Brdf.cpp \
           Noise.cpp \
-		  Model.cpp \
-          Main.cpp 
-          
+          Model.cpp \
+          Main.cpp
+
     DESTDIR=.
 
 win32 {
@@ -55,4 +55,3 @@ unix {
 
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
-

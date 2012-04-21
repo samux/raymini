@@ -30,7 +30,7 @@ void Vertex::interpolate (const Vertex & u, const Vertex & v, float alpha) {
 // Static Members Methods.
 // ------------------------------------
 
-void Vertex::computeAveragePosAndRadius (std::vector<Vertex> & vertices, 
+void Vertex::computeAveragePosAndRadius (std::vector<Vertex> & vertices,
                                          Vec3Df & center, float & radius) {
     center = Vec3Df (0.0, 0.0, 0.0);
     for (unsigned int i = 0; i < vertices.size (); i++)
@@ -44,22 +44,22 @@ void Vertex::computeAveragePosAndRadius (std::vector<Vertex> & vertices,
     }
 }
 
-void Vertex::scaleToUnitBox (vector<Vertex> & vertices, 
+void Vertex::scaleToUnitBox (vector<Vertex> & vertices,
                              Vec3Df & center, float & scaleToUnit) {
     computeAveragePosAndRadius (vertices, center, scaleToUnit);
-    for (unsigned int i = 0; i < vertices.size (); i++) 
+    for (unsigned int i = 0; i < vertices.size (); i++)
         vertices[i].setPos (Vec3Df::segment (center, vertices[i].getPos ()) / scaleToUnit);
 }
 
 void Vertex::normalizeNormals (vector<Vertex> & vertices) {
-    for (std::vector<Vertex>::iterator it = vertices.begin (); 
-         it != vertices.end (); 
+    for (std::vector<Vertex>::iterator it = vertices.begin ();
+         it != vertices.end ();
          it++) {
         Vec3Df n = it->getNormal ();
         if (n != Vec3Df (0.0, 0.0, 0.0)) {
             n.normalize ();
             it->setNormal (n);
         }
-    }    
+    }
 }
 

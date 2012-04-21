@@ -22,12 +22,12 @@
 
 class Window : public QMainWindow {
     Q_OBJECT
-public:
+    public:
     Window();
     virtual ~Window();
 
-    static void showStatusMessage (const QString & msg);  
-    
+    static void showStatusMessage (const QString & msg);
+
 public slots :
     void renderRayImage ();
     void setRayEffect (int);
@@ -37,10 +37,10 @@ public slots :
     void exportRayImage ();
     void about ();
     void changeAntiAliasingType(int index);
-    
+
 private :
     void initControlWidget ();
-        
+
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
     QString currentDirectory;

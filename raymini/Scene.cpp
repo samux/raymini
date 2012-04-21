@@ -51,7 +51,7 @@ void Scene::buildDefaultScene () {
     objects.push_back (ground);
 
     Mesh ramMesh;
-    ramMesh.loadOFF ("models/ram1.off");
+    ramMesh.loadOFF ("models/ram.off");
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
     ram.setTrans (Vec3Df (1.f, 0.f, 0.f));
@@ -70,14 +70,6 @@ void Scene::buildDefaultScene () {
     Object garg (gargMesh, gargMat);
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.f));
     objects.push_back (garg);
-
-
-    /*Mesh sphereMesh;
-    sphereMesh.loadOFF ("models/sphere.off");
-    Material sphereMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
-    Object sphere (sphereMesh, sphereMat);
-    sphere.setTrans (Vec3Df (0.f, 0.f, 0.f));
-    objects.push_back (sphere);*/
 
 
     Light l (Vec3Df (3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 1.0f, 1.0f), 1.0f);

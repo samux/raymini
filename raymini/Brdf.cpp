@@ -19,7 +19,7 @@ Vec3Df Brdf::phong(Vec3Df r, Vec3Df i, Vec3Df n) {
 }
 
 Vec3Df Brdf::getColor(const Vec3Df &p, const Vec3Df &n,
-        const Vec3Df posCam, int type) {
+                      const Vec3Df posCam, int type) {
     Vec3Df color;
 
     Vec3Df ra=(posCam-p);

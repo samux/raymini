@@ -15,7 +15,7 @@
 
 class IntegerWidget : public QWidget {
     Q_OBJECT
-public:
+    public:
     IntegerWidget (const QString & name, int minValue, int maxValue, int value,
                    QWidget * parent = NULL);
     virtual ~IntegerWidget ();
@@ -36,9 +36,9 @@ private:
 
 class DoubleWidget : public QWidget {
     Q_OBJECT
-public:
+    public:
     DoubleWidget (const QString & name, double minValue, double maxValue, double value,
-                   QWidget * parent = NULL);
+                  QWidget * parent = NULL);
     virtual ~DoubleWidget ();
 
     QString getName () const { return label->text (); }

@@ -12,8 +12,7 @@
 
 #include <iostream>
 
-enum AntiAliasingType
-{
+enum AntiAliasingType {
     NO_ANTIALIASING,
     UNIFORM,
     POLYGONAL,
@@ -22,29 +21,29 @@ enum AntiAliasingType
 
 class Model
 {
-    public:
-        /** Default constructor */
-        Model();
+public:
+    /** Default constructor */
+    Model();
 
-        /** Return the model instance of the program */
-        static Model *getInstance();
+    /** Return the model instance of the program */
+    static Model *getInstance();
 
-        /** Set the antiAliasingType */
-        void setAntiAliasingType(AntiAliasingType type);
+    /** Set the antiAliasingType */
+    void setAntiAliasingType(AntiAliasingType type);
 
-        /** Get the antiAliasingType */
-        AntiAliasingType getAntiAliasingType() const;
+    /** Get the antiAliasingType */
+    AntiAliasingType getAntiAliasingType() const;
 
-        /** Set the antiAliasingRaysPerPixel */
-        void setAntiAliasingRaysPerPixel(unsigned int raysPerPixel);
+    /** Set the antiAliasingRaysPerPixel */
+    void setAntiAliasingRaysPerPixel(unsigned int raysPerPixel);
 
-        /** Get the antiAliasingRaysPerPixel */
-        unsigned int getAntiAliasingRaysPerPixel() const;
+    /** Get the antiAliasingRaysPerPixel */
+    unsigned int getAntiAliasingRaysPerPixel() const;
 
-    private:
-        /** AntiAliasing to be used*/
-        AntiAliasingType antiAliasingType;
+private:
+    /** AntiAliasing to be used*/
+    AntiAliasingType antiAliasingType;
 
-        /** Number of rays used for each pixel */
-        unsigned int antiAliasingRaysPerPixel;
+    /** Number of rays used for each pixel */
+    unsigned int antiAliasingRaysPerPixel;
 };

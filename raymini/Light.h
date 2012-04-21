@@ -31,7 +31,7 @@ public:
     std::vector<Vec3Df> generateImpulsion();
 
     static unsigned int NB_IMPULSE;
-    
+
 private:
     Vec3Df pos;
     float radius;
