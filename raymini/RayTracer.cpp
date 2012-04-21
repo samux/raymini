@@ -13,6 +13,7 @@
 #include "Brdf.h"
 #include "Noise.h"
 #include "Model.h"
+#include "Color.h"
 
 using namespace std;
 
@@ -129,8 +130,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
         for (unsigned int j = 0; j < screenHeight; j++) {
 
 
-            Vec3Df c (backgroundColor);
-            bool isColorInit(false);
+            Color c (backgroundColor);
             bool inter(false);
             Vec3Df dir;
             Vertex inter_nearest;
@@ -138,7 +138,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             static const Perlin perlin(0.5f, 4, 10);
 
             // For each ray in each pixel
-            for (pair<float, float> offset : offsets) {
+            for (const pair<float, float> &offset : offsets) {
                 float tanX = tan (fieldOfView)*aspectRatio;
                 float tanY = tan (fieldOfView);
                 Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
@@ -171,15 +171,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         }
                     }
                 }
-                if (isColorInit) {
-                    c += addedColor;
-                } else {
-                    c = addedColor;
-                    isColorInit = true;
-                }
-
+                c += addedColor;
             }
-            c /= offsets.size();
 
             // TODO: do it for every light sources in the scene
 
@@ -225,7 +218,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
                 }
 
-                c = c*visibilite;
+                c *= visibilite;
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
