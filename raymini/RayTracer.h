@@ -22,7 +22,7 @@ class Vertex;
 
 class RayTracer {
 public:
-    enum RayEffect {NoLight=0, Shadow=1, Mirror=2};
+    enum RayEffect {NoLight=0, Shadow=1};
     RayEffect rayMode;
     static RayTracer * getInstance ();
     static void destroyInstance ();

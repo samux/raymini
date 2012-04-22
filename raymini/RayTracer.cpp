@@ -139,7 +139,7 @@ Color RayTracer::getColor(Object *intersectedObject,
     Vec3Df color(backgroundColor);
     float visibilite = 1.f;
 
-    if(rayMode != Mirror || !intersectedObject->getMaterial().isMirror)
+    if(!intersectedObject->getMaterial().isMirror)
         color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
     else {
         const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();

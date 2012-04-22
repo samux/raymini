@@ -73,9 +73,6 @@ void Window::setRayEffect(int i) {
     case 1:
         rayTracer->rayMode = RayTracer::Shadow;
         break;
-    case 2:
-        rayTracer->rayMode = RayTracer::Mirror;
-        break;
     }
 }
 
@@ -223,13 +220,10 @@ void Window::initControlWidget () {
     rayButtonGroup->setExclusive (true);
     QRadioButton * no_lightButton = new QRadioButton ("Nothing", previewGroupBox);
     QRadioButton * shadowButton = new QRadioButton ("Shadow", previewGroupBox);
-    QRadioButton * mirrorButton = new QRadioButton ("Mirror", previewGroupBox);
     rayButtonGroup->addButton (no_lightButton, static_cast<int>(RayTracer::NoLight));
     rayButtonGroup->addButton (shadowButton, static_cast<int>(RayTracer::Shadow));
-    rayButtonGroup->addButton (mirrorButton, static_cast<int>(RayTracer::Mirror));
     connect (rayButtonGroup, SIGNAL (buttonClicked (int)), this, SLOT (setRayEffect (int)));
     rayLayout->addWidget (no_lightButton);
-    rayLayout->addWidget (mirrorButton);
     rayLayout->addWidget (shadowButton);
 
     QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
