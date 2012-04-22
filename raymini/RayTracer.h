@@ -46,9 +46,14 @@ protected:
 private:
     Vec3Df backgroundColor;
 
-    inline Color getColor(const Object * intersectedObject,
+    inline Color getColor(Object * intersectedObject,
                           const Vertex & closestIntersection,
                           const Vec3Df & camPos) const;
+
+    inline bool intersect(const Vec3Df & dir,
+                          const Vec3Df & camPos,
+                          Object* & intersectedObject,
+                          Vertex & closestIntersection) const;
 };
 
 

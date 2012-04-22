@@ -46,22 +46,28 @@ void Scene::updateBoundingBox () {
 void Scene::buildDefaultScene () {
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
-    Material groundMat;
+    Material groundMat (1.f, 0.f, Vec3Df (.2f, 0.6f, .2f));;
     Object ground (groundMesh, groundMat);
     objects.push_back (ground);
+
+    Mesh mirrorMesh;
+    mirrorMesh.loadOFF ("models/mirror.off");
+    Material mirrorMat;
+    Object mirror(mirrorMesh, mirrorMat);
+    objects.push_back (mirror);
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
     Material ramMat (1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
-    ram.setTrans (Vec3Df (1.f, 0.f, 0.f));
+    ram.setTrans (Vec3Df (-1.f, -1.0f, 0.f));
     objects.push_back (ram);
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
     Material rhinoMat (1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f));
     Object rhino (rhinoMesh, rhinoMat);
-    rhino.setTrans (Vec3Df (-1.f, -1.0f, 0.4f));
+    rhino.setTrans (Vec3Df (1.f, 0.f, 0.4f));
     objects.push_back (rhino);
 
     Mesh gargMesh;

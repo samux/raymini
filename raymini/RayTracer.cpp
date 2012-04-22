@@ -50,7 +50,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenWidth,
                           unsigned int screenHeight) {
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
-    Scene * scene = Scene::getInstance ();
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
@@ -74,29 +73,10 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 Vec3Df dir = direction + step;
                 dir.normalize ();
 
-                bool hasIntersection = false;
                 Object *intersectedObject;
                 Vertex closestIntersection;
-                float smallestIntersectionDistance = 1000000.f;
 
-                // For each object
-                for (Object & o : scene->getObjects()) {
-                    Ray ray (camPos-o.getTrans (), dir);
-
-                    if (o.getKDtree().intersect(ray)) {
-                        float intersectionDistance = ray.getIntersectionDistance();
-                        const Vertex &intersection = ray.getIntersection();
-
-                        if(intersectionDistance < smallestIntersectionDistance) {
-                            smallestIntersectionDistance = intersectionDistance;
-
-                            hasIntersection = true;
-                            intersectedObject = &o;
-                            closestIntersection = intersection;
-                        }
-                    }
-                }
-                if(hasIntersection)
+                if(intersect(dir, camPos, intersectedObject, closestIntersection))
                     c += getColor(intersectedObject, closestIntersection, camPos);
             }
 
@@ -107,7 +87,38 @@ QImage RayTracer::render (const Vec3Df & camPos,
     return image;
 }
 
-Color RayTracer::getColor(const Object *intersectedObject,
+inline bool RayTracer::intersect(const Vec3Df & dir,
+                                 const Vec3Df & camPos,
+                                 Object* & intersectedObject,
+                                 Vertex & closestIntersection) const {
+    Scene * scene = Scene::getInstance ();
+
+    float smallestIntersectionDistance = 1000000.f;
+    bool hasIntersection = false;
+
+    for (Object & o : scene->getObjects()) {
+        if(o.isInvisible)
+            continue;
+        Ray ray (camPos-o.getTrans (), dir);
+
+        if (o.getKDtree().intersect(ray)) {
+            float intersectionDistance = ray.getIntersectionDistance();
+            const Vertex & intersection = ray.getIntersection();
+
+            if(intersectionDistance < smallestIntersectionDistance) {
+                smallestIntersectionDistance = intersectionDistance;
+
+                hasIntersection = true;
+                intersectedObject = &o;
+                closestIntersection = intersection;
+            }
+        }
+    }
+    return hasIntersection;
+}
+
+
+Color RayTracer::getColor(Object *intersectedObject,
                           const Vertex & closestIntersection,
                           const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
@@ -123,8 +134,30 @@ Color RayTracer::getColor(const Object *intersectedObject,
               0.1,
               1.5);
 
-    Vec3Df color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    Vec3Df color;
     float visibilite = 1.f;
+
+    color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    if(rayMode == Mirror && intersectedObject->getMaterial().isMirror) {
+        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
+        Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
+        dir.normalize();
+
+        bool status = intersectedObject->isInvisible;
+        intersectedObject->isInvisible = true;
+
+        Object *ioMirror;
+        Vertex ciMirror;
+
+        if(intersect(dir, pos, ioMirror, ciMirror)) {
+            brdf.colorDif = ioMirror->getMaterial().getColor();
+            brdf.Kd = ioMirror->getMaterial().getDiffuse();
+            brdf.Ks = ioMirror->getMaterial().getSpecular();
+
+            color = brdf.getColor(ciMirror.getPos(), ciMirror.getNormal(), pos) * 255.0;
+        }
+        intersectedObject->isInvisible = status;
+    }
 
     // TODO: do it for every light sources in the scene
     if(rayMode == Shadow) {
@@ -143,27 +176,6 @@ Color RayTracer::getColor(const Object *intersectedObject,
             }
         }
         visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
-    }
-
-    if(rayMode == Mirror) {
-        const Vec3Df & impulse_l = scene->getLights()[0].getPos();
-        for(Object & o : scene->getObjects()) {
-
-            Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans() + o.getTrans();
-            dir.normalize();
-            Ray ray_light(closestIntersection.getPos() + intersectedObject->getTrans() - o.getTrans() + 0.000001*dir, dir);
-            if(o.getKDtree().intersect(ray_light) &&
-               ray_light.getIntersectionDistance() > 0.000001 &&
-               &o !=intersectedObject) {
-                const Vertex &intersection = ray_light.getIntersection();
-                brdf.lights = {scene->getLights()[0]};
-                brdf.colorDif = o.getMaterial().getColor();
-                brdf.Kd = o.getMaterial().getDiffuse();
-                brdf.Ks = o.getMaterial().getSpecular();
-
-                color = brdf.getColor(intersection.getPos(), intersection.getNormal(), camPos) * 255.0;
-            }
-        }
     }
 
     return visibilite*color;

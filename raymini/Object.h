@@ -19,10 +19,12 @@
 class Object {
 public:
     inline Object () : tree(nullptr){}
-    inline Object (const Mesh & mesh, const Material & mat) : mesh (mesh), mat (mat), tree(nullptr) {
+    inline Object (const Mesh & mesh, const Material & mat) :
+        mesh (mesh), mat (mat), tree(nullptr), isInvisible(false) {
         updateBoundingBox ();
     }
-    inline Object (const Object & o) : mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr) {}
+    inline Object (const Object & o) :
+        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr), isInvisible(false) {}
     virtual ~Object () {
         delete tree;
     }
@@ -60,6 +62,9 @@ private:
     BoundingBox bbox;
     Vec3Df trans;
     KDtree *tree;
+
+public:
+    bool isInvisible;
 };
 
 

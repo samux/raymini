@@ -214,6 +214,9 @@ public:
         T w = dotProduct (((*this) - P), N);
         return (*this) - (N * w);
     }
+    inline Vec3D reflect (const Vec3D & N) const {
+        return (*this)-2*projectOn(N, Vec3D());
+    }
     static inline Vec3D segment (const Vec3D & a, const Vec3D & b) {
         Vec3D r;
         r[0] = b[0] - a[0];
