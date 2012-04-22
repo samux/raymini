@@ -149,13 +149,9 @@ Color RayTracer::getColor(Object *intersectedObject,
         Object *ioMirror;
         Vertex ciMirror;
 
-        if(intersect(dir, pos, ioMirror, ciMirror)) {
-            brdf.colorDif = ioMirror->getMaterial().getColor();
-            brdf.Kd = ioMirror->getMaterial().getDiffuse();
-            brdf.Ks = ioMirror->getMaterial().getSpecular();
+        if(intersect(dir, pos, ioMirror, ciMirror))
+            color = getColor(ioMirror, ciMirror, pos)();
 
-            color = brdf.getColor(ciMirror.getPos(), ciMirror.getNormal(), pos) * 255.0;
-        }
         intersectedObject->isInvisible = status;
     }
 
