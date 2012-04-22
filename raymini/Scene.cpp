@@ -6,6 +6,7 @@
 // *********************************************************
 
 #include "Scene.h"
+#include "Noise.h"
 
 using namespace std;
 
@@ -46,7 +47,11 @@ void Scene::updateBoundingBox () {
 void Scene::buildDefaultScene () {
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
-    Material groundMat (1.f, 0.f, Vec3Df (.2f, 0.6f, .2f));;
+    Material groundMat (1.f, 0.f, Vec3Df (.2f, 0.6f, .2f),
+                        [](const Vertex & v){
+                            static const Perlin perlin(0.5f, 4, 10);
+                            return perlin(v.getPos());
+                        });
     Object ground (groundMesh, groundMat);
     objects.push_back (ground);
 
@@ -65,7 +70,11 @@ void Scene::buildDefaultScene () {
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
-    Material rhinoMat (1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f));
+    Material rhinoMat (1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f),
+                       [](const Vertex & v) -> float{
+                           static const Perlin perlin(0.5f, 4, 5);
+                           return sqrt(fabs(sin(2 * M_PI * perlin(v.getPos()))));
+                       });
     Object rhino (rhinoMesh, rhinoMat);
     rhino.setTrans (Vec3Df (1.f, 0.f, 0.4f));
     objects.push_back (rhino);

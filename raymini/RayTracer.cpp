@@ -11,7 +11,6 @@
 #include "Ray.h"
 #include "Scene.h"
 #include "Brdf.h"
-#include "Noise.h"
 #include "Model.h"
 #include "AntiAliasing.h"
 #include "Color.h"
@@ -124,22 +123,20 @@ Color RayTracer::getColor(Object *intersectedObject,
                           const Vertex & closestIntersection,
                           const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
-    static const Perlin perlin(0.5f, 4, 10);
-    float noise = perlin(closestIntersection.getPos());
-
+    const Material &mat = intersectedObject->getMaterial();
     Brdf brdf(scene->getLights(),
-              noise*intersectedObject->getMaterial().getColor(),
+              mat.getColor(closestIntersection),
               Vec3Df(1.0,1.0,1.0),
               Vec3Df(0.5,0.5,0.0),
-              intersectedObject->getMaterial().getDiffuse(),
-              intersectedObject->getMaterial().getSpecular(),
+              mat.getDiffuse(),
+              mat.getSpecular(),
               0.1,
               1.5);
 
     Vec3Df color(backgroundColor);
     float visibilite = 1.f;
 
-    if(!intersectedObject->getMaterial().isMirror)
+    if(!intersectedObject->getMaterial().isMirror())
         color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
     else {
         const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
