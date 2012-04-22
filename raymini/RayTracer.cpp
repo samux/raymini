@@ -98,15 +98,14 @@ inline bool RayTracer::intersect(const Vec3Df & dir,
     bool hasIntersection = false;
 
     for (Object & o : scene->getObjects()) {
-        if(o.isInvisible)
-            continue;
-        Ray ray (camPos-o.getTrans (), dir);
+        Ray ray (camPos-o.getTrans ()+ DISTANCE_MIN_INTERSECT*dir, dir);
 
         if (o.getKDtree().intersect(ray)) {
             float intersectionDistance = ray.getIntersectionDistance();
             const Vertex & intersection = ray.getIntersection();
 
-            if(intersectionDistance < smallestIntersectionDistance) {
+            if(intersectionDistance < smallestIntersectionDistance &&
+               intersectionDistance > DISTANCE_MIN_INTERSECT) {
                 smallestIntersectionDistance = intersectionDistance;
 
                 hasIntersection = true;
@@ -137,25 +136,21 @@ Color RayTracer::getColor(Object *intersectedObject,
               0.1,
               1.5);
 
-    Vec3Df color;
+    Vec3Df color(backgroundColor);
     float visibilite = 1.f;
 
-    color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
-    if(rayMode == Mirror && intersectedObject->getMaterial().isMirror) {
+    if(rayMode != Mirror || !intersectedObject->getMaterial().isMirror)
+        color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    else {
         const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
         Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
         dir.normalize();
-
-        bool status = intersectedObject->isInvisible;
-        intersectedObject->isInvisible = true;
 
         Object *ioMirror;
         Vertex ciMirror;
 
         if(intersect(dir, pos, ioMirror, ciMirror))
             color = getColor(ioMirror, ciMirror, pos)();
-
-        intersectedObject->isInvisible = status;
     }
 
     // TODO: do it for every light sources in the scene
@@ -172,12 +167,8 @@ Color RayTracer::getColor(Object *intersectedObject,
             Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans();
             dir.normalize();
 
-            bool status = intersectedObject->isInvisible;
-            intersectedObject->isInvisible = true;
             if(intersect(dir, pos , ioShadow, ciShadow, true))
                 nb_impact++;
-            intersectedObject->isInvisible = status;
-
         }
         visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
     }

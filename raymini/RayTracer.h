@@ -55,6 +55,8 @@ private:
                           Object* & intersectedObject,
                           Vertex & closestIntersection,
                           bool stopAtFirst = false) const;
+
+    static constexpr float DISTANCE_MIN_INTERSECT = 0.000001;
 };
 
 
