@@ -90,7 +90,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
 inline bool RayTracer::intersect(const Vec3Df & dir,
                                  const Vec3Df & camPos,
                                  Object* & intersectedObject,
-                                 Vertex & closestIntersection) const {
+                                 Vertex & closestIntersection,
+                                 bool stopAtFirst) const {
     Scene * scene = Scene::getInstance ();
 
     float smallestIntersectionDistance = 1000000.f;
@@ -111,6 +112,8 @@ inline bool RayTracer::intersect(const Vec3Df & dir,
                 hasIntersection = true;
                 intersectedObject = &o;
                 closestIntersection = intersection;
+                if(stopAtFirst)
+                    return true;
             }
         }
     }
@@ -160,16 +163,21 @@ Color RayTracer::getColor(Object *intersectedObject,
         unsigned int nb_impact = 0;
         vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
 
+        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
+
         for(const Vec3Df & impulse_l : pulse_light) {
-            for(Object & o : scene->getObjects()) {
-                Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans() + o.getTrans();
-                dir.normalize();
-                Ray ray_light(closestIntersection.getPos() + intersectedObject->getTrans() - o.getTrans() + 0.000001*dir, dir);
-                if(o.getKDtree().intersect(ray_light) &&
-                   ray_light.getIntersectionDistance() > 0.000001) {
-                    nb_impact++;
-                }
-            }
+            Object *ioShadow;
+            Vertex ciShadow;
+
+            Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans();
+            dir.normalize();
+
+            bool status = intersectedObject->isInvisible;
+            intersectedObject->isInvisible = true;
+            if(intersect(dir, pos , ioShadow, ciShadow, true))
+                nb_impact++;
+            intersectedObject->isInvisible = status;
+
         }
         visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
     }

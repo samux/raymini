@@ -53,7 +53,8 @@ private:
     inline bool intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
                           Object* & intersectedObject,
-                          Vertex & closestIntersection) const;
+                          Vertex & closestIntersection,
+                          bool stopAtFirst = false) const;
 };
 
 
