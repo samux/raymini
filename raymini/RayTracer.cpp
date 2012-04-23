@@ -77,6 +77,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
                 if(intersect(dir, camPos, intersectedObject, closestIntersection))
                     c += getColor(intersectedObject, closestIntersection, camPos);
+                else
+                    c += backgroundColor;
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
