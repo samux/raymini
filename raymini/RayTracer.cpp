@@ -133,7 +133,18 @@ Vec3Df RayTracer::getColor(Object *intersectedObject,
     float visibilite = 1.f;
 
     // TODO: do it for every light sources in the scene
-    if(rayMode == Shadow) {
+    if(shadow == HARD) {
+        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
+        Object *ioShadow;
+        Vertex ciShadow;
+
+        Vec3Df dir = scene->getLights()[0].getPos() - (closestIntersection.getPos() + intersectedObject->getTrans());
+        dir.normalize();
+
+        if(intersect(dir, pos , ioShadow, ciShadow, true))
+            visibilite = 0.f;
+    }
+    else if(shadow == SOFT) {
         unsigned int nb_impact = 0;
         vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
 
@@ -143,7 +154,7 @@ Vec3Df RayTracer::getColor(Object *intersectedObject,
             Object *ioShadow;
             Vertex ciShadow;
 
-            Vec3Df dir = impulse_l - closestIntersection.getPos() - intersectedObject->getTrans();
+            Vec3Df dir = impulse_l - (closestIntersection.getPos() + intersectedObject->getTrans());
             dir.normalize();
 
             if(intersect(dir, pos , ioShadow, ciShadow, true))

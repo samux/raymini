@@ -30,7 +30,7 @@ class Window : public QMainWindow {
 
 public slots :
     void renderRayImage ();
-    void setRayEffect (int);
+    void setShadowMode (int);
     void setBGColor ();
     void showRayImage ();
     void exportGLImage ();

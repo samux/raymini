@@ -64,14 +64,17 @@ Window::~Window () {
 
 }
 
-void Window::setRayEffect(int i) {
+void Window::setShadowMode(int i) {
     RayTracer * rayTracer = RayTracer::getInstance ();
     switch(i) {
     case 0:
-        rayTracer->rayMode = RayTracer::NoLight;
+        rayTracer->shadow = RayTracer::NONE;
         break;
     case 1:
-        rayTracer->rayMode = RayTracer::Shadow;
+        rayTracer->shadow = RayTracer::HARD;
+        break;
+    case 2:
+        rayTracer->shadow = RayTracer::SOFT;
         break;
     }
 }
@@ -242,11 +245,12 @@ void Window::initControlWidget () {
 
 
 
-    QComboBox *rayTypeList = new QComboBox(rayGroupBox);
-    rayTypeList->addItem("BRDF only");
-    rayTypeList->addItem("With shadows");
-    connect (rayTypeList, SIGNAL (activated (int)), this, SLOT (setRayEffect (int)));
-    rayLayout->addWidget (rayTypeList);
+    QComboBox *shadowTypeList = new QComboBox(rayGroupBox);
+    shadowTypeList->addItem("No shadow");
+    shadowTypeList->addItem("Hard shadow");
+    shadowTypeList->addItem("Soft shadow");
+    connect (shadowTypeList, SIGNAL (activated (int)), this, SLOT (setShadowMode (int)));
+    rayLayout->addWidget (shadowTypeList);
 
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);

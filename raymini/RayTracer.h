@@ -22,8 +22,11 @@ class Vertex;
 
 class RayTracer {
 public:
-    enum RayEffect {NoLight=0, Shadow=1};
-    RayEffect rayMode;
+    /*   config   */
+    enum Shadow {NONE = 0, HARD, SOFT};
+    Shadow shadow;
+    /* end config */
+
     static RayTracer * getInstance ();
     static void destroyInstance ();
 
@@ -48,7 +51,7 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
 protected:
-    inline RayTracer () {}
+    inline RayTracer () : shadow(NONE) {}
     inline virtual ~RayTracer () {}
 
 private:
