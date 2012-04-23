@@ -126,8 +126,11 @@ void Window::exportRayImage () {
                                                      "Save ray-traced image",
                                                      ".",
                                                      "*.jpg *.bmp *.png");
-    if (!filename.isNull () && !filename.isEmpty ())
-        viewer->getRayImage().save (filename);
+    if (!filename.isNull () && !filename.isEmpty ()) {
+        // HACK: for some reason, saved image is fliped
+        QImage fliped(viewer->getRayImage().mirrored(false, true));
+        fliped.save (filename);
+    }
 }
 
 void Window::about () {
