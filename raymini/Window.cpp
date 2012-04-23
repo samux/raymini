@@ -212,20 +212,15 @@ void Window::initControlWidget () {
     rayLayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
 
+    QComboBox *rayTypeList = new QComboBox(rayGroupBox);
+    rayTypeList->addItem("BRDF only");
+    rayTypeList->addItem("With shadows");
+    connect (rayTypeList, SIGNAL (activated (int)), this, SLOT (setRayEffect (int)));
+    rayLayout->addWidget (rayTypeList);
+
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);
     connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
-
-    QButtonGroup * rayButtonGroup = new QButtonGroup (rayGroupBox);
-    rayButtonGroup->setExclusive (true);
-    QRadioButton * no_lightButton = new QRadioButton ("Nothing", previewGroupBox);
-    QRadioButton * shadowButton = new QRadioButton ("Shadow", previewGroupBox);
-    rayButtonGroup->addButton (no_lightButton, static_cast<int>(RayTracer::NoLight));
-    rayButtonGroup->addButton (shadowButton, static_cast<int>(RayTracer::Shadow));
-    connect (rayButtonGroup, SIGNAL (buttonClicked (int)), this, SLOT (setRayEffect (int)));
-    rayLayout->addWidget (no_lightButton);
-    rayLayout->addWidget (shadowButton);
-
     QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
     rayLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), this, SLOT (showRayImage ()));
