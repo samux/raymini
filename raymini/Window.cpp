@@ -126,8 +126,11 @@ void Window::exportRayImage () {
                                                      "Save ray-traced image",
                                                      ".",
                                                      "*.jpg *.bmp *.png");
-    if (!filename.isNull () && !filename.isEmpty ())
-        viewer->getRayImage().save (filename);
+    if (!filename.isNull () && !filename.isEmpty ()) {
+        // HACK: for some reason, saved image is fliped
+        QImage fliped(viewer->getRayImage().mirrored(false, true));
+        fliped.save (filename);
+    }
 }
 
 void Window::about () {
@@ -179,7 +182,7 @@ void Window::changeAmbientOcclusion(int index)
 
     unsigned int rays;
     switch (index)
-    {
+        {
         default:
         case 0:
             rays = 0;
@@ -190,7 +193,7 @@ void Window::changeAmbientOcclusion(int index)
         case 2:
             rays = 9;
             break;
-    }
+        }
 
     model->setAmbientOcclusionRaysCount(rays);
 }
@@ -206,15 +209,11 @@ void Window::initControlWidget () {
     connect (wireframeCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setWireframe (bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
-    QButtonGroup * modeButtonGroup = new QButtonGroup (previewGroupBox);
-    modeButtonGroup->setExclusive (true);
-    QRadioButton * flatButton = new QRadioButton ("Flat", previewGroupBox);
-    QRadioButton * smoothButton = new QRadioButton ("Smooth", previewGroupBox);
-    modeButtonGroup->addButton (flatButton, static_cast<int>(GLViewer::Flat));
-    modeButtonGroup->addButton (smoothButton, static_cast<int>(GLViewer::Smooth));
-    connect (modeButtonGroup, SIGNAL (buttonClicked (int)), viewer, SLOT (setRenderingMode (int)));
-    previewLayout->addWidget (flatButton);
-    previewLayout->addWidget (smoothButton);
+    QComboBox *modeList = new QComboBox(previewGroupBox);
+    modeList->addItem("Smooth");
+    modeList->addItem("Flat");
+    previewLayout->addWidget(modeList);
+    connect (modeList, SIGNAL (activated (int)), viewer, SLOT (setRenderingMode (int)));
 
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
     connect (snapshotButton, SIGNAL (clicked ()) , this, SLOT (exportGLImage ()));
@@ -234,27 +233,24 @@ void Window::initControlWidget () {
     rayLayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
 
-	QComboBox *ambientOcclusionList = new QComboBox(rayGroupBox);
+    QComboBox *ambientOcclusionList = new QComboBox(rayGroupBox);
     ambientOcclusionList->addItem("No ambient occlusion");
     ambientOcclusionList->addItem("Ambiant occlusion 4 rays");
     ambientOcclusionList->addItem("Ambiant occlusion 9 rays");
-	rayLayout->addWidget(ambientOcclusionList);
-	connect(ambientOcclusionList, SIGNAL(activated(int)), this, SLOT(changeAmbientOcclusion(int)));
+    rayLayout->addWidget(ambientOcclusionList);
+    connect(ambientOcclusionList, SIGNAL(activated(int)), this, SLOT(changeAmbientOcclusion(int)));
 
-    QButtonGroup * rayButtonGroup = new QButtonGroup (rayGroupBox);
-    rayButtonGroup->setExclusive (true);
-    QRadioButton * no_lightButton = new QRadioButton ("Nothing", previewGroupBox);
-    QRadioButton * shadowButton = new QRadioButton ("Shadow", previewGroupBox);
-    rayButtonGroup->addButton (no_lightButton, static_cast<int>(RayTracer::NoLight));
-    rayButtonGroup->addButton (shadowButton, static_cast<int>(RayTracer::Shadow));
-    connect (rayButtonGroup, SIGNAL (buttonClicked (int)), this, SLOT (setRayEffect (int)));
-    rayLayout->addWidget (no_lightButton);
-    rayLayout->addWidget (shadowButton);
+
+
+    QComboBox *rayTypeList = new QComboBox(rayGroupBox);
+    rayTypeList->addItem("BRDF only");
+    rayTypeList->addItem("With shadows");
+    connect (rayTypeList, SIGNAL (activated (int)), this, SLOT (setRayEffect (int)));
+    rayLayout->addWidget (rayTypeList);
 
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);
     connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
-
     QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
     rayLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), this, SLOT (showRayImage ()));

@@ -10,10 +10,7 @@
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"
-#include "Brdf.h"
-#include "Model.h"
 #include "AntiAliasing.h"
-#include "AmbientOcclusion.h"
 #include "Color.h"
 
 using namespace std;
@@ -73,13 +70,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 Vec3Df dir = direction + step;
                 dir.normalize ();
 
-                Object *intersectedObject;
-                Vertex closestIntersection;
+                c += getColor(dir, camPos);
 
-                if(intersect(dir, camPos, intersectedObject, closestIntersection))
-                    c += getColor(intersectedObject, closestIntersection, camPos);
-                else
-                    c += backgroundColor;
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
@@ -90,10 +82,10 @@ QImage RayTracer::render (const Vec3Df & camPos,
 }
 
 bool RayTracer::intersect(const Vec3Df & dir,
-                                 const Vec3Df & camPos,
-                                 Object* & intersectedObject,
-                                 Vertex & closestIntersection,
-                                 bool stopAtFirst) const {
+                          const Vec3Df & camPos,
+                          Object* & intersectedObject,
+                          Vertex & closestIntersection,
+                          bool stopAtFirst) const {
     Scene * scene = Scene::getInstance ();
 
     float smallestIntersectionDistance = 1000000.f;
@@ -121,43 +113,24 @@ bool RayTracer::intersect(const Vec3Df & dir,
     return hasIntersection;
 }
 
+Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
 
-Color RayTracer::getColor(Object *intersectedObject,
-                          const Vertex & closestIntersection,
-                          const Vec3Df & camPos) const {
+    Object *intersectedObject;
+    Vertex closestIntersection;
+
+    if(intersect(dir, camPos, intersectedObject, closestIntersection))
+        return getColor(intersectedObject, closestIntersection, camPos);
+    else
+        return backgroundColor;
+}
+
+Vec3Df RayTracer::getColor(Object *intersectedObject,
+                           const Vertex & closestIntersection,
+                           const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
-    const Material &mat = intersectedObject->getMaterial();
 
-    Vec3Df color(backgroundColor);
+    Vec3Df color = intersectedObject->genColor(camPos, closestIntersection);
     float visibilite = 1.f;
-
-    if(!intersectedObject->getMaterial().isMirror()) {
-        float ambientOcclusionContribution = 0.1;
-        if (Model::getInstance()->getAmbientOcclusionRaysCount()) {
-            vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
-            ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection, intersectedObject)/5.0;
-        }
-        Brdf brdf(scene->getLights(),
-                  mat.getColor(closestIntersection),
-                  Vec3Df(1.0,1.0,1.0),
-                  Vec3Df(0.5,0.5,0.0),
-                  mat.getDiffuse(),
-                  mat.getSpecular(),
-                  ambientOcclusionContribution,
-                  1.5);
-        color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
-    }
-    else {
-        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
-        Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
-        dir.normalize();
-
-        Object *ioMirror;
-        Vertex ciMirror;
-
-        if(intersect(dir, pos, ioMirror, ciMirror))
-            color = getColor(ioMirror, ciMirror, pos)();
-    }
 
     // TODO: do it for every light sources in the scene
     if(rayMode == Shadow) {

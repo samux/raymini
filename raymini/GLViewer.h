@@ -20,7 +20,7 @@ class GLViewer : public QGLViewer  {
     Q_OBJECT
     public:
 
-    typedef enum {Flat=0, Smooth=1} RenderingMode;
+    typedef enum {Smooth=0, Flat=1} RenderingMode;
     typedef enum {OpenGLDisplayMode=0, RayDisplayMode=1} DisplayMode;
 
     GLViewer ();

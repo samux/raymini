@@ -40,10 +40,12 @@ public:
                    unsigned int screenHeight);
 
     bool intersect(const Vec3Df & dir,
-                          const Vec3Df & camPos,
-                          Object* & intersectedObject,
-                          Vertex & closestIntersection,
-                          bool stopAtFirst = false) const;
+                   const Vec3Df & camPos,
+                   Object* & intersectedObject,
+                   Vertex & closestIntersection,
+                   bool stopAtFirst = false) const;
+
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
 protected:
     inline RayTracer () {}
@@ -52,11 +54,11 @@ protected:
 private:
     Vec3Df backgroundColor;
 
-    inline Color getColor(Object * intersectedObject,
-                          const Vertex & closestIntersection,
-                          const Vec3Df & camPos) const;
-
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001;
+
+    Vec3Df getColor(Object * intersectedObject,
+                    const Vertex & closestIntersection,
+                    const Vec3Df & camPos) const;
 };
 
 
