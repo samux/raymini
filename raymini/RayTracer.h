@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "Vec3D.h"
+#include "Shadow.h"
 
 class Color;
 class Object;
@@ -22,11 +23,6 @@ class Vertex;
 
 class RayTracer {
 public:
-    /*   config   */
-    enum Shadow {NONE = 0, HARD, SOFT};
-    Shadow shadow;
-    /* end config */
-
     static RayTracer * getInstance ();
     static void destroyInstance ();
 
@@ -50,8 +46,10 @@ public:
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
+    void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+
 protected:
-    inline RayTracer () : shadow(NONE) {}
+    inline RayTracer () {}
     inline virtual ~RayTracer () {}
 
 private:
@@ -62,6 +60,8 @@ private:
     Vec3Df getColor(Object * intersectedObject,
                     const Vertex & closestIntersection,
                     const Vec3Df & camPos) const;
+
+    Shadow shadow;
 };
 
 

@@ -22,6 +22,7 @@ HEADERS = Window.h \
           AntiAliasing.h \
           AmbientOcclusion.h \
           Color.h \
+          Shadow.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -44,6 +45,7 @@ SOURCES = Window.cpp \
           AntiAliasing.cpp \
           AmbientOcclusion.cpp \
           Color.cpp \
+          Shadow.cpp \
           Main.cpp
 
     DESTDIR=.

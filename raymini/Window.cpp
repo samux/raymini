@@ -68,13 +68,13 @@ void Window::setShadowMode(int i) {
     RayTracer * rayTracer = RayTracer::getInstance ();
     switch(i) {
     case 0:
-        rayTracer->shadow = RayTracer::NONE;
+        rayTracer->setShadowMode(Shadow::NONE);
         break;
     case 1:
-        rayTracer->shadow = RayTracer::HARD;
+        rayTracer->setShadowMode(Shadow::HARD);
         break;
     case 2:
-        rayTracer->shadow = RayTracer::SOFT;
+        rayTracer->setShadowMode(Shadow::SOFT);
         break;
     }
 }

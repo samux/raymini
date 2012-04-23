@@ -127,41 +127,9 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
 Vec3Df RayTracer::getColor(Object *intersectedObject,
                            const Vertex & closestIntersection,
                            const Vec3Df & camPos) const {
-    Scene * scene = Scene::getInstance ();
-
     Vec3Df color = intersectedObject->genColor(camPos, closestIntersection);
-    float visibilite = 1.f;
-
-    // TODO: do it for every light sources in the scene
-    if(shadow == HARD) {
-        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
-        Object *ioShadow;
-        Vertex ciShadow;
-
-        Vec3Df dir = scene->getLights()[0].getPos() - (closestIntersection.getPos() + intersectedObject->getTrans());
-        dir.normalize();
-
-        if(intersect(dir, pos , ioShadow, ciShadow, true))
-            visibilite = 0.f;
-    }
-    else if(shadow == SOFT) {
-        unsigned int nb_impact = 0;
-        vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
-
-        const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
-
-        for(const Vec3Df & impulse_l : pulse_light) {
-            Object *ioShadow;
-            Vertex ciShadow;
-
-            Vec3Df dir = impulse_l - (closestIntersection.getPos() + intersectedObject->getTrans());
-            dir.normalize();
-
-            if(intersect(dir, pos , ioShadow, ciShadow, true))
-                nb_impact++;
-        }
-        visibilite = (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
-    }
+    float visibilite = shadow(intersectedObject, closestIntersection);
+    if(!visibilite) return {0,0,0};
 
     return visibilite*color;
 }
