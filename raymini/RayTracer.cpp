@@ -71,13 +71,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 Vec3Df dir = direction + step;
                 dir.normalize ();
 
-                Object *intersectedObject;
-                Vertex closestIntersection;
+                c += getColor(dir, camPos);
 
-                if(intersect(dir, camPos, intersectedObject, closestIntersection))
-                    c += getColor(intersectedObject, closestIntersection, camPos);
-                else
-                    c += backgroundColor;
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
@@ -119,13 +114,23 @@ bool RayTracer::intersect(const Vec3Df & dir,
     return hasIntersection;
 }
 
+Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
+
+    Object *intersectedObject;
+    Vertex closestIntersection;
+
+    if(intersect(dir, camPos, intersectedObject, closestIntersection))
+        return getColor(intersectedObject, closestIntersection, camPos);
+    else
+        return backgroundColor;
+}
 
 Vec3Df RayTracer::getColor(Object *intersectedObject,
                            const Vertex & closestIntersection,
                            const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
 
-    Vec3Df color = intersectedObject->getMaterial().genColor(camPos, closestIntersection, intersectedObject);
+    Vec3Df color = intersectedObject->genColor(camPos, closestIntersection);
     float visibilite = 1.f;
 
     // TODO: do it for every light sources in the scene

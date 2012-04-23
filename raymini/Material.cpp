@@ -32,13 +32,5 @@ Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersecti
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    Object *ioMirror;
-    Vertex ciMirror;
-
-    RayTracer * rayTracer = RayTracer::getInstance();
-
-    if(rayTracer->intersect(dir, pos, ioMirror, ciMirror))
-        return rayTracer->getColor(ioMirror, ciMirror, pos);
-    else
-        return rayTracer->getBackgroundColor();
+    return RayTracer::getInstance()->getColor(dir, pos);
 }

@@ -45,9 +45,7 @@ public:
                    Vertex & closestIntersection,
                    bool stopAtFirst = false) const;
 
-    Vec3Df getColor(Object * intersectedObject,
-                    const Vertex & closestIntersection,
-                    const Vec3Df & camPos) const;
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
 protected:
     inline RayTracer () {}
@@ -57,6 +55,10 @@ private:
     Vec3Df backgroundColor;
 
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001;
+
+    Vec3Df getColor(Object * intersectedObject,
+                    const Vertex & closestIntersection,
+                    const Vec3Df & camPos) const;
 };
 
 

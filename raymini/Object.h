@@ -53,6 +53,11 @@ public:
         return *tree;
     }
 
+    inline const Vec3Df genColor (const Vec3Df & camPos,
+                                  const Vertex & closestIntersection) {
+        return mat->genColor(camPos, closestIntersection, this);
+    }
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
