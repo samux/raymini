@@ -187,15 +187,11 @@ void Window::initControlWidget () {
     connect (wireframeCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setWireframe (bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
-    QButtonGroup * modeButtonGroup = new QButtonGroup (previewGroupBox);
-    modeButtonGroup->setExclusive (true);
-    QRadioButton * flatButton = new QRadioButton ("Flat", previewGroupBox);
-    QRadioButton * smoothButton = new QRadioButton ("Smooth", previewGroupBox);
-    modeButtonGroup->addButton (flatButton, static_cast<int>(GLViewer::Flat));
-    modeButtonGroup->addButton (smoothButton, static_cast<int>(GLViewer::Smooth));
-    connect (modeButtonGroup, SIGNAL (buttonClicked (int)), viewer, SLOT (setRenderingMode (int)));
-    previewLayout->addWidget (flatButton);
-    previewLayout->addWidget (smoothButton);
+    QComboBox *modeList = new QComboBox(previewGroupBox);
+    modeList->addItem("Smooth");
+    modeList->addItem("Flat");
+    previewLayout->addWidget(modeList);
+    connect (modeList, SIGNAL (activated (int)), viewer, SLOT (setRenderingMode (int)));
 
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
     connect (snapshotButton, SIGNAL (clicked ()) , this, SLOT (exportGLImage ()));
