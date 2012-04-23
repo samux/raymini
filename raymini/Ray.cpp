@@ -5,6 +5,8 @@
 // All rights reserved.
 // *********************************************************
 
+#include <GL/glew.h>
+
 #include "Ray.h"
 
 using namespace std;
@@ -105,4 +107,12 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
         return true;
     }
     return false;
+}
+
+void Ray::draw()
+{
+	glBegin(GL_LINES);
+	glVertex3f(origin[0], origin[1], origin[2]);
+	glVertex3f(origin[0]+direction[0], origin[1]+direction[1], origin[2]+direction[2]);
+	glEnd();
 }
