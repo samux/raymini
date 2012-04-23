@@ -126,20 +126,21 @@ Color RayTracer::getColor(Object *intersectedObject,
                           const Vec3Df & camPos) const {
     Scene * scene = Scene::getInstance ();
     const Material &mat = intersectedObject->getMaterial();
-    Brdf brdf(scene->getLights(),
-              mat.getColor(closestIntersection),
-              Vec3Df(1.0,1.0,1.0),
-              Vec3Df(0.5,0.5,0.0),
-              mat.getDiffuse(),
-              mat.getSpecular(),
-              0.1,
-              1.5);
 
     Vec3Df color(backgroundColor);
     float visibilite = 1.f;
 
-    if(!intersectedObject->getMaterial().isMirror())
+    if(!intersectedObject->getMaterial().isMirror()) {
+        Brdf brdf(scene->getLights(),
+                  mat.getColor(closestIntersection),
+                  Vec3Df(1.0,1.0,1.0),
+                  Vec3Df(0.5,0.5,0.0),
+                  mat.getDiffuse(),
+                  mat.getSpecular(),
+                  0.1,
+                  1.5);
         color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    }
     else {
         const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
         Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
