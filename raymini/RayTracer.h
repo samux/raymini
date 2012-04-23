@@ -40,8 +40,8 @@ public:
 
     bool intersect(const Vec3Df & dir,
                    const Vec3Df & camPos,
+                   Ray & bestRay,
                    Object* & intersectedObject,
-                   Vertex & closestIntersection,
                    bool stopAtFirst = false) const;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;

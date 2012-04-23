@@ -35,9 +35,6 @@ inline int clamp (float f, int inf, int sup) {
     return (v < inf ? inf : (v > sup ? sup : v));
 }
 
-// POINT D'ENTREE DU PROJET.
-// Le code suivant ray trace uniquement la boite englobante de la scene.
-// Il faut remplacer ce code par une veritable raytracer
 QImage RayTracer::render (const Vec3Df & camPos,
                           const Vec3Df & direction,
                           const Vec3Df & upVector,
@@ -71,7 +68,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 dir.normalize ();
 
                 c += getColor(dir, camPos);
-
             }
 
             image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
@@ -83,43 +79,33 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
 bool RayTracer::intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
+                          Ray & bestRay,
                           Object* & intersectedObject,
-                          Vertex & closestIntersection,
                           bool stopAtFirst) const {
     Scene * scene = Scene::getInstance ();
-
-    float smallestIntersectionDistance = 1000000.f;
-    bool hasIntersection = false;
+    bestRay = Ray();
 
     for (Object & o : scene->getObjects()) {
         Ray ray (camPos-o.getTrans ()+ DISTANCE_MIN_INTERSECT*dir, dir);
 
-        if (o.getKDtree().intersect(ray)) {
-            float intersectionDistance = ray.getIntersectionDistance();
-            const Vertex & intersection = ray.getIntersection();
-
-            if(intersectionDistance < smallestIntersectionDistance &&
-               intersectionDistance > DISTANCE_MIN_INTERSECT) {
-                smallestIntersectionDistance = intersectionDistance;
-
-                hasIntersection = true;
-                intersectedObject = &o;
-                closestIntersection = intersection;
-                if(stopAtFirst)
-                    return true;
-            }
+        if (o.getKDtree().intersect(ray) &&
+            ray.getIntersectionDistance() < bestRay.getIntersectionDistance() &&
+            ray.getIntersectionDistance() > DISTANCE_MIN_INTERSECT) {
+            intersectedObject = &o;
+            bestRay = ray;
+            if(stopAtFirst) return true;
         }
     }
-    return hasIntersection;
+    return bestRay.intersect();
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
 
     Object *intersectedObject;
-    Vertex closestIntersection;
+    Ray bestRay;
 
-    if(intersect(dir, camPos, intersectedObject, closestIntersection))
-        return getColor(intersectedObject, closestIntersection, camPos);
+    if(intersect(dir, camPos, bestRay, intersectedObject))
+        return getColor(intersectedObject, bestRay.getIntersection(), camPos);
     else
         return backgroundColor;
 }

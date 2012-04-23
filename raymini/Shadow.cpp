@@ -11,12 +11,12 @@ float Shadow::hard(Object *intersectedObject,
     Scene * scene = Scene::getInstance ();
     const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
     Object *ioShadow;
-    Vertex ciShadow;
+    Ray riShadow;
 
     Vec3Df dir = scene->getLights()[0].getPos() - (closestIntersection.getPos() + intersectedObject->getTrans());
     dir.normalize();
 
-    if(RayTracer::getInstance()->intersect(dir, pos , ioShadow, ciShadow, true))
+    if(RayTracer::getInstance()->intersect(dir, pos, riShadow, ioShadow, true))
         return 0.f;
     else
         return 1.f;
@@ -32,12 +32,12 @@ float Shadow::soft(Object *intersectedObject,
 
     for(const Vec3Df & impulse_l : pulse_light) {
         Object *ioShadow;
-        Vertex ciShadow;
+        Ray riShadow;
 
         Vec3Df dir = impulse_l - (closestIntersection.getPos() + intersectedObject->getTrans());
         dir.normalize();
 
-        if(RayTracer::getInstance()->intersect(dir, pos , ioShadow, ciShadow, true))
+        if(RayTracer::getInstance()->intersect(dir, pos , riShadow, ioShadow, true))
             nb_impact++;
     }
 

@@ -44,10 +44,9 @@ float AmbientOcclusion::getAmbientOcclusionLightContribution(Vertex intersection
         const Vec3Df & pos = intersection.getPos() + object->getTrans();
 
         Object *intersectedObject;
-        Vertex closestIntersection;
-        if (rayTracer->intersect(direction, pos, intersectedObject, closestIntersection)) {
-            float  distance = (pos-closestIntersection.getPos()).getLength();
-            if (distance < r) {
+        Ray bestRay;
+        if (rayTracer->intersect(direction, pos, bestRay, intersectedObject)) {
+            if (bestRay.getIntersectionDistance() < r) {
                 occlusion++;
             }
         }

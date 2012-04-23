@@ -8,7 +8,6 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include <iostream>
 #include <vector>
 
 #include "Vec3D.h"
@@ -34,7 +33,7 @@ public:
     inline float getDiffuse () const { return diffuse; }
     inline float getSpecular () const { return specular; }
     inline Vec3Df getColor () const { return color; }
-    //inline Vec3Df getColor (const Vertex & v) const { return noise(v)*color; }
+
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection, Object *intersectedObject) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
@@ -50,7 +49,7 @@ protected:
 
 class Mirror : public Material {
 public:
-    Mirror() : Material(1.f, 1.f, {0.7f, 0.7f, 1.f}) { std::cout<< "const\n" ;}
+    Mirror() : Material(1.f, 1.f, {0.7f, 0.7f, 1.f}) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection, Object *intersectedObject) const;
 };

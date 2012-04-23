@@ -29,9 +29,10 @@ public:
     inline Vec3Df & getDirection () { return direction; }
     inline const Vertex& getIntersection() const { return intersection; }
     inline float getIntersectionDistance() const { return intersectionDistance; }
+    inline bool intersect() const { return hasIntersection; }
 
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
-    bool intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3);
+    bool intersect (const Vertex & v1, const Vertex & v2, const Vertex & v3);
 
     /** Debug ray drawing using OpenGL */
     void draw();
