@@ -77,36 +77,50 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
 
     float norm = Vec3Df::dotProduct(nn, direction);
 
-    float Ir = -Vec3Df::dotProduct(nn, Otr)/norm;
-    if(Ir<0)
+    // If triangle turned
+    if (norm > 0) {
         return false;
+    }
 
+    // If starting ray behind triangle
+    if (Vec3Df::dotProduct(nn, Otr) < 0) {
+        return false;
+    }
+
+    // Coordinates into triangle
     float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/norm;
+
+    if ( (0>Iu) || (Iu >1) ) {
+        return false;
+    }
+
     float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/norm;
 
-    if ( (0<=Iu) && (Iu <=1) && (0<=Iv) && (Iv <=1) && (Iu+Iv<=1) ) {
-        Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
-
-        float surf_v1 = Vec3Df::getSurface(v3.getPos(), v2.getPos(), pos);
-        float surf_v2 = Vec3Df::getSurface(v3.getPos(), v1.getPos(), pos);
-        float surf_v3 = Vec3Df::getSurface(v1.getPos(), v2.getPos(), pos);
-
-        Vec3Df normal =
-            surf_v3*v3.getNormal() +
-            surf_v2*v2.getNormal() +
-            surf_v1*v1.getNormal();
-
-        normal.normalize();
-
-        float distance = Vec3Df::squaredDistance (pos, origin);
-        if(!hasIntersection || distance < intersectionDistance) {
-            hasIntersection = true;
-            intersectionDistance = distance;
-            intersection = {pos, normal};
-        }
-        return true;
+    if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
+        return false;
     }
-    return false;
+    Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
+
+    float surf_v1 = Vec3Df::getSurface(v3.getPos(), v2.getPos(), pos);
+    float surf_v2 = Vec3Df::getSurface(v3.getPos(), v1.getPos(), pos);
+    float surf_v3 = Vec3Df::getSurface(v1.getPos(), v2.getPos(), pos);
+
+    Vec3Df normal =
+        surf_v3*v3.getNormal() +
+        surf_v2*v2.getNormal() +
+        surf_v1*v1.getNormal();
+
+    normal.normalize();
+
+    float distance = Vec3Df::squaredDistance (pos, origin);
+
+    if (!hasIntersection || distance < intersectionDistance) {
+        hasIntersection = true;
+        intersectionDistance = distance;
+        intersection = {pos, normal};
+    }
+
+    return true;
 }
 
 void Ray::draw()
