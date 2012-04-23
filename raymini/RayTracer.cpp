@@ -13,6 +13,7 @@
 #include "Brdf.h"
 #include "Model.h"
 #include "AntiAliasing.h"
+#include "AmbientOcclusion.h"
 #include "Color.h"
 
 using namespace std;
@@ -88,7 +89,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     return image;
 }
 
-inline bool RayTracer::intersect(const Vec3Df & dir,
+bool RayTracer::intersect(const Vec3Df & dir,
                                  const Vec3Df & camPos,
                                  Object* & intersectedObject,
                                  Vertex & closestIntersection,
@@ -131,13 +132,18 @@ Color RayTracer::getColor(Object *intersectedObject,
     float visibilite = 1.f;
 
     if(!intersectedObject->getMaterial().isMirror()) {
+        float ambientOcclusionContribution = 0.1;
+        if (Model::getInstance()->getAmbientOcclusionRaysCount()) {
+            vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
+            ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection, intersectedObject)/5.0;
+        }
         Brdf brdf(scene->getLights(),
                   mat.getColor(closestIntersection),
                   Vec3Df(1.0,1.0,1.0),
                   Vec3Df(0.5,0.5,0.0),
                   mat.getDiffuse(),
                   mat.getSpecular(),
-                  0.1,
+                  ambientOcclusionContribution,
                   1.5);
         color = brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
     }

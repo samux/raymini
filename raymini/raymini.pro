@@ -20,6 +20,7 @@ HEADERS = Window.h \
           Noise.h \
           Model.h \
           AntiAliasing.h \
+          AmbientOcclusion.h \
           Color.h \
           Brdf.h
 
@@ -41,6 +42,7 @@ SOURCES = Window.cpp \
           Noise.cpp \
           Model.cpp \
           AntiAliasing.cpp \
+          AmbientOcclusion.cpp \
           Color.cpp \
           Main.cpp
 

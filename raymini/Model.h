@@ -40,10 +40,28 @@ public:
     /** Get the antiAliasingRaysPerPixel */
     unsigned int getAntiAliasingRaysPerPixel() const;
 
+    /** Set the ambientOcclusionRaysCount */
+    void setAmbientOcclusionRaysCount(unsigned int count);
+
+    /** Get the ambientOcclusionRaysCount */
+    unsigned int getAmbientOcclusionRaysCount() const;
+
+    /** Set the ambientOcclusionRadius */
+    void setAmbientOcclusionRadius(float radius);
+
+    /** Get the ambientOcclusionRadius */
+    float getAmbientOcclusionRadius() const;
+
 private:
     /** AntiAliasing to be used*/
     AntiAliasingType antiAliasingType;
 
     /** Number of rays used for each pixel */
     unsigned int antiAliasingRaysPerPixel;
+
+    /** Ambient occlusion number of rays */
+    unsigned int ambientOcclusionRaysCount;
+
+    /** Ambient occlusion radius */
+    float ambientOcclusionRadius;
 };

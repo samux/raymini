@@ -37,6 +37,7 @@ public slots :
     void exportRayImage ();
     void about ();
     void changeAntiAliasingType(int index);
+    void changeAmbientOcclusion(int index);
 
 private :
     void initControlWidget ();

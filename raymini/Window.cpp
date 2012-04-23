@@ -173,6 +173,28 @@ void Window::changeAntiAliasingType(int index)
     model->setAntiAliasingType(type);
 }
 
+void Window::changeAmbientOcclusion(int index)
+{
+    Model *model = Model::getInstance();
+
+    unsigned int rays;
+    switch (index)
+    {
+        default:
+        case 0:
+            rays = 0;
+            break;
+        case 1:
+            rays = 4;
+            break;
+        case 2:
+            rays = 9;
+            break;
+    }
+
+    model->setAmbientOcclusionRaysCount(rays);
+}
+
 void Window::initControlWidget () {
     controlWidget = new QGroupBox ();
     QVBoxLayout * layout = new QVBoxLayout (controlWidget);
@@ -212,9 +234,12 @@ void Window::initControlWidget () {
     rayLayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
 
-    QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
-    rayLayout->addWidget (rayButton);
-    connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
+	QComboBox *ambientOcclusionList = new QComboBox(rayGroupBox);
+    ambientOcclusionList->addItem("No ambient occlusion");
+    ambientOcclusionList->addItem("Ambiant occlusion 4 rays");
+    ambientOcclusionList->addItem("Ambiant occlusion 9 rays");
+	rayLayout->addWidget(ambientOcclusionList);
+	connect(ambientOcclusionList, SIGNAL(activated(int)), this, SLOT(changeAmbientOcclusion(int)));
 
     QButtonGroup * rayButtonGroup = new QButtonGroup (rayGroupBox);
     rayButtonGroup->setExclusive (true);
@@ -225,6 +250,10 @@ void Window::initControlWidget () {
     connect (rayButtonGroup, SIGNAL (buttonClicked (int)), this, SLOT (setRayEffect (int)));
     rayLayout->addWidget (no_lightButton);
     rayLayout->addWidget (shadowButton);
+
+    QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
+    rayLayout->addWidget (rayButton);
+    connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
 
     QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
     rayLayout->addWidget (showButton);

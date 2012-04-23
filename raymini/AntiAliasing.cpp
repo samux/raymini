@@ -51,7 +51,6 @@ vector<pair<float, float> > AntiAliasing::generateOffsets() {
 
         case STOCHASTIC: {
                 // Picked using randomness
-                srand(time(NULL));
                 for (unsigned int i=0; i<rays; i++) {
                     float di = (float)rand() / (float)RAND_MAX;
                     float dj = (float)rand() / (float)RAND_MAX;
