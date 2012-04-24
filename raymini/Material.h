@@ -12,6 +12,7 @@
 
 #include "Vec3D.h"
 #include "Vertex.h"
+#include "Brdf.h"
 
 class Object;
 
@@ -34,7 +35,8 @@ public:
     inline float getSpecular () const { return specular; }
     inline Vec3Df getColor () const { return color; }
 
-    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection, Object *intersectedObject) const;
+    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
+                             Object *intersectedObject, Brdf::Type type = Brdf::All) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
@@ -51,7 +53,8 @@ class Mirror : public Material {
 public:
     Mirror() : Material(1.f, 1.f, {0.7f, 0.7f, 1.f}) {}
 
-    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection, Object *intersectedObject) const;
+    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
+                             Object *intersectedObject, Brdf::Type type) const;
 };
 
 

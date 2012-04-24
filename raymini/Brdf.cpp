@@ -15,11 +15,12 @@ Vec3Df Brdf::lambert(Vec3Df i, Vec3Df n) const {
 Vec3Df Brdf::phong(Vec3Df r, Vec3Df i, Vec3Df n) const {
     Vec3Df ref = 2*Vec3Df::dotProduct(n,i)*n - i;
     ref.normalize();
-    return colorSpec * Ks * pow(max(Vec3Df::dotProduct(ref,r),0.0f), alpha);
+    float res = Ks * pow(max(Vec3Df::dotProduct(ref,r),0.0f), alpha);
+    return {res, res, res};
 }
 
 Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
-                      const Vec3Df posCam, int type) const{
+                        const Vec3Df posCam, Type type) const{
     Vec3Df color;
 
     Vec3Df ra=(posCam-p);

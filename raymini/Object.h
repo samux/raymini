@@ -15,6 +15,7 @@
 #include "Material.h"
 #include "BoundingBox.h"
 #include "KDtree.h"
+#include "Brdf.h"
 
 class Object {
 public:
@@ -54,8 +55,8 @@ public:
     }
 
     inline const Vec3Df genColor (const Vec3Df & camPos,
-                                  const Vertex & closestIntersection) {
-        return mat->genColor(camPos, closestIntersection, this);
+                                  const Vertex & closestIntersection, Brdf::Type type = Brdf::All) {
+        return mat->genColor(camPos, closestIntersection, this, type);
     }
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
