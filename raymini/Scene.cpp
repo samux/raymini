@@ -91,8 +91,8 @@ void Scene::buildDefaultScene () {
     objects.push_back (garg);
 
 
-    Light l (Vec3Df (3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (0.7f, 1.0f, 0.5f), 1.0f);
+    Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
-    Light l1 (Vec3Df (-3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
+    Light l1 (Vec3Df (.5f, 3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
     lights.push_back (l1);
 }

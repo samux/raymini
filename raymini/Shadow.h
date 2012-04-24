@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Vertex.h"
+#include "Vec3D.h"
 #include "Object.h"
+#include "Light.h"
 
-// TODO: do it for every light sources in the scene
+
 class Shadow {
 public:
     enum Mode {NONE = 0, HARD, SOFT};
@@ -11,17 +12,15 @@ public:
 
     Shadow() : mode(NONE) {}
 
-    inline float operator()(Object *intersectedObject,
-                            const Vertex & closestIntersection) const {
+    inline float operator()(const Vec3Df & pos, const Light & light) const {
         if(mode == HARD)
-            return hard(intersectedObject, closestIntersection);
+            return float(hard(pos, light.getPos()));
         else if(mode == SOFT)
-            return soft(intersectedObject, closestIntersection);
+            return soft(pos, light);
         return 1.0;
     }
 
-
 private:
-    float hard(Object *intersectedObject, const Vertex & closestIntersection) const;
-    float soft(Object *intersectedObject, const Vertex & closestIntersection) const;
+    bool hard(const Vec3Df & pos, const Vec3Df & light) const;
+    float soft(const Vec3Df & pos, const Light & light) const;
 };

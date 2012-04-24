@@ -9,15 +9,16 @@
 
 unsigned int Light::NB_IMPULSE = 10;
 
-std::vector<Vec3Df> Light::generateImpulsion() {
-    impulsion.clear();
+std::vector<Vec3Df> Light::generateImpulsion() const{
+    std::vector<Vec3Df> impulsion;
+    impulsion.resize(NB_IMPULSE);
     for(unsigned int i = 0; i < NB_IMPULSE; i++) {
         Vec3Df r(rand(), rand(), rand());
         r.normalize();
         r = r.projectOn(normal, {0, 0, 0});
         float norm = rand()/float(RAND_MAX);
         r = radius*norm*r;
-        impulsion.push_back(pos + r);
+        impulsion[i] = pos + r;
     }
     return impulsion;
 }

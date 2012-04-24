@@ -105,17 +105,18 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
     Ray bestRay;
 
     if(intersect(dir, camPos, bestRay, intersectedObject))
-        return getColor(intersectedObject, bestRay.getIntersection(), camPos);
+        return intersectedObject->genColor(camPos, bestRay.getIntersection());
     else
         return backgroundColor;
 }
 
-Vec3Df RayTracer::getColor(Object *intersectedObject,
-                           const Vertex & closestIntersection,
-                           const Vec3Df & camPos) const {
-    Vec3Df color = intersectedObject->genColor(camPos, closestIntersection);
-    float visibilite = shadow(intersectedObject, closestIntersection);
-    if(!visibilite) return {0,0,0};
+vector<Light> RayTracer::getLights(Object *intersectedObject, const Vertex & closestIntersection, bool onlySpec) const {
+    vector<Light> lights = Scene::getInstance ()->getLights();
 
-    return visibilite*color;
+    for(Light &light : lights) {
+        float visibilite = shadow(closestIntersection.getPos() + intersectedObject->getTrans(), light);
+        light.setIntensity(light.getIntensity() * visibilite);
+    }
+
+    return lights;
 }

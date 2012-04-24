@@ -28,7 +28,7 @@ public:
     inline void setColor (const Vec3Df & c) { color = c; }
     inline void setIntensity (float i) { intensity = i; }
 
-    std::vector<Vec3Df> generateImpulsion();
+    std::vector<Vec3Df> generateImpulsion() const;
 
     static unsigned int NB_IMPULSE;
 
@@ -38,7 +38,6 @@ private:
     Vec3Df normal;
     Vec3Df color;
     float intensity;
-    std::vector<Vec3Df> impulsion;
 };
 
 

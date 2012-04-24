@@ -1,45 +1,25 @@
 #include "Shadow.h"
 
 #include "RayTracer.h"
-#include "Scene.h"
-#include "Vec3D.h"
 
 using namespace std;
 
-float Shadow::hard(Object *intersectedObject,
-                   const Vertex & closestIntersection) const {
-    Scene * scene = Scene::getInstance ();
-    const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
+bool Shadow::hard(const Vec3Df & pos, const Vec3Df& light) const {
     Object *ioShadow;
     Ray riShadow;
 
-    Vec3Df dir = scene->getLights()[0].getPos() - (closestIntersection.getPos() + intersectedObject->getTrans());
+    Vec3Df dir = light - pos;
     dir.normalize();
 
-    if(RayTracer::getInstance()->intersect(dir, pos, riShadow, ioShadow, true))
-        return 0.f;
-    else
-        return 1.f;
+    return !RayTracer::getInstance()->intersect(dir, pos, riShadow, ioShadow, true);
 }
 
-float Shadow::soft(Object *intersectedObject,
-                   const Vertex & closestIntersection) const {
-    Scene * scene = Scene::getInstance ();
+float Shadow::soft(const Vec3Df & pos, const Light & light) const {
     unsigned int nb_impact = 0;
-    vector<Vec3Df> pulse_light = scene->getLights()[0].generateImpulsion();
+    vector<Vec3Df> pulse_light = light.generateImpulsion();
 
-    const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
-
-    for(const Vec3Df & impulse_l : pulse_light) {
-        Object *ioShadow;
-        Ray riShadow;
-
-        Vec3Df dir = impulse_l - (closestIntersection.getPos() + intersectedObject->getTrans());
-        dir.normalize();
-
-        if(RayTracer::getInstance()->intersect(dir, pos , riShadow, ioShadow, true))
-            nb_impact++;
-    }
+    for(const Vec3Df & impulse_l : pulse_light)
+        nb_impact += int(!hard(pos, impulse_l));
 
     return (float)(Light::NB_IMPULSE - nb_impact) / (float)Light::NB_IMPULSE;
 }

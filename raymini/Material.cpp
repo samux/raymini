@@ -9,7 +9,6 @@
 
 #include "Material.h"
 
-#include "Scene.h"
 #include "RayTracer.h"
 #include "Object.h"
 #include "Brdf.h"
@@ -20,14 +19,13 @@ using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos,
                            const Vertex & closestIntersection, Object *intersectedObject) const {
-    Scene * scene = Scene::getInstance ();
     float ambientOcclusionContribution = 0.1;
     if (Model::getInstance()->getAmbientOcclusionRaysCount()) {
         vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
         ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection, intersectedObject)/5.0;
     }
-
-    Brdf brdf(scene->getLights(),
+    //if(!visibilite) return {0,0,0};
+    Brdf brdf(RayTracer::getInstance()->getLights(intersectedObject, closestIntersection),
               noise(closestIntersection)*color,
               Vec3Df(1.0,1.0,1.0),
               Vec3Df(0.5,0.5,0.0),
@@ -40,8 +38,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos,
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                          Object *intersectedObject) const {
-    Scene * scene = Scene::getInstance ();
-    Brdf brdf(scene->getLights(),
+    Brdf brdf(RayTracer::getInstance()->getLights(intersectedObject, closestIntersection),
               {0, 0, 0},
               {1.0,1.0,1.0},
               {0, 0, 0},

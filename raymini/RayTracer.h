@@ -16,6 +16,7 @@
 
 #include "Vec3D.h"
 #include "Shadow.h"
+#include "Light.h"
 
 class Color;
 class Object;
@@ -47,20 +48,16 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+    std::vector<Light> getLights(Object *intersectedObject, const Vertex & closestIntersection,
+                                 bool onlySpec = false) const;
 
 protected:
     inline RayTracer () {}
     inline virtual ~RayTracer () {}
 
 private:
-    Vec3Df backgroundColor;
-
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001;
-
-    Vec3Df getColor(Object * intersectedObject,
-                    const Vertex & closestIntersection,
-                    const Vec3Df & camPos) const;
-
+    Vec3Df backgroundColor;
     Shadow shadow;
 };
 
