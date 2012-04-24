@@ -57,12 +57,16 @@ void Scene::buildDefaultScene () {
 
     Mesh mirrorMesh;
     mirrorMesh.loadOFF ("models/mirror.off");
+    mirrorMesh.scale(2.0);
     Object mirror(mirrorMesh, new Mirror());
+    mirror.setTrans(Vec3Df(-1.95251, 0, 3));
     objects.push_back (mirror);
 
-    Mesh mirror2Mesh(mirrorMesh);
+    Mesh mirror2Mesh;
+    mirror2Mesh.loadOFF ("models/mirror.off");
     mirror2Mesh.rotate(Vec3Df(0, 0, 1), M_PI);
     Object mirror2(mirror2Mesh, new Mirror());
+    mirror2.setTrans(Vec3Df(1.95251, 0, 1.5));
     objects.push_back (mirror2);
 
     Mesh ramMesh;

@@ -50,6 +50,9 @@ public:
     /** Rotate all vertices */
     void rotate(const Vec3Df &axis, const float &angle);
 
+    /** Scale object */
+    void scale(const float &s);
+
     class Exception {
     private:
         std::string msg;

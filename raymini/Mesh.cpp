@@ -220,3 +220,10 @@ void Mesh::rotate(const Vec3Df &axis, const float &angle) {
 
     recomputeSmoothVertexNormals (0);
 }
+
+
+void Mesh::scale(const float &s) {
+    for (Vertex & v : vertices) {
+        v.setPos(v.getPos().scale(s));
+    }
+}
