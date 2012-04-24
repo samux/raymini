@@ -17,14 +17,15 @@
 using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                           Object *intersectedObject, Brdf::Type type)  const {
+                           Object *intersectedObject,
+                           std::vector<Light> lights, Brdf::Type type)  const {
     float ambientOcclusionContribution = 0.1;
-    if (Model::getInstance()->getAmbientOcclusionRaysCount()) {
+    if ((type & Brdf::Ambient) && Model::getInstance()->getAmbientOcclusionRaysCount()) {
         vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
         ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection, intersectedObject)/5.0;
     }
 
-    Brdf brdf(RayTracer::getInstance()->getLights(intersectedObject, closestIntersection),
+    Brdf brdf(lights,
               noise(closestIntersection)*color,
               Vec3Df(0.5,0.5,0.0),
               diffuse,
@@ -36,8 +37,9 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 }
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                         Object *intersectedObject, Brdf::Type) const {
-    Brdf brdf(RayTracer::getInstance()->getLights(intersectedObject, closestIntersection),
+                         Object *intersectedObject,
+                         std::vector<Light> lights, Brdf::Type type)  const {
+    Brdf brdf(lights,
               {0, 0, 0},
               {0, 0, 0},
               0,

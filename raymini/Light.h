@@ -15,7 +15,9 @@
 
 class Light {
 public:
-    inline Light () : color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f){}
+    inline Light () : radius (0.f), color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f) {}
+    inline Light (const Vec3Df & pos, const Vec3Df & color, float intensity)
+        : pos (pos), radius (0.f), color (color), intensity (intensity) {}
     inline Light (const Vec3Df & pos, float radius, const Vec3Df & normal, const Vec3Df & color, float intensity)
         : pos (pos), radius (radius), normal(normal), color (color), intensity (intensity) {}
     virtual ~Light () {}
