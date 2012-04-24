@@ -24,6 +24,9 @@ class Vertex;
 
 class RayTracer {
 public:
+    unsigned depthPathTracing;
+    unsigned nbRayonPathTracing;
+
     static RayTracer * getInstance ();
     static void destroyInstance ();
 
@@ -48,17 +51,21 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
-    std::vector<Light> getLights(Object *intersectedObject, const Vertex & closestIntersection,
-                                 bool onlySpec = false) const;
 
 protected:
-    inline RayTracer () {}
+    inline RayTracer () : depthPathTracing(1), nbRayonPathTracing(20) {}
     inline virtual ~RayTracer () {}
 
 private:
-    static constexpr float DISTANCE_MIN_INTERSECT = 0.000001;
+    static constexpr float DISTANCE_MIN_INTERSECT = 0.000001f;
     Vec3Df backgroundColor;
     Shadow shadow;
+
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
+    std::vector<Light> getLights(Object *intersectedObject, const Vertex & closestIntersection) const;
+    std::vector<Light> getLightsPT(Object *intersectedObject, const Vertex & closestIntersection,
+                                   unsigned depth = 0) const;
+    std::vector<Vec3Df> getPathTracingDirection(const Vec3Df & normal) const;
 };
 
 

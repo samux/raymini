@@ -55,15 +55,19 @@ void Scene::buildDefaultScene () {
     Object ground (groundMesh, groundMat);
     objects.push_back (ground);
 
-    Mesh mirrorMesh;
-    mirrorMesh.loadOFF ("models/mirror.off");
-    Object mirror(mirrorMesh, new Mirror());
-    objects.push_back (mirror);
+    Mesh wallMesh;
+    wallMesh.loadOFF ("models/wall.off");
 
-    Mesh mirror2Mesh(mirrorMesh);
-    mirror2Mesh.rotate(Vec3Df(0, 0, 1), M_PI);
-    Object mirror2(mirror2Mesh, new Mirror());
-    objects.push_back (mirror2);
+    Material *blue = new Material(1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
+    Object leftWall(wallMesh, blue);
+    //Object leftWall(wallMesh, new Mirror());
+    objects.push_back (leftWall);
+
+    Mesh backWallMesh(wallMesh);
+    backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
+    Material *red = new Material(1.f, 1.f, Vec3Df (1.0f, 0.f, 0.f));
+    Object backWall(backWallMesh, red);
+    objects.push_back (backWall);
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");

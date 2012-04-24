@@ -12,6 +12,7 @@
 #include "Scene.h"
 #include "AntiAliasing.h"
 #include "Color.h"
+#include "Brdf.h"
 
 using namespace std;
 
@@ -100,17 +101,28 @@ bool RayTracer::intersect(const Vec3Df & dir,
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos) const {
-
-    Object *intersectedObject;
     Ray bestRay;
-
-    if(intersect(dir, camPos, bestRay, intersectedObject))
-        return intersectedObject->genColor(camPos, bestRay.getIntersection());
-    else
-        return backgroundColor;
+    return getColor(dir, camPos, bestRay);
 }
 
-vector<Light> RayTracer::getLights(Object *intersectedObject, const Vertex & closestIntersection, bool onlySpec) const {
+Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
+    Object *intersectedObject;
+
+    if(intersect(dir, camPos, bestRay, intersectedObject)) {
+        Vec3Df color = intersectedObject->genColor(camPos, bestRay.getIntersection(),
+                                                   getLights(intersectedObject, bestRay.getIntersection()),
+                                                   type);
+        if(depth < depthPathTracing)
+            color += intersectedObject->genColor(camPos, bestRay.getIntersection(),
+                                                 getLightsPT(intersectedObject, bestRay.getIntersection(), depth),
+                                                 Brdf::Diffuse);
+        return color;
+    }
+
+    return backgroundColor;
+}
+
+vector<Light> RayTracer::getLights(Object *intersectedObject, const Vertex & closestIntersection) const {
     vector<Light> lights = Scene::getInstance ()->getLights();
 
     for(Light &light : lights) {
@@ -119,4 +131,45 @@ vector<Light> RayTracer::getLights(Object *intersectedObject, const Vertex & clo
     }
 
     return lights;
+}
+
+vector<Light> RayTracer::getLightsPT(Object *intersectedObject,
+                                     const Vertex & closestIntersection, unsigned depth) const {
+    vector<Light> lights;
+
+    Vec3Df pos = closestIntersection.getPos() + intersectedObject->getTrans();
+    vector<Vec3Df> dirs = getPathTracingDirection(closestIntersection.getNormal());
+
+    for (const Vec3Df & dir : dirs) {
+        Ray bestRay;
+        Vec3Df color = getColor(dir, pos, bestRay, depth+1, Brdf::Diffuse);
+
+        if(bestRay.intersect()) {
+            float d = bestRay.getIntersectionDistance();
+            float intensity = 1.f/(pow(1+d,3)*nbRayonPathTracing);
+
+            lights.push_back(Light(bestRay.getIntersection().getPos(),
+                                   color, intensity));
+        }
+    }
+    return lights;
+}
+
+vector<Vec3Df> RayTracer::getPathTracingDirection(const Vec3Df & normal) const {
+    vector<Vec3Df> directions;
+    directions.resize(nbRayonPathTracing);
+
+    for (unsigned int i=0 ; i < nbRayonPathTracing ; i++) {
+        Vec3Df randomDirection;
+        for (int j=0; j<3; j++) {
+            randomDirection[j] += (float)(rand()) / (float)(RAND_MAX) - 0.5; // in [-0.5,0.5]
+        }
+        randomDirection.normalize();
+        randomDirection *= 0.4;
+        randomDirection += normal;
+        randomDirection.normalize();
+        directions[i] = randomDirection;
+    }
+
+    return directions;
 }
