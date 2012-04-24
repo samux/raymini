@@ -93,6 +93,6 @@ void Scene::buildDefaultScene () {
 
     Light l (Vec3Df (3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (0.7f, 1.0f, 0.5f), 1.0f);
     lights.push_back (l);
-    // Light l1 (Vec3Df (-3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
-    // lights.push_back (l1);
+    Light l1 (Vec3Df (-3.5f, .0f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
+    lights.push_back (l1);
 }

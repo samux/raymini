@@ -35,14 +35,25 @@ Vec3Df Material::genColor (const Vec3Df & camPos,
               specular,
               ambientOcclusionContribution,
               1.5);
-    return brdf.getColor(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
+    return brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos) * 255.0;
 }
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                          Object *intersectedObject) const {
+    Scene * scene = Scene::getInstance ();
+    Brdf brdf(scene->getLights(),
+              {0, 0, 0},
+              {1.0,1.0,1.0},
+              {0, 0, 0},
+              0,
+              1.f,
+              0,
+              30);
+    Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, Brdf::Phong) * 255.0;
+
     const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    return RayTracer::getInstance()->getColor(dir, pos);
+    return spec+RayTracer::getInstance()->getColor(dir, pos);
 }

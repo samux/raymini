@@ -18,7 +18,7 @@ Vec3Df Brdf::phong(Vec3Df r, Vec3Df i, Vec3Df n) const {
     return colorSpec * Ks * pow(max(Vec3Df::dotProduct(ref,r),0.0f), alpha);
 }
 
-Vec3Df Brdf::getColor(const Vec3Df &p, const Vec3Df &n,
+Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
                       const Vec3Df posCam, int type) const{
     Vec3Df color;
 

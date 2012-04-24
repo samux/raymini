@@ -7,11 +7,11 @@
 
 class Brdf {
 public:
-    typedef enum {
+    enum Type {
         Ambient = 1,
         Lambert = 1<<1,
         Phong   = 1<<2,
-    } Type;
+    };
     std::vector<Light> lights;
     Vec3Df colorDif, colorSpec, colorAmbient;
     float Kd, Ks, Ka;
@@ -27,7 +27,8 @@ public:
         alpha(alpha) {};
 
 
-    Vec3Df getColor(const Vec3Df &p, const Vec3Df &n, const Vec3Df posCam, int type = Ambient|Lambert|Phong) const;
+
+    Vec3Df operator()(const Vec3Df &p, const Vec3Df &n, const Vec3Df posCam, int type = Ambient|Lambert|Phong) const;
 
 private:
     inline Vec3Df ambient() const;
