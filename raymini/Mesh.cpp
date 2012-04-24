@@ -209,3 +209,14 @@ void Mesh::loadOFF (const std::string & filename) {
     input.close ();
     recomputeSmoothVertexNormals (0);
 }
+
+void Mesh::rotate(const Vec3Df &axis, const float &angle) {
+    Vec3Df normalizedAxis = axis;
+    normalizedAxis.normalize();
+
+    for (Vertex & v : vertices) {
+        v.setPos(v.getPos().rotate(normalizedAxis, angle));
+    }
+
+    recomputeSmoothVertexNormals (0);
+}

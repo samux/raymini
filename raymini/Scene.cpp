@@ -60,6 +60,11 @@ void Scene::buildDefaultScene () {
     Object mirror(mirrorMesh, new Mirror());
     objects.push_back (mirror);
 
+    Mesh mirror2Mesh(mirrorMesh);
+    mirror2Mesh.rotate(Vec3Df(0, 0, 1), M_PI);
+    Object mirror2(mirror2Mesh, new Mirror());
+    objects.push_back (mirror2);
+
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
     Material *ramMat = new Material(1.f, 1.f, Vec3Df (1.f, .6f, .2f));

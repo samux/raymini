@@ -47,6 +47,9 @@ public:
 
     void loadOFF (const std::string & filename);
 
+    /** Rotate all vertices */
+    void rotate(const Vec3Df &axis, const float &angle);
+
     class Exception {
     private:
         std::string msg;

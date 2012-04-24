@@ -296,6 +296,17 @@ public:
                       n[0]*q[0] + n[1]*q[1] + n[2]*q[2]);
     }
 
+    /** Rotate given normalized axis and angle */
+    inline Vec3D rotate(const Vec3D &axis, const T &angle) const {
+        Vec3D<T> result;
+        T cosTheta = (T)cos(angle);
+        T sinTheta = (T)sin(angle);
+
+        result = (*this) * cosTheta + crossProduct(axis, *this) * sinTheta + axis * (dotProduct(axis, *this)) * ((T)(1) - cosTheta);
+
+        return result;
+    }
+
 protected:
     T p[3];
 };
