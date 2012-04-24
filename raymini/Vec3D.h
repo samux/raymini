@@ -307,6 +307,13 @@ public:
         return result;
     }
 
+    /** Scale */
+    inline Vec3D scale(const T &s) const {
+        Vec3D result = *this;
+        result *= s;
+        return result;
+    }
+
 protected:
     T p[3];
 };

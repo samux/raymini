@@ -23,6 +23,8 @@ HEADERS = Window.h \
           AmbientOcclusion.h \
           Color.h \
           Shadow.h \
+          SkyBoxMaterial.h \
+          Texture.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -44,11 +46,24 @@ SOURCES = Window.cpp \
           Model.cpp \
           AntiAliasing.cpp \
           AmbientOcclusion.cpp \
+          SkyBoxMaterial.cpp \
+          Texture.cpp \
           Color.cpp \
           Shadow.cpp \
           Main.cpp
 
     DESTDIR=.
+
+    #SKYBOX_TEXTURE_TARGET_BASENAME = "textures/skybox"
+    #SKYBOX_TEXTURE_TARGET = $${SKYBOX_TEXTURE_TARGET_BASENAME}.ppm
+    #SKYBOX_TEXTURE_SOURCE = $${SKYBOX_TEXTURE_TARGET_BASENAME}.jpg
+
+    #!exists($${SKYBOX_TEXTURE_TARGET}) {
+        #!exists($${SKYBOX_TEXTURE_SOURCE}) {
+            #error("Cannot find "$${SKYBOX_TEXTURE_SOURCE})
+        #}
+        #system(convert $${SKYBOX_TEXTURE_SOURCE} $${SKYBOX_TEXTURE_TARGET})
+    #}
 
 win32 {
     INCLUDEPATH += 'C:\Users\boubek\projects\cg\extern\libQGLViewer-2.3.4'

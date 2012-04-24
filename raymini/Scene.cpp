@@ -7,6 +7,7 @@
 
 #include "Scene.h"
 #include "Noise.h"
+#include "SkyBoxMaterial.h"
 
 using namespace std;
 
@@ -61,12 +62,14 @@ void Scene::buildDefaultScene () {
     Material *blue = new Material(1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
     Object leftWall(wallMesh, blue);
     //Object leftWall(wallMesh, new Mirror());
+    leftWall.setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
     Material *red = new Material(1.f, 1.f, Vec3Df (1.0f, 0.f, 0.f));
     Object backWall(backWallMesh, red);
+    backWall.setTrans(Vec3Df(0, 1.95251, 1.5));
     objects.push_back (backWall);
 
     Mesh ramMesh;
@@ -94,6 +97,11 @@ void Scene::buildDefaultScene () {
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.f));
     objects.push_back (garg);
 
+    Mesh skyBoxMesh;
+    skyBoxMesh.loadOFF("models/skybox.off");
+    Material *skyBoxMaterial = new SkyBoxMaterial("textures/skybox.ppm");
+    Object skyBox(skyBoxMesh, skyBoxMaterial);
+    objects.push_back(skyBox);
 
     Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);

@@ -38,7 +38,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                          Object *intersectedObject,
-                         std::vector<Light> lights, Brdf::Type type)  const {
+                         std::vector<Light> lights, Brdf::Type)  const {
     Brdf brdf(lights,
               {0, 0, 0},
               {0, 0, 0},
