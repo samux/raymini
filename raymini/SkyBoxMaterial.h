@@ -23,8 +23,7 @@ public:
     virtual ~SkyBoxMaterial();
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             Object *intersectedObject, std::vector<Light> lights,
-                             Brdf::Type type) const;
+                             std::vector<Light> lights, Brdf::Type type = Brdf::All) const;
 protected:
     Texture texture;
 

@@ -95,7 +95,7 @@ SkyBoxMaterial::~SkyBoxMaterial()
 {}
 
 Vec3Df SkyBoxMaterial::genColor(const Vec3Df &, const Vertex & closestIntersection,
-                                Object *, std::vector<Light>, Brdf::Type) const {
+                                std::vector<Light>, Brdf::Type) const {
     CubeSide side;
     int u, v;
     getSide(closestIntersection.getPos(), side, u, v);
