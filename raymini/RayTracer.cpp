@@ -50,6 +50,9 @@ QImage RayTracer::render (const Vec3Df & camPos,
     progressDialog.show ();
 
     vector<pair<float, float>> offsets = AntiAliasing::generateOffsets();
+    float tang = tan (fieldOfView);
+    Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
+    Vec3Df upVec = tang * upVector / screenWidth;
 
     // For each pixel
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -60,10 +63,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
             // For each ray in each pixel
             for (const pair<float, float> &offset : offsets) {
-                float tanX = tan (fieldOfView)*aspectRatio;
-                float tanY = tan (fieldOfView);
-                Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f)/screenWidth * tanX * rightVector;
-                Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f)/screenHeight * tanY * upVector;
+                Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
+                Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
                 Vec3Df step = stepX + stepY;
                 Vec3Df dir = direction + step;
                 dir.normalize ();
