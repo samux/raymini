@@ -17,6 +17,7 @@
 #include "Vec3D.h"
 #include "Shadow.h"
 #include "Light.h"
+#include "AntiAliasing.h"
 
 class Color;
 class Object;
@@ -32,6 +33,9 @@ public:
     float radiusAmbientOcclusion;
     unsigned nbRayAmbientOcclusion;
     float maxAngleAmbientOcclusion;
+
+    AntiAliasing::Type typeAntiAliasing;
+    unsigned nbRayAntiAliasing;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     /*        End Config         */
@@ -63,7 +67,8 @@ public:
 protected:
     inline RayTracer () :
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
-        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2) {}
+        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2),
+        typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(1) {}
     inline virtual ~RayTracer () {}
 
 private:

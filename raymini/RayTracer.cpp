@@ -10,7 +10,6 @@
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"
-#include "AntiAliasing.h"
 #include "Color.h"
 #include "Brdf.h"
 
@@ -49,7 +48,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
-    vector<pair<float, float>> offsets = AntiAliasing::generateOffsets();
+    vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     float tang = tan (fieldOfView);
     Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
     Vec3Df upVec = tang * upVector / screenHeight;

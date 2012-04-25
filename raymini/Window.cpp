@@ -36,7 +36,7 @@
 #include <QComboBox>
 
 #include "RayTracer.h"
-#include "Model.h"
+#include "AntiAliasing.h"
 
 using namespace std;
 
@@ -143,41 +143,36 @@ void Window::about () {
                         "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
 }
 
-void Window::changeAntiAliasingType(int index)
-{
-    Model *model;
-    AntiAliasingType type;
+void Window::changeAntiAliasingType(int index) {
+    AntiAliasing::Type type;
     unsigned int rays;
-
-    model = Model::getInstance();
 
     switch (index)
         {
         default:
         case 0:
-            type = NO_ANTIALIASING;
+            type = AntiAliasing::NONE;
             rays = 1;
             break;
         case 1:
             rays = 4;
-            type = UNIFORM;
+            type = AntiAliasing::UNIFORM;
             break;
         case 2:
             rays = 9;
-            type = UNIFORM;
+            type = AntiAliasing::UNIFORM;
             break;
         case 3:
             rays = 5;
-            type = POLYGONAL;
+            type = AntiAliasing::POLYGONAL;
             break;
         case 4:
             rays = 5;
-            type = STOCHASTIC;
+            type = AntiAliasing::STOCHASTIC;
             break;
         }
-
-    model->setAntiAliasingRaysPerPixel(rays);
-    model->setAntiAliasingType(type);
+    RayTracer::getInstance()->nbRayAntiAliasing = rays;
+    RayTracer::getInstance()->typeAntiAliasing = type;
 }
 
 void Window::changeAmbientOcclusion(int index) {

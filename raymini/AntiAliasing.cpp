@@ -1,20 +1,17 @@
-#include "AntiAliasing.h"
-#include "Model.h"
-#include  <cmath>
+#include <cmath>
+#include <cstdlib>
 
+#include "AntiAliasing.h"
 
 using namespace std;
 
 /** Prepare a list of anti aliasing offsets for both i and j */
-vector<pair<float, float> > AntiAliasing::generateOffsets() {
+vector<pair<float, float> > AntiAliasing::generateOffsets(Type type, unsigned rays) {
     // Each ray picking is translated to fill the pixel which bottom left coordinate is i,j
-    Model *model = Model::getInstance();
-    unsigned int rays = model->getAntiAliasingRaysPerPixel();
-    AntiAliasingType type = model->getAntiAliasingType();
     vector<pair<float, float>> offsets;
 
     switch (type) {
-        case NO_ANTIALIASING:
+        case NONE:
             // One ray on the bottom left of the pixel
             offsets.push_back(make_pair(0.0, 0.0));
             break;
