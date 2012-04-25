@@ -48,7 +48,7 @@ public:
                    Object* & intersectedObject,
                    bool stopAtFirst = false) const;
 
-    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos) const;
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
 

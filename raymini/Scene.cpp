@@ -60,8 +60,8 @@ void Scene::buildDefaultScene () {
     wallMesh.loadOFF ("models/wall.off");
 
     Material *blue = new Material(1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
-    Object leftWall(wallMesh, blue);
-    //Object leftWall(wallMesh, new Mirror());
+    //Object leftWall(wallMesh, blue);
+    Object leftWall(wallMesh, new Mirror());
     leftWall.setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
 

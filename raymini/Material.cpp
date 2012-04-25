@@ -36,18 +36,13 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                          std::vector<Light> lights, Brdf::Type)  const {
-    Brdf brdf(lights,
-              {0, 0, 0},
-              {0, 0, 0},
-              0,
-              1.f,
-              0,
-              30);
+    Brdf brdf(lights, {0, 0, 0}, {0, 0, 0}, 0, 1.f, 0, 30);
+
     Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, Brdf::Specular) * 255.0;
 
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    return spec + RayTracer::getInstance()->getColor(dir, pos);
+    return spec + RayTracer::getInstance()->getColor(dir, pos, false);
 }
