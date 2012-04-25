@@ -180,10 +180,7 @@ void Window::changeAntiAliasingType(int index)
     model->setAntiAliasingType(type);
 }
 
-void Window::changeAmbientOcclusion(int index)
-{
-    Model *model = Model::getInstance();
-
+void Window::changeAmbientOcclusion(int index) {
     unsigned int rays;
     switch (index)
         {
@@ -199,7 +196,7 @@ void Window::changeAmbientOcclusion(int index)
             break;
         }
 
-    model->setAmbientOcclusionRaysCount(rays);
+    RayTracer::getInstance()->nbRayAmbientOcclusion = rays;
 }
 
 void Window::initControlWidget () {

@@ -20,7 +20,6 @@ HEADERS = Window.h \
           Noise.h \
           Model.h \
           AntiAliasing.h \
-          AmbientOcclusion.h \
           Color.h \
           Shadow.h \
           SkyBoxMaterial.h \
@@ -45,7 +44,6 @@ SOURCES = Window.cpp \
           Noise.cpp \
           Model.cpp \
           AntiAliasing.cpp \
-          AmbientOcclusion.cpp \
           SkyBoxMaterial.cpp \
           Texture.cpp \
           Color.cpp \

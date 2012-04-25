@@ -145,7 +145,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 
     Vec3Df pos = closestIntersection.getPos();
     vector<Vec3Df> dirs = closestIntersection.getNormal().randRotate(maxAnglePathTracing,
-                                                                      nbRayonPathTracing);
+                                                                     nbRayPathTracing);
 
     for (const Vec3Df & dir : dirs) {
         Ray bestRay;
@@ -153,11 +153,34 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 
         if(bestRay.intersect()) {
             float d = bestRay.getIntersectionDistance();
-            float intensity = 1.f/(pow(1+d,3)*nbRayonPathTracing);
+            float intensity = 1.f/(pow(1+d,3)*nbRayPathTracing);
 
             lights.push_back(Light(bestRay.getIntersection().getPos(),
                                    color, intensity));
         }
     }
     return lights;
+}
+
+float RayTracer::getAmbientOcclusion(Vertex intersection) const {
+    if (!nbRayAmbientOcclusion) {
+        return 0.5f;
+    }
+
+    int occlusion = 0;
+    vector<Vec3Df> directions = intersection.getNormal().randRotate(maxAngleAmbientOcclusion,
+                                                                    nbRayPathTracing);
+    for (Vec3Df & direction : directions) {
+        const Vec3Df & pos = intersection.getPos();
+
+        Object *intersectedObject;
+        Ray bestRay;
+        if (intersect(direction, pos, bestRay, intersectedObject)) {
+            if (bestRay.getIntersectionDistance() < radiusAmbientOcclusion) {
+                occlusion++;
+            }
+        }
+    }
+
+    return 1.f-float(occlusion)/float(nbRayPathTracing);
 }

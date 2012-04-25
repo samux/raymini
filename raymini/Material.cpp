@@ -10,17 +10,14 @@
 #include "Material.h"
 
 #include "RayTracer.h"
-#include "AmbientOcclusion.h"
-#include "Model.h"
 
 using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                            std::vector<Light> lights, Brdf::Type type)  const {
-    float ambientOcclusionContribution = 0.1;
-    if ((type & Brdf::Ambient) && Model::getInstance()->getAmbientOcclusionRaysCount()) {
-        ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection)/5.0;
-    }
+    float ambientOcclusionContribution = (type & Brdf::Ambient)?
+        RayTracer::getInstance()->getAmbientOcclusion(closestIntersection)/5.0:
+        0.f;
 
     Brdf brdf(lights,
               noise(closestIntersection)*color,

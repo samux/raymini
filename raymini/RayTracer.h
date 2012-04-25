@@ -24,9 +24,17 @@ class Vertex;
 
 class RayTracer {
 public:
+    /*          Config           */
     unsigned depthPathTracing;
-    unsigned nbRayonPathTracing;
+    unsigned nbRayPathTracing;
     float maxAnglePathTracing;
+
+    float radiusAmbientOcclusion;
+    unsigned nbRayAmbientOcclusion;
+    float maxAngleAmbientOcclusion;
+
+    void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+    /*        End Config         */
 
     static RayTracer * getInstance ();
     static void destroyInstance ();
@@ -50,11 +58,12 @@ public:
                    bool stopAtFirst = false) const;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
-
-    void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+    float getAmbientOcclusion(Vertex pos) const;
 
 protected:
-    inline RayTracer () : depthPathTracing(1), nbRayonPathTracing(50), maxAnglePathTracing(M_PI/2) {}
+    inline RayTracer () :
+        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
+        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2) {}
     inline virtual ~RayTracer () {}
 
 private:
