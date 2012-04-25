@@ -36,6 +36,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 
 template<typename T> class Vec3D;
@@ -214,6 +215,10 @@ public:
         T w = dotProduct (((*this) - P), N);
         return (*this) - (N * w);
     }
+    inline Vec3D projectOn (const Vec3D & N) const {
+        T w = dotProduct (*this, N);
+        return (*this) - (N * w);
+    }
     inline Vec3D reflect (const Vec3D & N) const {
         return (*this)-2*projectOn(N, Vec3D());
     }
@@ -312,6 +317,32 @@ public:
         Vec3D result = *this;
         result *= s;
         return result;
+    }
+
+    inline Vec3D randRotate(const T & maxAngle) const {
+        auto random = []() -> T {
+            return T(rand())/T(RAND_MAX);
+        };//rand in [0,1[
+
+        Vec3D rVect;
+        for(unsigned i = 0 ; i < 3 ; i++)
+            rVect[i] = random()-0.5f;
+        rVect.projectOn(*this);
+        rVect.normalize();
+        rVect = *this + tan(random()*maxAngle)*rVect;
+        rVect.normalize();
+
+        return rVect;
+    }
+
+    std::vector<Vec3D> randRotate(const T & maxAngle, unsigned number) const {
+        std::vector<Vec3D> directions;
+        directions.resize(number);
+
+        for (unsigned i = 0 ; i < number ; i++)
+            directions[i] = randRotate(maxAngle);
+
+        return directions;
     }
 
 protected:

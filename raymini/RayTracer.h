@@ -26,6 +26,7 @@ class RayTracer {
 public:
     unsigned depthPathTracing;
     unsigned nbRayonPathTracing;
+    float maxAnglePathTracing;
 
     static RayTracer * getInstance ();
     static void destroyInstance ();
@@ -53,7 +54,7 @@ public:
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
 
 protected:
-    inline RayTracer () : depthPathTracing(1), nbRayonPathTracing(20) {}
+    inline RayTracer () : depthPathTracing(1), nbRayonPathTracing(50), maxAnglePathTracing(M_PI/2) {}
     inline virtual ~RayTracer () {}
 
 private:
@@ -64,7 +65,6 @@ private:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light> getLights(const Vertex & closestIntersection) const;
     std::vector<Light> getLightsPT(const Vertex & closestIntersection, unsigned depth = 0) const;
-    std::vector<Vec3Df> getPathTracingDirection(const Vec3Df & normal) const;
 };
 
 

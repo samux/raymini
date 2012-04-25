@@ -15,7 +15,7 @@ std::vector<Vec3Df> Light::generateImpulsion() const{
     for(unsigned int i = 0; i < NB_IMPULSE; i++) {
         Vec3Df r(rand(), rand(), rand());
         r.normalize();
-        r = r.projectOn(normal, {0, 0, 0});
+        r = r.projectOn(normal);
         float norm = rand()/float(RAND_MAX);
         r = radius*norm*r;
         impulsion[i] = pos + r;

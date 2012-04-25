@@ -144,7 +144,8 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
     vector<Light> lights;
 
     Vec3Df pos = closestIntersection.getPos();
-    vector<Vec3Df> dirs = getPathTracingDirection(closestIntersection.getNormal());
+    vector<Vec3Df> dirs = closestIntersection.getNormal().randRotate(maxAnglePathTracing,
+                                                                      nbRayonPathTracing);
 
     for (const Vec3Df & dir : dirs) {
         Ray bestRay;
@@ -159,23 +160,4 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
         }
     }
     return lights;
-}
-
-vector<Vec3Df> RayTracer::getPathTracingDirection(const Vec3Df & normal) const {
-    vector<Vec3Df> directions;
-    directions.resize(nbRayonPathTracing);
-
-    for (unsigned int i=0 ; i < nbRayonPathTracing ; i++) {
-        Vec3Df randomDirection;
-        for (int j=0; j<3; j++) {
-            randomDirection[j] += (float)(rand()) / (float)(RAND_MAX) - 0.5; // in [-0.5,0.5]
-        }
-        randomDirection.normalize();
-        randomDirection *= 0.4;
-        randomDirection += normal;
-        randomDirection.normalize();
-        directions[i] = randomDirection;
-    }
-
-    return directions;
 }
