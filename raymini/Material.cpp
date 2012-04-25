@@ -19,7 +19,6 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
                            std::vector<Light> lights, Brdf::Type type)  const {
     float ambientOcclusionContribution = 0.1;
     if ((type & Brdf::Ambient) && Model::getInstance()->getAmbientOcclusionRaysCount()) {
-        vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
         ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection)/5.0;
     }
 
