@@ -31,6 +31,10 @@ public:
     inline float getIntersectionDistance() const { return intersectionDistance; }
     inline bool intersect() const { return hasIntersection; }
 
+    void translate(const Vec3Df & trans) {
+        intersection.setPos(intersection.getPos() + trans);
+    }
+
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
     bool intersect (const Vertex & v1, const Vertex & v2, const Vertex & v3);
 

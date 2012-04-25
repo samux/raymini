@@ -15,8 +15,6 @@
 #include "Brdf.h"
 #include "Light.h"
 
-class Object;
-
 // Ce modèle suppose une couleur spéculaire blanche (1.0, 1.0, 1.0)
 
 class Material {
@@ -37,8 +35,7 @@ public:
     inline Vec3Df getColor () const { return color; }
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             Object *intersectedObject, std::vector<Light> lights,
-                             Brdf::Type type = Brdf::All) const;
+                             std::vector<Light> lights, Brdf::Type type = Brdf::All) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
@@ -56,8 +53,7 @@ public:
     Mirror() : Material(1.f, 1.f, {0.7f, 0.7f, 1.f}) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             Object *intersectedObject, std::vector<Light> lights,
-                             Brdf::Type type) const;
+                             std::vector<Light> lights, Brdf::Type type) const;
 };
 
 

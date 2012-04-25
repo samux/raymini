@@ -55,12 +55,6 @@ public:
         return *tree;
     }
 
-    inline const Vec3Df genColor (const Vec3Df & camPos,
-                                  const Vertex & closestIntersection, std::vector<Light> lights,
-                                  Brdf::Type type = Brdf::All) {
-        return mat->genColor(camPos, closestIntersection, this, lights, type);
-    }
-
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 

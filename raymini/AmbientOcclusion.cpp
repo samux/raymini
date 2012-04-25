@@ -2,6 +2,7 @@
 
 #include "RayTracer.h"
 #include "Model.h"
+#include "Object.h"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ vector<Vec3Df> AmbientOcclusion::getAmbientOcclusionDirections(Vertex intersecti
 }
 
 /** Compute ambient occlusion light contribution */
-float AmbientOcclusion::getAmbientOcclusionLightContribution(Vertex intersection, Object *object)
+float AmbientOcclusion::getAmbientOcclusionLightContribution(Vertex intersection)
 {
     Model *model = Model::getInstance();
     int k = model->getAmbientOcclusionRaysCount();
@@ -41,7 +42,7 @@ float AmbientOcclusion::getAmbientOcclusionLightContribution(Vertex intersection
     vector<Vec3Df> directions = getAmbientOcclusionDirections(intersection);
     RayTracer *rayTracer = RayTracer::getInstance();
     for (Vec3Df & direction : directions) {
-        const Vec3Df & pos = intersection.getPos() + object->getTrans();
+        const Vec3Df & pos = intersection.getPos();
 
         Object *intersectedObject;
         Ray bestRay;

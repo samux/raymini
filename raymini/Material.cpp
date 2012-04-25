@@ -10,19 +10,17 @@
 #include "Material.h"
 
 #include "RayTracer.h"
-#include "Object.h"
 #include "AmbientOcclusion.h"
 #include "Model.h"
 
 using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                           Object *intersectedObject,
                            std::vector<Light> lights, Brdf::Type type)  const {
     float ambientOcclusionContribution = 0.1;
     if ((type & Brdf::Ambient) && Model::getInstance()->getAmbientOcclusionRaysCount()) {
         vector<Vec3Df> directions = AmbientOcclusion::getAmbientOcclusionDirections(closestIntersection);
-        ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection, intersectedObject)/5.0;
+        ambientOcclusionContribution = AmbientOcclusion::getAmbientOcclusionLightContribution(closestIntersection)/5.0;
     }
 
     Brdf brdf(lights,
@@ -37,7 +35,6 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 }
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                         Object *intersectedObject,
                          std::vector<Light> lights, Brdf::Type)  const {
     Brdf brdf(lights,
               {0, 0, 0},
@@ -48,7 +45,7 @@ Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersecti
               30);
     Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, Brdf::Specular) * 255.0;
 
-    const Vec3Df & pos = closestIntersection.getPos() + intersectedObject->getTrans();
+    const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 

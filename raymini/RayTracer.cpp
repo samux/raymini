@@ -97,6 +97,11 @@ bool RayTracer::intersect(const Vec3Df & dir,
             if(stopAtFirst) return true;
         }
     }
+
+    if(bestRay.intersect()) {
+        bestRay.translate(intersectedObject->getTrans());
+    }
+
     return bestRay.intersect();
 }
 
@@ -109,35 +114,35 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
     Object *intersectedObject;
 
     if(intersect(dir, camPos, bestRay, intersectedObject)) {
-        Vec3Df color = intersectedObject->genColor(camPos, bestRay.getIntersection(),
-                                                   getLights(intersectedObject, bestRay.getIntersection()),
-                                                   type);
+        const Material & mat = intersectedObject->getMaterial();
+        Vec3Df color = mat.genColor(camPos, bestRay.getIntersection(),
+                                    getLights(bestRay.getIntersection()),
+                                    type);
         if(depth < depthPathTracing)
-            color += intersectedObject->genColor(camPos, bestRay.getIntersection(),
-                                                 getLightsPT(intersectedObject, bestRay.getIntersection(), depth),
-                                                 Brdf::Diffuse);
+            color += mat.genColor(camPos, bestRay.getIntersection(),
+                                  getLightsPT(bestRay.getIntersection(), depth),
+                                  Brdf::Diffuse);
         return color;
     }
 
     return backgroundColor;
 }
 
-vector<Light> RayTracer::getLights(Object *intersectedObject, const Vertex & closestIntersection) const {
+vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
     vector<Light> lights = Scene::getInstance ()->getLights();
 
     for(Light &light : lights) {
-        float visibilite = shadow(closestIntersection.getPos() + intersectedObject->getTrans(), light);
+        float visibilite = shadow(closestIntersection.getPos(), light);
         light.setIntensity(light.getIntensity() * visibilite);
     }
 
     return lights;
 }
 
-vector<Light> RayTracer::getLightsPT(Object *intersectedObject,
-                                     const Vertex & closestIntersection, unsigned depth) const {
+vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigned depth) const {
     vector<Light> lights;
 
-    Vec3Df pos = closestIntersection.getPos() + intersectedObject->getTrans();
+    Vec3Df pos = closestIntersection.getPos();
     vector<Vec3Df> dirs = getPathTracingDirection(closestIntersection.getNormal());
 
     for (const Vec3Df & dir : dirs) {

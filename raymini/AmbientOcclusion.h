@@ -4,7 +4,6 @@
 
 #include "Vec3D.h"
 #include "Vertex.h"
-#include "Object.h"
 
 /** Ambient occlusion parameters and functions */
 class AmbientOcclusion {
@@ -13,5 +12,5 @@ public:
     static std::vector<Vec3Df> getAmbientOcclusionDirections(Vertex intersection);
 
     /** Compute ambient occlusion light contribution */
-    static float getAmbientOcclusionLightContribution(Vertex intersection, Object *object);
+    static float getAmbientOcclusionLightContribution(Vertex intersection);
 };
