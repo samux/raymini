@@ -29,7 +29,7 @@ void Scene::updateBoundingBox () {
     else {
         bbox = objects[0].getBoundingBox ();
         for (unsigned int i = 1; i < objects.size (); i++)
-            bbox.extendTo (objects[i].getBoundingBox ());
+            bbox.extendTo (objects[i].getBoundingBox ().translate(objects[i].getTrans()));
     }
 }
 
@@ -75,6 +75,7 @@ void Scene::buildDefaultScene () {
     ram.setTrans (Vec3Df (-1.f, -1.0f, 0.f));
     objects.push_back (ram);
 
+
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
     Object rhino (rhinoMesh, rhinoMat, "Rhino");
@@ -93,8 +94,9 @@ void Scene::buildDefaultScene () {
     skyBox.setEnabled(false);
     objects.push_back(skyBox);
 
-    Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
+    //Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
+    Light l (Vec3Df (0, 0, 5), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
     Light l1 (Vec3Df (.5f, 3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
-    lights.push_back (l1);
+    //lights.push_back (l1);
 }

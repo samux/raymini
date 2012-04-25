@@ -26,6 +26,42 @@ void Vertex::interpolate (const Vertex & u, const Vertex & v, float alpha) {
     setNormal (normal);
 }
 
+vector<Vec3Df> Vertex::getDirectionsOnCube(unsigned int res) const {
+    vector<Vec3Df> directions;
+    Vec3Df basis[3];
+    float stepTan = 2;
+    basis[0] = normal;
+    basis[1] = basis[0].getAnyOrthogonal();
+    basis[2] = Vec3Df::crossProduct(basis[1], basis[0]);
+    for (unsigned int basisIndex=0; basisIndex<3; basisIndex++) {
+        basis[basisIndex].normalize();
+    }
+
+    // For each side
+    for (unsigned int side = 0; side<6; side++) {
+        bool evenCase = side%2 == 0;
+        unsigned int basisIndex = side/2;
+        Vec3Df n = evenCase?basis[side/2]:-basis[side/2];
+        Vec3Df upVector = basis[evenCase?(basisIndex+1)%3:(basisIndex+2)%3] * stepTan;
+        Vec3Df rightVector = basis[evenCase?(basisIndex+2)%3:(basisIndex+1)%3] * stepTan;
+
+        // For each pixel
+        for (unsigned int i = 0; i < res; i++) {
+            Vec3Df stepX = (float(i) - res/2.f)/res * rightVector;
+            for (unsigned int j = 0; j < res; j++) {
+                Vec3Df stepY = (float(j) - res/2.f)/res * upVector;
+                Vec3Df step = stepX + stepY;
+                Vec3Df direction = n + step;
+                direction.normalize();
+                directions.push_back(direction);
+            }
+        }
+    }
+
+    return directions;
+
+}
+
 // ------------------------------------
 // Static Members Methods.
 // ------------------------------------

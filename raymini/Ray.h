@@ -37,9 +37,10 @@ public:
 
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
     bool intersect (const Vertex & v1, const Vertex & v2, const Vertex & v3);
+    bool intersectDisc(const Vec3Df & center, const Vec3Df & normal, float radius) ;
 
     /** Debug ray drawing using OpenGL */
-    void draw();
+    void draw(float r = 1.0, float g = 1.0, float b = 1.0);
 
 private:
     static constexpr float BBOX_INTERSEC_DELTA = 0.1f;

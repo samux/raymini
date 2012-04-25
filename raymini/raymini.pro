@@ -18,7 +18,9 @@ HEADERS = Window.h \
           Ray.h \
           KDtree.h \
           Noise.h \
+          Model.h \
           AntiAliasing.h \
+          AmbientOcclusion.h \
           Color.h \
           Shadow.h \
           SkyBoxMaterial.h \
@@ -28,7 +30,11 @@ HEADERS = Window.h \
           Controller.h \
           WindowModel.h \
           Focus.h \
-          Brdf.h
+          Surfel.h \
+          PointCloud.h \
+          Brdf.h \
+          PBGI.h \
+          Octree.h
 
 SOURCES = Window.cpp \
           GLViewer.cpp \
@@ -46,7 +52,9 @@ SOURCES = Window.cpp \
           KDtree.cpp \
           Brdf.cpp \
           Noise.cpp \
+          Model.cpp \
           AntiAliasing.cpp \
+          AmbientOcclusion.cpp \
           SkyBoxMaterial.cpp \
           Texture.cpp \
           Color.cpp \
@@ -55,6 +63,10 @@ SOURCES = Window.cpp \
           Controller.cpp \
           WindowModel.cpp \
           Focus.cpp \
+          Surfel.cpp \
+          PointCloud.cpp \
+          Octree.cpp \
+          PBGI.cpp \
           Main.cpp
 
     DESTDIR=.

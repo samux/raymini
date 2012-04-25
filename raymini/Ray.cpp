@@ -123,10 +123,26 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     return true;
 }
 
-void Ray::draw()
+void Ray::draw(float r, float g, float b)
 {
-	glBegin(GL_LINES);
-	glVertex3f(origin[0], origin[1], origin[2]);
-	glVertex3f(origin[0]+direction[0], origin[1]+direction[1], origin[2]+direction[2]);
-	glEnd();
+    glColor3f(r, g, b);
+    glBegin(GL_LINES);
+    glVertex3f(origin[0], origin[1], origin[2]);
+    glVertex3f(origin[0]+direction[0], origin[1]+direction[1], origin[2]+direction[2]);
+    glEnd();
+}
+
+bool Ray::intersectDisc(const Vec3Df & center, const Vec3Df & normal, float radius) {
+    float d = -Vec3Df::dotProduct(center, normal);
+    float t = -(Vec3Df::dotProduct(origin, normal) + d) / Vec3Df::dotProduct(direction, normal);
+    Vec3Df posIntersection = origin + t*direction;
+
+
+    if((t > 0.0) && (center - posIntersection).getSquaredLength() < radius*radius) {
+        hasIntersection = true;
+        intersectionDistance = (posIntersection - origin).getLength();
+        intersection = {posIntersection, Vec3Df()};
+        return true;
+    }
+    return false;
 }

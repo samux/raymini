@@ -52,6 +52,8 @@ public:
                                 Vec3Df & center, float & scaleToUnitBox);
     static void normalizeNormals (std::vector<Vertex> & vertices);
 
+    std::vector<Vec3Df> getDirectionsOnCube(unsigned int res) const;
+
 private:
     Vec3Df pos;
     Vec3Df normal;

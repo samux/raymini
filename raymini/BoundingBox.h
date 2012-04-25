@@ -35,6 +35,7 @@
 #define BOUNDINGBOX_H
 
 #include <vector>
+#include <array>
 #include <algorithm>
 
 #include "Vec3D.h"
@@ -67,6 +68,9 @@ public:
     }
     inline float getRadius () const {
         return Vec3Df::distance (minBb, maxBb) / 2.0;
+    }
+    inline BoundingBox translate(const Vec3Df & trans) const {
+        return BoundingBox(minBb + trans, maxBb + trans);
     }
     inline void extendTo (const Vec3Df & p) {
         for (unsigned int i = 0; i < 3; i++) {
@@ -118,12 +122,11 @@ public:
     inline const Vec3Df & getMax () const {
         return maxBb;
     }
-    inline void subdivide (std::vector<BoundingBox> & splitBoundingBoxArray) const {
+    inline void subdivide (std::array<BoundingBox,8> & splitBoundingBoxArray) const {
         Vec3Df med = (minBb + maxBb) / 2;
         float x_2 = (maxBb[0] - minBb [0]) / 2;
         float y_2 = (maxBb[1] - minBb [1]) / 2;
         float z_2 = (maxBb[2] - minBb [2]) / 2;
-        splitBoundingBoxArray.resize (8);
         splitBoundingBoxArray[0] = BoundingBox (minBb, med);
         splitBoundingBoxArray[1] = BoundingBox (minBb + Vec3Df (x_2, 0.0, 0.0), med + Vec3Df (x_2, 0.0, 0.0));
         splitBoundingBoxArray[2] = BoundingBox (minBb + Vec3Df (0.0, y_2, 0.0), med + Vec3Df (0.0, y_2, 0.0));
