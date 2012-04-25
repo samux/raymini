@@ -54,28 +54,49 @@ QImage RayTracer::render (const Vec3Df & camPos,
     Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
     Vec3Df upVec = tang * upVector / screenHeight;
 
-    // For each pixel
-    for (unsigned int i = 0; i < screenWidth; i++) {
-        progressDialog.setValue ((100*i)/screenWidth);
-        for (unsigned int j = 0; j < screenHeight; j++) {
+    vector<Color> buffer;
+    buffer.resize(screenHeight*screenWidth);
+    Scene *scene = Scene::getInstance();
 
-            Color c (backgroundColor);
+    // For each picture
+    for (unsigned int pictureNumber = 0; pictureNumber<5; pictureNumber++) {
 
-            // For each ray in each pixel
-            for (const pair<float, float> &offset : offsets) {
-                Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
-                Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
-                Vec3Df step = stepX + stepY;
-                Vec3Df dir = direction + step;
-                dir.normalize ();
-
-                c += getColor(dir, camPos);
+        for (Object &o : scene->getObjects()) {
+            if (o.isMobile()) {
+                o.setTrans(o.getTrans()+Vec3Df(0, 1, 0)*0.2);
             }
+        }
 
-            image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
+        // For each pixel
+        for (unsigned int i = 0; i < screenWidth; i++) {
+            progressDialog.setValue ((100*i)/screenWidth);
+            for (unsigned int j = 0; j < screenHeight; j++) {
+
+                Color c (backgroundColor);
+
+
+
+                // For each ray in each pixel
+                for (const pair<float, float> &offset : offsets) {
+                    Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
+                    Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
+                    Vec3Df step = stepX + stepY;
+                    Vec3Df dir = direction + step;
+                    dir.normalize ();
+
+                    c += getColor(dir, camPos);
+                }
+                buffer[j*screenWidth+i] += c;
+            }
         }
     }
     progressDialog.setValue (100);
+    for (unsigned int i = 0; i < screenWidth; i++) {
+        for (unsigned int j = 0; j < screenHeight; j++) {
+            Color c = buffer[j*screenWidth+i];
+            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
+        }
+    }
     return image;
 }
 

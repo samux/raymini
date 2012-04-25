@@ -5,8 +5,7 @@
 // All rights reserved.
 // *********************************************************
 
-#ifndef OBJECT_H
-#define OBJECT_H
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -20,16 +19,15 @@
 
 class Object {
 public:
-    inline Object () : tree(nullptr){}
-    inline Object (const Mesh & mesh, const Material * mat) :
-        mesh (mesh), mat (mat), tree(nullptr) {
+    inline Object () : tree(nullptr), mobile(false) {}
+    Object (const Mesh & mesh, const Material * mat, bool mobile=false) :
+        mesh (mesh), mat (mat), tree(nullptr), mobile(mobile) {
         updateBoundingBox ();
     }
     inline Object (const Object & o) :
-        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr){}
+        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr), mobile(o.mobile){}
     virtual ~Object () {
         delete tree;
-        //   delete mat;
     }
 
     inline Object & operator= (const Object & o) {
@@ -38,11 +36,15 @@ public:
         bbox = o.bbox;
         trans = o.trans;
         tree = nullptr;
+        mobile = o.mobile;
         return (*this);
     }
 
     inline const Vec3Df & getTrans () const { return trans;}
     inline void setTrans (const Vec3Df & t) { trans = t; }
+
+    inline bool isMobile() const {return mobile; }
+    inline void setMobile(bool mobile) { this->mobile = mobile; }
 
     inline const Mesh & getMesh () const { return mesh; }
     inline Mesh & getMesh () { return mesh; }
@@ -64,10 +66,8 @@ private:
     BoundingBox bbox;
     Vec3Df trans;
     KDtree *tree;
+    bool mobile;
 };
-
-
-#endif // Scene_H
 
 // Some Emacs-Hints -- please don't remove:
 //
