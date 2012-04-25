@@ -39,6 +39,9 @@ Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
         color += light.getIntensity()*light.getColor()*currentColor;
     }
 
+    if(lights.size())
+        color /= lights.size();
+
     if(type&Ambient)
         color += ambient();
 
