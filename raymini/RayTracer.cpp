@@ -52,7 +52,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     vector<pair<float, float>> offsets = AntiAliasing::generateOffsets();
     float tang = tan (fieldOfView);
     Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
-    Vec3Df upVec = tang * upVector / screenWidth;
+    Vec3Df upVec = tang * upVector / screenHeight;
 
     // For each pixel
     for (unsigned int i = 0; i < screenWidth; i++) {
