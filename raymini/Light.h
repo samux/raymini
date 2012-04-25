@@ -25,14 +25,12 @@ public:
     inline const Vec3Df & getPos () const { return pos; }
     inline const Vec3Df & getColor () const { return color; }
     inline float getIntensity () const { return intensity; }
+    inline Vec3Df getNormal () const { return normal; }
+    inline float getRadius () const { return radius; }
 
     inline void setPos (const Vec3Df & p) { pos = p; }
     inline void setColor (const Vec3Df & c) { color = c; }
     inline void setIntensity (float i) { intensity = i; }
-
-    std::vector<Vec3Df> generateImpulsion() const;
-
-    static unsigned int NB_IMPULSE;
 
 private:
     Vec3Df pos;

@@ -38,6 +38,7 @@ public:
     unsigned nbRayAntiAliasing;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+    void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
     /*        End Config         */
 
     static RayTracer * getInstance ();
