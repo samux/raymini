@@ -197,7 +197,8 @@ public:
     inline float transProduct (const Vec3D & v) const {
         return (p[0]*v[0] + p[1]*v[1] + p[2]*v[2]);
     }
-    inline void getTwoOrthogonals (Vec3D & u, Vec3D & v) const {
+    inline Vec3D getOrthogonal () const {
+        Vec3D u;
         if (fabs(p[0]) < fabs(p[1])) {
             if (fabs(p[0]) < fabs(p[2]))
                 u = Vec3D (0, -p[2], p[1]);
@@ -209,6 +210,10 @@ public:
             else
                 u = Vec3D(-p[1], p[0], 0);
         }
+        return u;
+    }
+    inline void getTwoOrthogonals (Vec3D & u, Vec3D & v) const {
+        u = getOrthogonal();
         v = crossProduct (*this, u);
     }
     inline Vec3D projectOn (const Vec3D & N, const Vec3D & P) const {
@@ -220,7 +225,7 @@ public:
         return (*this) - (N * w);
     }
     inline Vec3D reflect (const Vec3D & N) const {
-        return (*this)-2*projectOn(N, Vec3D());
+        return (*this)-2*projectOn(N);
     }
     static inline Vec3D segment (const Vec3D & a, const Vec3D & b) {
         Vec3D r;
@@ -319,23 +324,21 @@ public:
         return result;
     }
 
-    inline Vec3D randRotate(const T & maxAngle) const {
+    inline Vec3D randRotate(const float & maxAngle) const {
         auto random = []() -> T {
             return T(rand())/T(RAND_MAX);
         };//rand in [0,1[
 
-        Vec3D rVect;
-        for(unsigned i = 0 ; i < 3 ; i++)
-            rVect[i] = random()-0.5f;
+        Vec3D rVect(random(), random(), random());
         rVect.projectOn(*this);
         rVect.normalize();
-        rVect = *this + tan(random()*maxAngle)*rVect;
+        rVect = *this + T(tan((2*random()-1.f)*maxAngle))*rVect;
         rVect.normalize();
 
         return rVect;
     }
 
-    std::vector<Vec3D> randRotate(const T & maxAngle, unsigned number) const {
+    std::vector<Vec3D> randRotate(const float & maxAngle, unsigned number) const {
         std::vector<Vec3D> directions;
         directions.resize(number);
 
