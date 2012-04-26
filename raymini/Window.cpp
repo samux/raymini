@@ -197,6 +197,7 @@ void Window::changeAmbientOcclusion(int index) {
 void Window::setFocal(bool isFocal) {
     RayTracer *rayTracer = RayTracer::getInstance();
     rayTracer->useFocal = isFocal;
+    viewer->updateGL();
 }
 
 void Window::initControlWidget () {

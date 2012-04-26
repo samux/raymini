@@ -144,15 +144,25 @@ void GLViewer::draw () {
         qglviewer::Vec p = cam->position ();
         qglviewer::Vec d = cam->viewDirection ();
         qglviewer::Vec u = cam->upVector ();
+        qglviewer::Vec r = cam->rightVector ();
+        Vec3Df rightVector (r[0], r[1], r[2]);
         Vec3Df upVector (u[0], u[1], u[2]);
         Vec3Df camPos (p[0], p[1], p[2]);
         Vec3Df viewDirection (d[0], d[1], d[2]);
         Ray focusSelect = Ray(camPos, viewDirection);
         Object *object;
-        glColor3f(1, 0, 0);
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object, false)) {
             rayTracer->focalPoint = (object->getBoundingBox().getCenter() + object->getTrans());
-            Ray(camPos-upVector*2.0, rayTracer->focalPoint-camPos).draw();
+            viewDirection.normalize();
+            glDisable (GL_LIGHTING);
+            glColor3f(1, 1, 1);
+            for (float i=-1; i<=1; i+=2) {
+                for (float j=-1; j<=1; j+=2) {
+                    Vec3Df start = camPos+i*upVector+j*rightVector;
+                    Vec3Df end = focusSelect.getOrigin()+focusSelect.getDirection()*focusSelect.getIntersectionDistance();
+                    Ray(start, end-start).draw();
+                }
+            }
             focalObject = object;
         }
         else {
@@ -184,6 +194,7 @@ void GLViewer::draw () {
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, glMatAmb);
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
         glDisable (GL_COLOR_MATERIAL);
+        glEnable (GL_LIGHTING);
         o.getMesh ().renderGL (renderingMode == Flat);
         glPopMatrix ();
     }

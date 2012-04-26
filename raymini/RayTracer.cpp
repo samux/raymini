@@ -64,7 +64,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     cout << "focal distance: " << focalDistance << endl;
 
     Vec3Df originalCamPos = camPos;
-    Vec3Df campos;
+    Vec3Df focusMovedCamPos;
 
     // For each picture
     for (unsigned int pictureNumber = 0; pictureNumber<1; pictureNumber++) {
@@ -88,21 +88,22 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
                     Vec3Df step = stepX + stepY;
                     Vec3Df dir = direction + step;
+                    dir.normalize();
                     if (useFocal) {
                         float distanceCameraScreen = sqrt(step.getLength()*step.getLength() + distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                         dir.normalize ();
                         Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/distanceOrthogonalCameraScreen)*dir;
                         for(int x = -1; x < 1; x++) {
                             for(int y = -1; y < 1; y++) {
-                                campos = originalCamPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
-                                dir = focalPoint - campos;
+                                focusMovedCamPos = originalCamPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
+                                dir = focalPoint - focusMovedCamPos;
                                 dir.normalize();
-                                c += getColor(dir, campos);
+                                c += getColor(dir, focusMovedCamPos);
                             }
                         }
                     }
                     else {
-                        c += getColor(dir, campos);
+                        c += getColor(dir, camPos);
                     }
                 }
                 buffer[j*screenWidth+i] += c;
