@@ -58,8 +58,11 @@ QImage RayTracer::render (const Vec3Df & camPos,
     buffer.resize(screenHeight*screenWidth);
     Scene *scene = Scene::getInstance();
 
+    float distanceOrthogonalCameraScreen = 1.0;
+    float focalDistance = 2.0;
+
     // For each picture
-    for (unsigned int pictureNumber = 0; pictureNumber<5; pictureNumber++) {
+    for (unsigned int pictureNumber = 0; pictureNumber<1; pictureNumber++) {
 
         for (Object &o : scene->getObjects()) {
             if (o.isMobile()) {
@@ -74,15 +77,15 @@ QImage RayTracer::render (const Vec3Df & camPos,
 
                 Color c (backgroundColor);
 
-
-
                 // For each ray in each pixel
                 for (const pair<float, float> &offset : offsets) {
                     Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
                     Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
                     Vec3Df step = stepX + stepY;
                     Vec3Df dir = direction + step;
+                    float distanceCameraScreen = sqrt(step.getLength()*step.getLength() + distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                     dir.normalize ();
+                    Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/distanceOrthogonalCameraScreen)*dir;
 
                     c += getColor(dir, camPos);
                 }
