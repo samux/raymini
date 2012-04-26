@@ -6,6 +6,7 @@
 // *********************************************************
 
 #include <QProgressDialog>
+#include <algorithm>
 
 #include "RayTracer.h"
 #include "Ray.h"
@@ -30,9 +31,9 @@ void RayTracer::destroyInstance () {
     }
 }
 
-inline int clamp (float f, int inf, int sup) {
-    int v = static_cast<int> (f);
-    return (v < inf ? inf : (v > sup ? sup : v));
+inline int clamp (float f) {
+    int v = static_cast<int> (255*f);
+    return min(max(v, 0), 255);
 }
 
 QImage RayTracer::render (const Vec3Df & camPos,
@@ -71,7 +72,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 c += getColor(dir, camPos);
             }
 
-            image.setPixel (i, j, qRgb (clamp (c[0], 0, 255), clamp (c[1], 0, 255), clamp (c[2], 0, 255)));
+            image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
     }
     progressDialog.setValue (100);
@@ -163,12 +164,12 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 
 float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     if (!nbRayAmbientOcclusion) {
-        return 0.5f;
+        return 0.1f;
     }
 
     int occlusion = 0;
     vector<Vec3Df> directions = intersection.getNormal().randRotate(maxAngleAmbientOcclusion,
-                                                                    nbRayPathTracing);
+                                                                    nbRayAmbientOcclusion);
     for (Vec3Df & direction : directions) {
         const Vec3Df & pos = intersection.getPos();
 
@@ -181,5 +182,5 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
         }
     }
 
-    return 1.f-float(occlusion)/float(nbRayPathTracing);
+    return (1.f-float(occlusion)/float(nbRayAmbientOcclusion))/5;
 }

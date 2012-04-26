@@ -108,10 +108,10 @@ void Window::renderRayImage () {
 
 void Window::setBGColor () {
     RayTracer *rayTracer = RayTracer::getInstance();
-    Vec3Df bg = rayTracer->getBackgroundColor();
+    Vec3Df bg = 255*rayTracer->getBackgroundColor();
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), this);
     if (c.isValid () == true) {
-        RayTracer::getInstance ()->setBackgroundColor (Vec3Df (c.red (), c.green (), c.blue ()));
+        RayTracer::getInstance ()->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
         viewer->setBackgroundColor (c);
         viewer->updateGL ();
     }

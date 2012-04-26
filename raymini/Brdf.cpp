@@ -5,11 +5,11 @@
 using namespace std;
 
 Vec3Df Brdf::ambient() const {
-    return colorAmbient * Ka;
+    return color * Ka;
 }
 
 Vec3Df Brdf::lambert(Vec3Df i, Vec3Df n) const {
-    return colorDif * Kd * max(Vec3Df::dotProduct(i,n),0.0f);
+    return color * Kd * max(Vec3Df::dotProduct(i,n),0.0f);
 }
 
 Vec3Df Brdf::phong(Vec3Df r, Vec3Df i, Vec3Df n) const {
@@ -43,7 +43,7 @@ Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
         color /= lights.size();
 
     if(type&Ambient)
-        color += ambient();
+        color += ambientColor * ambient();
 
     return color;
 }
