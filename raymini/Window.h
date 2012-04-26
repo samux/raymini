@@ -38,6 +38,7 @@ public slots :
     void about ();
     void changeAntiAliasingType(int index);
     void changeAmbientOcclusion(int index);
+    void setFocal(bool);
 
 private :
     void initControlWidget ();

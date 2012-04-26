@@ -194,6 +194,11 @@ void Window::changeAmbientOcclusion(int index) {
     RayTracer::getInstance()->nbRayAmbientOcclusion = rays;
 }
 
+void Window::setFocal(bool isFocal) {
+    RayTracer *rayTracer = RayTracer::getInstance();
+    rayTracer->useFocal = isFocal;
+}
+
 void Window::initControlWidget () {
     controlWidget = new QGroupBox ();
     QVBoxLayout * layout = new QVBoxLayout (controlWidget);
@@ -244,6 +249,10 @@ void Window::initControlWidget () {
     shadowTypeList->addItem("Soft shadow");
     connect (shadowTypeList, SIGNAL (activated (int)), this, SLOT (setShadowMode (int)));
     rayLayout->addWidget (shadowTypeList);
+
+    QCheckBox * focalCheckBox = new QCheckBox ("Focal", rayGroupBox);
+    connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (setFocal (bool)));
+    rayLayout->addWidget (focalCheckBox);
 
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);

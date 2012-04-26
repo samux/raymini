@@ -15,6 +15,8 @@
 #include <string>
 
 #include "Scene.h"
+#include "Material.h"
+#include "Object.h"
 
 class GLViewer : public QGLViewer  {
     Q_OBJECT
@@ -62,6 +64,8 @@ private:
     RenderingMode renderingMode;
     DisplayMode displayMode;
     QImage rayImage;
+    Material *focalMaterial;
+    Object *focalObject;
 };
 
 #endif // GLVIEWER_H

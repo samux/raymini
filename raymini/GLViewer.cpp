@@ -14,6 +14,8 @@
 #include <cassert>
 #include <string>
 
+#include "RayTracer.h"
+
 using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
@@ -21,6 +23,8 @@ static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT
 GLViewer::GLViewer () : QGLViewer () {
     wireframe = false;
     renderingMode = Smooth;
+    focalMaterial = new Material(1, 1, Vec3Df(0, 0, 1));
+    focalObject = NULL;
 }
 
 GLViewer::~GLViewer () {
@@ -134,12 +138,34 @@ void GLViewer::draw () {
         return;
     }
     Scene * scene = Scene::getInstance ();
+    RayTracer * rayTracer = RayTracer::getInstance ();
+    if (rayTracer->useFocal) {
+        qglviewer::Camera * cam = camera ();
+        qglviewer::Vec p = cam->position ();
+        qglviewer::Vec d = cam->viewDirection ();
+        qglviewer::Vec u = cam->upVector ();
+        Vec3Df upVector (u[0], u[1], u[2]);
+        Vec3Df camPos (p[0], p[1], p[2]);
+        Vec3Df viewDirection (d[0], d[1], d[2]);
+        Ray focusSelect = Ray(camPos, viewDirection);
+        Object *object;
+        glColor3f(1, 0, 0);
+        if (rayTracer->intersect(viewDirection, camPos, focusSelect, object, false)) {
+            rayTracer->focalPoint = (object->getBoundingBox().getCenter() + object->getTrans());
+            Ray(camPos-upVector*2.0, rayTracer->focalPoint-camPos).draw();
+            focalObject = object;
+        }
+        else {
+            rayTracer->focalPoint = Vec3Df();
+            focalObject = NULL;
+        }
+    }
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object & o = scene->getObjects ()[i];
         const Vec3Df & trans = o.getTrans ();
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
-        const Material & mat = o.getMaterial ();
+        const Material & mat = (rayTracer->useFocal&&(&o)==focalObject)?*focalMaterial:o.getMaterial ();
         const Vec3Df & color = mat.getColor ();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();

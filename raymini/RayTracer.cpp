@@ -59,7 +59,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     Scene *scene = Scene::getInstance();
 
     float distanceOrthogonalCameraScreen = 1.0;
-    Vec3Df camToObject = (scene->getObjects()[5].getBoundingBox().getCenter() + scene->getObjects()[5].getTrans() - camPos);
+    Vec3Df camToObject(focalPoint - camPos);
     float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
     cout << "focal distance: " << focalDistance << endl;
 
@@ -88,16 +88,21 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
                     Vec3Df step = stepX + stepY;
                     Vec3Df dir = direction + step;
-                    float distanceCameraScreen = sqrt(step.getLength()*step.getLength() + distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
-                    dir.normalize ();
-                    Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/distanceOrthogonalCameraScreen)*dir;
-                    for(int x = -1; x < 1; x++) {
-                        for(int y = -1; y < 1; y++) {
-                            campos = originalCamPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
-                            dir = focalPoint - campos;
-                            dir.normalize();
-                            c += getColor(dir, campos);
+                    if (useFocal) {
+                        float distanceCameraScreen = sqrt(step.getLength()*step.getLength() + distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
+                        dir.normalize ();
+                        Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/distanceOrthogonalCameraScreen)*dir;
+                        for(int x = -1; x < 1; x++) {
+                            for(int y = -1; y < 1; y++) {
+                                campos = originalCamPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
+                                dir = focalPoint - campos;
+                                dir.normalize();
+                                c += getColor(dir, campos);
+                            }
                         }
+                    }
+                    else {
+                        c += getColor(dir, campos);
                     }
                 }
                 buffer[j*screenWidth+i] += c;
