@@ -206,6 +206,19 @@ void Window::setFocal(bool isFocal) {
     viewer->updateGL();
 }
 
+void Window::setDepthPathTracing(int i) {
+    RayTracer::getInstance()->depthPathTracing = i;
+    PTNbRaySpinBox->setVisible(i != 0);
+    PTMaxAngleSpinBox->setVisible(i != 0);
+}
+
+void Window::setNbRayPathTracing(int i) {
+    RayTracer::getInstance()->nbRayPathTracing = i;
+}
+void Window::setMaxAnglePathTracing(int i) {
+    RayTracer::getInstance()->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
+}
+
 void Window::initControlWidget () {
     // Control widget
     controlWidget = new QGroupBox ();
@@ -280,6 +293,34 @@ void Window::initControlWidget () {
     shadowsLayout->addWidget (shadowSpinBox);
 
     rayLayout->addWidget (shadowsGroupBox);
+
+    //  Path Tracing
+    QGroupBox * PTGroupBox = new QGroupBox ("Path tracing", rayGroupBox);
+    QVBoxLayout * PTLayout = new QVBoxLayout (PTGroupBox);
+
+    QSpinBox *PTDepthSpinBox = new QSpinBox(PTGroupBox);
+    PTDepthSpinBox->setPrefix ("Depth: ");
+    PTDepthSpinBox->setMinimum (0);
+    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setDepthPathTracing (int)));
+    PTLayout->addWidget (PTDepthSpinBox);
+
+    PTNbRaySpinBox = new QSpinBox(PTGroupBox);
+    PTNbRaySpinBox->setSuffix (" rays");
+    PTNbRaySpinBox->setMinimum (1);
+    PTNbRaySpinBox->setVisible(false);
+    connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbRayPathTracing (int)));
+    PTLayout->addWidget (PTNbRaySpinBox);
+
+    PTMaxAngleSpinBox = new QSpinBox(PTGroupBox);
+    PTMaxAngleSpinBox->setPrefix ("Max angle: ");
+    PTMaxAngleSpinBox->setMinimum (0);
+    PTMaxAngleSpinBox->setMaximum (180);
+    PTMaxAngleSpinBox->setVisible(false);
+    connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setMaxAnglePathTracing (int)));
+    PTLayout->addWidget (PTMaxAngleSpinBox);
+
+    rayLayout->addWidget (PTGroupBox);
+
 
     //  Focal
     QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);

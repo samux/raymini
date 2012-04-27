@@ -40,6 +40,9 @@ public slots :
     void changeAntiAliasingType(int index);
     void changeAmbientOcclusion(int index);
     void setFocal(bool);
+    void setDepthPathTracing(int);
+    void setNbRayPathTracing(int);
+    void setMaxAnglePathTracing(int);
 
 private :
     void initControlWidget ();
@@ -50,6 +53,9 @@ private :
 
     // Needed for further actions
     QSpinBox *shadowSpinBox;
+
+    QSpinBox *PTNbRaySpinBox;
+    QSpinBox *PTMaxAngleSpinBox;
 
     GLViewer * viewer;
 };
