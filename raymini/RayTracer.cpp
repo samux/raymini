@@ -99,7 +99,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         c += getColor(dir, camPos);
                     }
                 }
-                buffer[j*screenWidth+i] += c;
+                buffer[j*screenWidth+i] += c();
             }
         }
         if(nbPictures>1)
