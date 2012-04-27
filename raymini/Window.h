@@ -31,6 +31,7 @@ class Window : public QMainWindow {
 public slots :
     void renderRayImage ();
     void setShadowMode (int);
+    void setShadowNbRays (int);
     void setBGColor ();
     void showRayImage ();
     void exportGLImage ();
@@ -46,6 +47,9 @@ private :
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
     QString currentDirectory;
+
+    // Needed for further actions
+    QSpinBox *shadowSpinBox;
 
     GLViewer * viewer;
 };

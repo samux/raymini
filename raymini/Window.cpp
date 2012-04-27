@@ -77,6 +77,12 @@ void Window::setShadowMode(int i) {
         rayTracer->setShadowMode(Shadow::SOFT);
         break;
     }
+    shadowSpinBox->setVisible(i == 2);
+}
+
+void Window::setShadowNbRays (int i) {
+    RayTracer *rayTracer = RayTracer::getInstance();
+    rayTracer->setShadowNbImpule(i);
 }
 
 void Window::renderRayImage () {
@@ -201,9 +207,11 @@ void Window::setFocal(bool isFocal) {
 }
 
 void Window::initControlWidget () {
+    // Control widget
     controlWidget = new QGroupBox ();
     QVBoxLayout * layout = new QVBoxLayout (controlWidget);
 
+    // Preview
     QGroupBox * previewGroupBox = new QGroupBox ("Preview", controlWidget);
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
 
@@ -223,38 +231,66 @@ void Window::initControlWidget () {
 
     layout->addWidget (previewGroupBox);
 
+    // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
 
-    QComboBox *antiAliasingList = new QComboBox(rayGroupBox);
+    //  Anti Aliasing
+    QGroupBox * AAGroupBox = new QGroupBox ("Anti aliasing", rayGroupBox);
+    QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
+
+    QComboBox *antiAliasingList = new QComboBox(AAGroupBox);
     antiAliasingList->addItem("No antialiasing");
     antiAliasingList->addItem("Uniform 4");
     antiAliasingList->addItem("Uniform 9");
     antiAliasingList->addItem("Pentagonal");
     antiAliasingList->addItem("Stochastic 5");
-    rayLayout->addWidget(antiAliasingList);
+    AALayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
+    rayLayout->addWidget(AAGroupBox);
 
-    QComboBox *ambientOcclusionList = new QComboBox(rayGroupBox);
+    //  Ambient occlusion
+    QGroupBox * AOGroupBox = new QGroupBox ("Ambient Occlusion", rayGroupBox);
+    QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
+
+    QComboBox *ambientOcclusionList = new QComboBox(AOGroupBox);
     ambientOcclusionList->addItem("No ambient occlusion");
     ambientOcclusionList->addItem("Ambiant occlusion 4 rays");
     ambientOcclusionList->addItem("Ambiant occlusion 9 rays");
-    rayLayout->addWidget(ambientOcclusionList);
+    AOLayout->addWidget(ambientOcclusionList);
     connect(ambientOcclusionList, SIGNAL(activated(int)), this, SLOT(changeAmbientOcclusion(int)));
+    rayLayout->addWidget(AOGroupBox);
 
+    //  Shadows
+    QGroupBox * shadowsGroupBox = new QGroupBox ("Shadows", rayGroupBox);
+    QVBoxLayout * shadowsLayout = new QVBoxLayout (shadowsGroupBox);
 
-
-    QComboBox *shadowTypeList = new QComboBox(rayGroupBox);
+    QComboBox *shadowTypeList = new QComboBox(shadowsGroupBox);
     shadowTypeList->addItem("No shadow");
     shadowTypeList->addItem("Hard shadow");
     shadowTypeList->addItem("Soft shadow");
     connect (shadowTypeList, SIGNAL (activated (int)), this, SLOT (setShadowMode (int)));
-    rayLayout->addWidget (shadowTypeList);
+    shadowsLayout->addWidget (shadowTypeList);
 
-    QCheckBox * focalCheckBox = new QCheckBox ("Focal", rayGroupBox);
+    shadowSpinBox = new QSpinBox(shadowsGroupBox);
+    shadowSpinBox->setSuffix (" rays");
+    shadowSpinBox->setMinimum (2);
+    shadowSpinBox->setVisible (false);
+    connect (shadowSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setShadowNbRays (int)));
+    shadowsLayout->addWidget (shadowSpinBox);
+
+    rayLayout->addWidget (shadowsGroupBox);
+
+    //  Focal
+    QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);
+    QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
+
+    QCheckBox * focalCheckBox = new QCheckBox ("Focal", focalGroupBox);
     connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (setFocal (bool)));
-    rayLayout->addWidget (focalCheckBox);
+    focalLayout->addWidget (focalCheckBox);
+    rayLayout->addWidget (focalGroupBox);
 
+    // Render
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);
     connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
@@ -267,6 +303,7 @@ void Window::initControlWidget () {
 
     layout->addWidget (rayGroupBox);
 
+    // Global settings
     QGroupBox * globalGroupBox = new QGroupBox ("Global Settings", controlWidget);
     QVBoxLayout * globalLayout = new QVBoxLayout (globalGroupBox);
 
