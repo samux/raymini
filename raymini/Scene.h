@@ -14,6 +14,7 @@
 #include "Object.h"
 #include "Light.h"
 #include "BoundingBox.h"
+#include "Vec3D.h"
 
 class Scene {
 public:
@@ -28,6 +29,16 @@ public:
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
+
+    void move(const Vec3Df & trans) {
+        for (Object &o : objects)
+            o.move(trans);
+    }
+
+    void reset() {
+        for (Object &o : objects)
+            o.reset();
+    }
 
 protected:
     Scene ();

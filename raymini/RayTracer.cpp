@@ -44,40 +44,31 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           float aspectRatio,
                           unsigned int screenWidth,
                           unsigned int screenHeight) {
+    Scene *scene = Scene::getInstance();
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
+    vector<Color> buffer;
+    buffer.resize(screenHeight*screenWidth);
 
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
     vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+
     float tang = tan (fieldOfView);
     Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
     Vec3Df upVec = tang * upVector / screenHeight;
 
-    vector<Color> buffer;
-    buffer.resize(screenHeight*screenWidth);
-    Scene *scene = Scene::getInstance();
-
-    float distanceOrthogonalCameraScreen = 1.0;
+    const float distanceOrthogonalCameraScreen = 1.0;
     Vec3Df camToObject(focalPoint - camPos);
     float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
     cout << "focal distance: " << focalDistance << endl;
 
-    Vec3Df originalCamPos = camPos;
-    Vec3Df focusMovedCamPos;
-
     // For each picture
-    for (unsigned int pictureNumber = 0; pictureNumber<1; pictureNumber++) {
-
-        for (Object &o : scene->getObjects()) {
-            if (o.isMobile()) {
-                o.setTrans(o.getTrans()+Vec3Df(0, 1, 0)*0.2);
-            }
-        }
+    for (unsigned picNumber = 0 ; picNumber<nbPictures ; picNumber++) {
 
         // For each pixel
         for (unsigned int i = 0; i < screenWidth; i++) {
-            progressDialog.setValue ((100*i)/screenWidth);
+            progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbPictures);
             for (unsigned int j = 0; j < screenHeight; j++) {
 
                 Color c (backgroundColor);
@@ -89,13 +80,15 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     Vec3Df step = stepX + stepY;
                     Vec3Df dir = direction + step;
                     dir.normalize();
-                    if (useFocal) {
-                        float distanceCameraScreen = sqrt(step.getLength()*step.getLength() + distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
+                    if (focus) {
+                        float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
+                                                          distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                         dir.normalize ();
-                        Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/distanceOrthogonalCameraScreen)*dir;
+                        Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
+                                                      distanceOrthogonalCameraScreen)*dir;
                         for(int x = -1; x < 1; x++) {
                             for(int y = -1; y < 1; y++) {
-                                focusMovedCamPos = originalCamPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
+                                Vec3Df focusMovedCamPos = camPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
                                 dir = focalPoint - focusMovedCamPos;
                                 dir.normalize();
                                 c += getColor(dir, focusMovedCamPos);
@@ -109,14 +102,21 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 buffer[j*screenWidth+i] += c;
             }
         }
+        if(nbPictures>1)
+            scene->move(Vec3Df(0, 1, 0)*0.2);
     }
-    progressDialog.setValue (100);
+
     for (unsigned int i = 0; i < screenWidth; i++) {
         for (unsigned int j = 0; j < screenHeight; j++) {
             Color c = buffer[j*screenWidth+i];
             image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
     }
+    if(nbPictures>1)
+        scene->reset();
+
+    progressDialog.setValue (100);
+
     return image;
 }
 

@@ -37,11 +37,13 @@ public:
     AntiAliasing::Type typeAntiAliasing;
     unsigned nbRayAntiAliasing;
 
+    unsigned nbPictures;
+
+    bool focus;
+    Vec3Df focalPoint;
+
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
-
-    bool useFocal;
-    Vec3Df focalPoint;
     /*        End Config         */
 
     static RayTracer * getInstance ();
@@ -73,7 +75,8 @@ protected:
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(1),
-        useFocal(false) {}
+        nbPictures(1),
+        focus(false) {}
     inline virtual ~RayTracer () {}
 
 private:

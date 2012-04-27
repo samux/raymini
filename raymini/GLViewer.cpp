@@ -139,7 +139,7 @@ void GLViewer::draw () {
     }
     Scene * scene = Scene::getInstance ();
     RayTracer * rayTracer = RayTracer::getInstance ();
-    if (rayTracer->useFocal) {
+    if (rayTracer->focus) {
         qglviewer::Camera * cam = camera ();
         qglviewer::Vec p = cam->position ();
         qglviewer::Vec d = cam->viewDirection ();
@@ -175,7 +175,7 @@ void GLViewer::draw () {
         const Vec3Df & trans = o.getTrans ();
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
-        const Material & mat = (rayTracer->useFocal&&(&o)==focalObject)?*focalMaterial:o.getMaterial ();
+        const Material & mat = (rayTracer->focus&&(&o)==focalObject)?*focalMaterial:o.getMaterial ();
         const Vec3Df & color = mat.getColor ();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();

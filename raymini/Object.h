@@ -25,7 +25,7 @@ public:
         updateBoundingBox ();
     }
     inline Object (const Object & o) :
-        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), tree(nullptr), mobile(o.mobile){}
+        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile) {}
     virtual ~Object () {
         delete tree;
     }
@@ -35,13 +35,20 @@ public:
         mat = o.mat;
         bbox = o.bbox;
         trans = o.trans;
+        origTrans = trans;
         tree = nullptr;
         mobile = o.mobile;
         return (*this);
     }
 
     inline const Vec3Df & getTrans () const { return trans;}
-    inline void setTrans (const Vec3Df & t) { trans = t; }
+    inline void setTrans (const Vec3Df & t) {
+        trans = t;
+        origTrans = trans;
+    }
+
+    inline void move(const Vec3Df & v) { if(mobile) trans += v; }
+    inline void reset() { trans = origTrans; }
 
     inline bool isMobile() const {return mobile; }
     inline void setMobile(bool mobile) { this->mobile = mobile; }
@@ -65,6 +72,7 @@ private:
     const Material * mat;
     BoundingBox bbox;
     Vec3Df trans;
+    Vec3Df origTrans;
     KDtree *tree;
     bool mobile;
 };
