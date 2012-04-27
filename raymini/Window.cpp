@@ -276,6 +276,7 @@ void Window::initControlWidget () {
     AANbRaySpinBox = new QSpinBox(AAGroupBox);
     AANbRaySpinBox->setSuffix(" rays");
     AANbRaySpinBox->setMinimum(4);
+    AANbRaySpinBox->setMaximum(10);
     AANbRaySpinBox->setVisible(false);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNbRayAntiAliasing(int)));
     AALayout->addWidget(AANbRaySpinBox);
@@ -308,6 +309,7 @@ void Window::initControlWidget () {
     shadowSpinBox = new QSpinBox(shadowsGroupBox);
     shadowSpinBox->setSuffix (" rays");
     shadowSpinBox->setMinimum (2);
+    shadowSpinBox->setMaximum (1000);
     shadowSpinBox->setVisible (false);
     connect (shadowSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setShadowNbRays (int)));
     shadowsLayout->addWidget (shadowSpinBox);
@@ -321,12 +323,14 @@ void Window::initControlWidget () {
     QSpinBox *PTDepthSpinBox = new QSpinBox(PTGroupBox);
     PTDepthSpinBox->setPrefix ("Depth: ");
     PTDepthSpinBox->setMinimum (0);
+    PTDepthSpinBox->setMaximum (5);
     connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setDepthPathTracing (int)));
     PTLayout->addWidget (PTDepthSpinBox);
 
     PTNbRaySpinBox = new QSpinBox(PTGroupBox);
     PTNbRaySpinBox->setSuffix (" rays");
     PTNbRaySpinBox->setMinimum (1);
+    PTNbRaySpinBox->setMaximum (1000);
     PTNbRaySpinBox->setVisible(false);
     connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
