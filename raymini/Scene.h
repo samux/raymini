@@ -30,9 +30,16 @@ public:
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
-    void move(const Vec3Df & trans) {
+    bool hasMobile() const {
+        for (const Object &o : objects)
+            if(o.isMobile())
+                return true;
+        return false;
+    }
+
+    void move(unsigned nbImages) {
         for (Object &o : objects)
-            o.move(trans);
+            o.move(nbImages);
     }
 
     void reset() {

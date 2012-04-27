@@ -46,6 +46,7 @@ public slots :
     void setDepthPathTracing(int);
     void setNbRayPathTracing(int);
     void setMaxAnglePathTracing(int);
+    void setNbImagesSpinBox(int);
 
 private :
     void initControlWidget ();

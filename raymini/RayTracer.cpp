@@ -52,23 +52,24 @@ QImage RayTracer::render (const Vec3Df & camPos,
     QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
     progressDialog.show ();
 
-    vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
 
-    float tang = tan (fieldOfView);
-    Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
-    Vec3Df upVec = tang * upVector / screenHeight;
+    const float tang = tan (fieldOfView);
+    const Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
+    const Vec3Df upVec = tang * upVector / screenHeight;
 
     const float distanceOrthogonalCameraScreen = 1.0;
-    Vec3Df camToObject(focalPoint - camPos);
-    float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
-    cout << "focal distance: " << focalDistance << endl;
+    const Vec3Df camToObject = focalPoint - camPos;
+    const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
+
+    const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
 
     // For each picture
-    for (unsigned picNumber = 0 ; picNumber<nbPictures ; picNumber++) {
+    for (unsigned picNumber = 0 ; picNumber < nbIterations ; picNumber++) {
 
         // For each pixel
         for (unsigned int i = 0; i < screenWidth; i++) {
-            progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbPictures);
+            progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbIterations);
             for (unsigned int j = 0; j < screenHeight; j++) {
 
                 Color c (backgroundColor);
@@ -102,8 +103,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                 buffer[j*screenWidth+i] += c();
             }
         }
-        if(nbPictures>1)
-            scene->move(Vec3Df(0, 1, 0)*0.2);
+        scene->move(nbPictures);
     }
 
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -112,9 +112,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
             image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
     }
-    if(nbPictures>1)
-        scene->reset();
 
+    scene->reset();
     progressDialog.setValue (100);
 
     return image;

@@ -19,9 +19,9 @@
 
 class Object {
 public:
-    inline Object () : tree(nullptr), mobile(false) {}
-    Object (const Mesh & mesh, const Material * mat, bool mobile=false) :
-        mesh (mesh), mat (mat), tree(nullptr), mobile(mobile) {
+    inline Object () : tree(nullptr) {}
+    Object (const Mesh & mesh, const Material * mat) :
+        mesh (mesh), mat (mat), tree(nullptr) {
         updateBoundingBox ();
     }
     inline Object (const Object & o) :
@@ -47,11 +47,11 @@ public:
         origTrans = trans;
     }
 
-    inline void move(const Vec3Df & v) { if(mobile) trans += v; }
+    inline void move(unsigned nbImages) { trans += mobile/nbImages ; }
     inline void reset() { trans = origTrans; }
 
-    inline bool isMobile() const {return mobile; }
-    inline void setMobile(bool mobile) { this->mobile = mobile; }
+    inline bool isMobile() const {return mobile!=Vec3Df(); }
+    inline void setMobile(const Vec3Df & mobile) { this->mobile = mobile; }
 
     inline const Mesh & getMesh () const { return mesh; }
     inline Mesh & getMesh () { return mesh; }
@@ -74,7 +74,7 @@ private:
     Vec3Df trans;
     Vec3Df origTrans;
     KDtree *tree;
-    bool mobile;
+    Vec3Df mobile;
 };
 
 // Some Emacs-Hints -- please don't remove:

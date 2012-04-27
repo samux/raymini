@@ -36,6 +36,7 @@
 #include <QComboBox>
 
 #include "RayTracer.h"
+#include "Scene.h"
 #include "AntiAliasing.h"
 
 using namespace std;
@@ -227,6 +228,10 @@ void Window::setMaxAnglePathTracing(int i) {
     RayTracer::getInstance()->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
 }
 
+void Window::setNbImagesSpinBox(int i) {
+    RayTracer::getInstance()->nbPictures = i;
+}
+
 void Window::initControlWidget () {
     // Control widget
     controlWidget = new QGroupBox ();
@@ -336,7 +341,6 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget (PTGroupBox);
 
-
     //  Focal
     QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);
     QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
@@ -344,11 +348,28 @@ void Window::initControlWidget () {
     QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", rayGroupBox);
     connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (enableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
-    rayLayout->addWidget (focalGroupBox);
+
     selecFocusedObject  = new QPushButton ("", rayGroupBox);
     selecFocusedObject->setVisible(false);
     connect (selecFocusedObject, SIGNAL (clicked ()) , this, SLOT ( setFocal()));
     focalLayout->addWidget (selecFocusedObject);
+
+    rayLayout->addWidget (focalGroupBox);
+
+    // Motion Blur
+    if(Scene::getInstance()->hasMobile()) {
+        QGroupBox * mBlurGroupBox = new QGroupBox ("Motion blur", rayGroupBox);
+        QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
+
+        QSpinBox * mBlurNbImagesSpinBox = new QSpinBox(PTGroupBox);
+        mBlurNbImagesSpinBox->setSuffix (" images");
+        mBlurNbImagesSpinBox->setMinimum (1);
+        mBlurNbImagesSpinBox->setMaximum (100);
+        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbImagesSpinBox (int)));
+        mBlurLayout->addWidget (mBlurNbImagesSpinBox);
+
+        rayLayout->addWidget (mBlurGroupBox);
+    }
 
     // Render
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
