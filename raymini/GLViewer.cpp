@@ -20,11 +20,9 @@ using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
 
-GLViewer::GLViewer () : QGLViewer () {
+GLViewer::GLViewer () : QGLViewer (), focusMode(false) {
     wireframe = false;
     renderingMode = Smooth;
-    focalMaterial = new Material(1, 1, Vec3Df(0, 0, 1));
-    focalObject = NULL;
 }
 
 GLViewer::~GLViewer () {
@@ -139,7 +137,7 @@ void GLViewer::draw () {
     }
     Scene * scene = Scene::getInstance ();
     RayTracer * rayTracer = RayTracer::getInstance ();
-    if (rayTracer->focus) {
+    if (focusMode) {
         qglviewer::Camera * cam = camera ();
         qglviewer::Vec p = cam->position ();
         qglviewer::Vec d = cam->viewDirection ();
@@ -151,31 +149,36 @@ void GLViewer::draw () {
         Vec3Df viewDirection (d[0], d[1], d[2]);
         Ray focusSelect = Ray(camPos, viewDirection);
         Object *object;
-        if (rayTracer->intersect(viewDirection, camPos, focusSelect, object, false)) {
-            rayTracer->focalPoint = (object->getBoundingBox().getCenter() + object->getTrans());
-            viewDirection.normalize();
-            glDisable (GL_LIGHTING);
-            glColor3f(1, 1, 1);
-            for (float i=-1; i<=1; i+=2) {
-                for (float j=-1; j<=1; j+=2) {
-                    Vec3Df start = camPos+i*upVector+j*rightVector;
-                    Vec3Df end = focusSelect.getOrigin()+focusSelect.getDirection()*focusSelect.getIntersectionDistance();
-                    Ray(start, end-start).draw();
-                }
-            }
-            focalObject = object;
-        }
-        else {
-            rayTracer->focalPoint = Vec3Df();
-            focalObject = NULL;
+        if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
+            focusPoint = focusSelect.getIntersection();
         }
     }
+
+    if(focusMode || rayTracer->focusEnabled()) {
+        Vec3Df X, Y;
+        focusPoint.getNormal().getTwoOrthogonals(X,Y);
+
+        glDisable (GL_LIGHTING);
+        glColor3f(1, 1, 1);
+        auto minidraw = [&focusPoint](const Vec3Df & delta) {
+            const Vec3Df pos = focusPoint.getPos() + 0.01*focusPoint.getNormal();
+            Vec3Df tmp = pos + delta;
+            glVertex3f(tmp[0], tmp[1], tmp[2]);
+        };
+        glBegin(GL_LINES);
+        minidraw(-0.2*X);
+        minidraw( 0.2*X);
+        minidraw(-0.2*Y);
+        minidraw( 0.2*Y);
+        glEnd();
+    }
+
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object & o = scene->getObjects ()[i];
         const Vec3Df & trans = o.getTrans ();
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
-        const Material & mat = (rayTracer->focus&&(&o)==focalObject)?*focalMaterial:o.getMaterial ();
+        const Material & mat = o.getMaterial ();
         const Vec3Df & color = mat.getColor ();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();

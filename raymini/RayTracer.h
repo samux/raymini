@@ -39,8 +39,12 @@ public:
 
     unsigned nbPictures;
 
-    bool focus;
-    Vec3Df focalPoint;
+    void noFocus() { focus = false; }
+
+    void setFocus(Vec3Df focal = Vec3Df()) {
+        focus = true;
+        focalPoint = focal;
+    }
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
@@ -70,6 +74,8 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;
 
+    bool focusEnabled() { return focus; };
+
 protected:
     inline RayTracer () :
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
@@ -83,6 +89,8 @@ private:
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001f;
     Vec3Df backgroundColor;
     Shadow shadow;
+    bool focus;
+    Vec3Df focalPoint;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light> getLights(const Vertex & closestIntersection) const;

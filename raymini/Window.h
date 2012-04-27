@@ -13,6 +13,7 @@
 #include <QSpinBox>
 #include <QImage>
 #include <QLabel>
+#include <QPushButton>
 
 #include <vector>
 #include <string>
@@ -40,7 +41,8 @@ public slots :
     void changeAntiAliasingType(int index);
     void setNbRayAntiAliasing(int);
     void changeAmbientOcclusion(int index);
-    void setFocal(bool);
+    void enableFocal(bool);
+    void setFocal();
     void setDepthPathTracing(int);
     void setNbRayPathTracing(int);
     void setMaxAnglePathTracing(int);
@@ -59,6 +61,8 @@ private :
     QSpinBox *PTMaxAngleSpinBox;
 
     QSpinBox *AANbRaySpinBox;
+
+    QPushButton * selecFocusedObject;
 
     GLViewer * viewer;
 };

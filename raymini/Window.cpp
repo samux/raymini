@@ -178,27 +178,40 @@ void Window::setNbRayAntiAliasing(int i) {
 
 void Window::changeAmbientOcclusion(int index) {
     unsigned int rays;
-    switch (index)
-        {
-        default:
-        case 0:
-            rays = 0;
-            break;
-        case 1:
-            rays = 4;
-            break;
-        case 2:
-            rays = 9;
-            break;
-        }
+    switch (index) {
+    default:
+    case 0:
+        rays = 0;
+        break;
+    case 1:
+        rays = 4;
+        break;
+    case 2:
+        rays = 9;
+        break;
+    }
 
     RayTracer::getInstance()->nbRayAmbientOcclusion = rays;
 }
 
-void Window::setFocal(bool isFocal) {
-    RayTracer *rayTracer = RayTracer::getInstance();
-    rayTracer->focus = isFocal;
+void Window::enableFocal(bool isFocal) {
+    selecFocusedObject->setText("Choose focused point");
+    selecFocusedObject->setVisible(isFocal);
+    viewer->focusMode = isFocal;
+    if(!isFocal)
+        RayTracer::getInstance()->noFocus();
     viewer->updateGL();
+}
+
+void Window::setFocal() {
+    if(viewer->focusMode) {
+        viewer->focusMode = false;
+        RayTracer::getInstance()->setFocus(viewer->getFocusPoint());
+        selecFocusedObject->setText("Change focus point");
+    }
+    else {
+        enableFocal(true);
+    }
 }
 
 void Window::setDepthPathTracing(int i) {
@@ -248,7 +261,7 @@ void Window::initControlWidget () {
     QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
 
     QComboBox *antiAliasingList = new QComboBox(AAGroupBox);
-    antiAliasingList->addItem("No antialiasing");
+    antiAliasingList->addItem("None");
     antiAliasingList->addItem("Uniform");
     antiAliasingList->addItem("Regular polygon");
     antiAliasingList->addItem("Stochastic");
@@ -269,7 +282,7 @@ void Window::initControlWidget () {
     QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
 
     QComboBox *ambientOcclusionList = new QComboBox(AOGroupBox);
-    ambientOcclusionList->addItem("No ambient occlusion");
+    ambientOcclusionList->addItem("None");
     ambientOcclusionList->addItem("Ambiant occlusion 4 rays");
     ambientOcclusionList->addItem("Ambiant occlusion 9 rays");
     AOLayout->addWidget(ambientOcclusionList);
@@ -281,7 +294,7 @@ void Window::initControlWidget () {
     QVBoxLayout * shadowsLayout = new QVBoxLayout (shadowsGroupBox);
 
     QComboBox *shadowTypeList = new QComboBox(shadowsGroupBox);
-    shadowTypeList->addItem("No shadow");
+    shadowTypeList->addItem("None");
     shadowTypeList->addItem("Hard shadow");
     shadowTypeList->addItem("Soft shadow");
     connect (shadowTypeList, SIGNAL (activated (int)), this, SLOT (setShadowMode (int)));
@@ -328,10 +341,14 @@ void Window::initControlWidget () {
     QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);
     QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
 
-    QCheckBox * focalCheckBox = new QCheckBox ("Focal", focalGroupBox);
-    connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (setFocal (bool)));
+    QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", rayGroupBox);
+    connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (enableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
     rayLayout->addWidget (focalGroupBox);
+    selecFocusedObject  = new QPushButton ("", rayGroupBox);
+    selecFocusedObject->setVisible(false);
+    connect (selecFocusedObject, SIGNAL (clicked ()) , this, SLOT ( setFocal()));
+    focalLayout->addWidget (selecFocusedObject);
 
     // Render
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);

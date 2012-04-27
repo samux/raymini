@@ -49,6 +49,9 @@ public slots :
     void setDisplayMode (int m) { setRenderingMode (static_cast<DisplayMode>(m)); }
     void setRayImage (const QImage & image);
 
+public:
+    bool focusMode;
+    Vec3Df getFocusPoint() { return focusPoint.getPos(); }
 protected :
     void init();
     void draw ();
@@ -64,8 +67,7 @@ private:
     RenderingMode renderingMode;
     DisplayMode displayMode;
     QImage rayImage;
-    Material *focalMaterial;
-    Object *focalObject;
+    Vertex focusPoint;
 };
 
 #endif // GLVIEWER_H
