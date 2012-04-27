@@ -151,34 +151,29 @@ void Window::about () {
 
 void Window::changeAntiAliasingType(int index) {
     AntiAliasing::Type type;
-    unsigned int rays;
 
     switch (index)
         {
         default:
         case 0:
             type = AntiAliasing::NONE;
-            rays = 1;
             break;
         case 1:
-            rays = 4;
             type = AntiAliasing::UNIFORM;
             break;
         case 2:
-            rays = 9;
-            type = AntiAliasing::UNIFORM;
-            break;
-        case 3:
-            rays = 5;
             type = AntiAliasing::POLYGONAL;
             break;
-        case 4:
-            rays = 5;
+        case 3:
             type = AntiAliasing::STOCHASTIC;
             break;
         }
-    RayTracer::getInstance()->nbRayAntiAliasing = rays;
     RayTracer::getInstance()->typeAntiAliasing = type;
+    AANbRaySpinBox->setVisible(type != AntiAliasing::NONE);
+}
+
+void Window::setNbRayAntiAliasing(int i) {
+    RayTracer::getInstance()->nbRayAntiAliasing = i;
 }
 
 void Window::changeAmbientOcclusion(int index) {
@@ -254,12 +249,19 @@ void Window::initControlWidget () {
 
     QComboBox *antiAliasingList = new QComboBox(AAGroupBox);
     antiAliasingList->addItem("No antialiasing");
-    antiAliasingList->addItem("Uniform 4");
-    antiAliasingList->addItem("Uniform 9");
-    antiAliasingList->addItem("Pentagonal");
-    antiAliasingList->addItem("Stochastic 5");
+    antiAliasingList->addItem("Uniform");
+    antiAliasingList->addItem("Regular polygon");
+    antiAliasingList->addItem("Stochastic");
     AALayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
+
+    AANbRaySpinBox = new QSpinBox(AAGroupBox);
+    AANbRaySpinBox->setSuffix(" rays");
+    AANbRaySpinBox->setMinimum(4);
+    AANbRaySpinBox->setVisible(false);
+    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNbRayAntiAliasing(int)));
+    AALayout->addWidget(AANbRaySpinBox);
+
     rayLayout->addWidget(AAGroupBox);
 
     //  Ambient occlusion

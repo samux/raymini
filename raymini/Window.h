@@ -38,6 +38,7 @@ public slots :
     void exportRayImage ();
     void about ();
     void changeAntiAliasingType(int index);
+    void setNbRayAntiAliasing(int);
     void changeAmbientOcclusion(int index);
     void setFocal(bool);
     void setDepthPathTracing(int);
@@ -56,6 +57,8 @@ private :
 
     QSpinBox *PTNbRaySpinBox;
     QSpinBox *PTMaxAngleSpinBox;
+
+    QSpinBox *AANbRaySpinBox;
 
     GLViewer * viewer;
 };
