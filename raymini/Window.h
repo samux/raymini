@@ -43,12 +43,15 @@ public slots :
     void changeAmbientOcclusionNbRays(int index);
     void setAmbientOcclusionMaxAngle(int);
     void setAmbientOcclusionRadius(double);
+    void setAmbientOcclusionIntensity(int);
+    void setOnlyAO(bool);
     void enableFocal(bool);
     void setFocal();
     void setDepthPathTracing(int);
     void setNbRayPathTracing(int);
     void setMaxAnglePathTracing(int);
     void setIntensityPathTracing(int);
+    void setOnlyPT(bool);
     void setNbImagesSpinBox(int);
 
 private :
@@ -64,11 +67,13 @@ private :
     QSpinBox *PTNbRaySpinBox;
     QSpinBox *PTMaxAngleSpinBox;
     QSpinBox *PTIntensitySpinBox;
+    QCheckBox *PTOnlyCheckBox;
 
     QSpinBox *AANbRaySpinBox;
 
     QSpinBox *AOMaxAngleSpinBox;
     QDoubleSpinBox *AORadiusSpinBox;
+    QCheckBox *AOOnlyCheckBox;
 
     QPushButton * selecFocusedObject;
 

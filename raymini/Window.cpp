@@ -191,6 +191,14 @@ void Window::setAmbientOcclusionRadius(double f) {
     RayTracer::getInstance()->radiusAmbientOcclusion = f;
 }
 
+void Window::setAmbientOcclusionIntensity(int i) {
+    RayTracer::getInstance()->intensityAmbientOcclusion = float(i)/100;
+}
+
+void Window::setOnlyAO(bool b) {
+    RayTracer::getInstance()->onlyAmbientOcclusion = b;
+}
+
 void Window::enableFocal(bool isFocal) {
     selecFocusedObject->setText("Choose focused point");
     selecFocusedObject->setVisible(isFocal);
@@ -216,6 +224,7 @@ void Window::setDepthPathTracing(int i) {
     PTNbRaySpinBox->setVisible(i != 0);
     PTMaxAngleSpinBox->setVisible(i != 0);
     PTIntensitySpinBox->setVisible(i != 0);
+    PTOnlyCheckBox->setVisible(i !=0);
 }
 
 void Window::setNbRayPathTracing(int i) {
@@ -231,6 +240,10 @@ void Window::setIntensityPathTracing(int i) {
 
 void Window::setNbImagesSpinBox(int i) {
     RayTracer::getInstance()->nbPictures = i;
+}
+
+void Window::setOnlyPT(bool b) {
+    RayTracer::getInstance()->onlyPathTracing = b;
 }
 
 void Window::initControlWidget () {
@@ -292,6 +305,8 @@ void Window::initControlWidget () {
 
     QSpinBox *AONbRaysSpinBox = new QSpinBox(AOGroupBox);
     AONbRaysSpinBox->setSuffix(" rays");
+    AONbRaysSpinBox->setMinimum(0);
+    AONbRaysSpinBox->setMaximum(1000);
     AONbRaysSpinBox->setValue(RayTracer::getInstance()->nbRayAmbientOcclusion);
     AOLayout->addWidget(AONbRaysSpinBox);
     connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeAmbientOcclusionNbRays(int)));
@@ -314,6 +329,18 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setVisible(false);
     connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
+
+    QSpinBox *AOIntensitySpinBox = new QSpinBox(AOGroupBox);
+    AOIntensitySpinBox->setPrefix ("Intensity: ");
+    AOIntensitySpinBox->setMinimum (0);
+    AOIntensitySpinBox->setMaximum (100);
+    AOIntensitySpinBox->setValue(100*RayTracer::getInstance()->intensityAmbientOcclusion);
+    connect(AOIntensitySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAmbientOcclusionIntensity(int)));
+    AOLayout->addWidget(AOIntensitySpinBox);
+
+    AOOnlyCheckBox = new QCheckBox ("Only ambient coloring", AOGroupBox);
+    connect (AOOnlyCheckBox, SIGNAL (toggled (bool)), this, SLOT (setOnlyAO (bool)));
+    AOLayout->addWidget (AOOnlyCheckBox);
 
     rayLayout->addWidget(AOGroupBox);
 
@@ -379,17 +406,22 @@ void Window::initControlWidget () {
     connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setIntensityPathTracing (int)));
     PTLayout->addWidget (PTIntensitySpinBox);
 
+    PTOnlyCheckBox = new QCheckBox ("Only path tracing coloring", PTGroupBox);
+    connect (PTOnlyCheckBox, SIGNAL (toggled (bool)), this, SLOT (setOnlyPT (bool)));
+    PTOnlyCheckBox->setVisible(false);
+    PTLayout->addWidget (PTOnlyCheckBox);
+
     rayLayout->addWidget (PTGroupBox);
 
     //  Focal
     QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);
     QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
 
-    QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", rayGroupBox);
+    QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", focalGroupBox);
     connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (enableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
 
-    selecFocusedObject  = new QPushButton ("", rayGroupBox);
+    selecFocusedObject  = new QPushButton ("", focalGroupBox);
     selecFocusedObject->setVisible(false);
     connect (selecFocusedObject, SIGNAL (clicked ()) , this, SLOT ( setFocal()));
     focalLayout->addWidget (selecFocusedObject);

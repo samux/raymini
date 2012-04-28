@@ -148,7 +148,8 @@ bool RayTracer::intersect(const Vec3Df & dir,
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing) const {
     Ray bestRay;
-    return getColor(dir, camPos, bestRay, rayTracing?0:depthPathTracing);
+    Brdf::Type type = onlyAmbientOcclusion?Brdf::Ambient:Brdf::All;
+    return getColor(dir, camPos, bestRay, rayTracing?0:depthPathTracing, type);
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
@@ -159,10 +160,15 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
         Vec3Df color = mat.genColor(camPos, bestRay.getIntersection(),
                                     getLights(bestRay.getIntersection()),
                                     type);
-        if(depth < depthPathTracing)
-            color += mat.genColor(camPos, bestRay.getIntersection(),
-                                  getLightsPT(bestRay.getIntersection(), depth),
-                                  Brdf::Diffuse);
+        if(depth < depthPathTracing) {
+            Vec3Df ptColor = mat.genColor(camPos, bestRay.getIntersection(),
+                                          getLightsPT(bestRay.getIntersection(), depth),
+                                          Brdf::Diffuse);
+            if(onlyPathTracing)
+                color = ptColor;
+            else
+                color += ptColor;
+        }
         return color;
     }
 
@@ -203,9 +209,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 }
 
 float RayTracer::getAmbientOcclusion(Vertex intersection) const {
-    if (!nbRayAmbientOcclusion) {
-        return 0.1f;
-    }
+    if (!nbRayAmbientOcclusion) return intensityAmbientOcclusion;
 
     int occlusion = 0;
     vector<Vec3Df> directions = intersection.getNormal().randRotate(maxAngleAmbientOcclusion,
@@ -222,5 +226,5 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
         }
     }
 
-    return (1.f-float(occlusion)/float(nbRayAmbientOcclusion))/5;
+    return intensityAmbientOcclusion * (1.f-float(occlusion)/float(nbRayAmbientOcclusion));
 }
