@@ -177,22 +177,18 @@ void Window::setNbRayAntiAliasing(int i) {
     RayTracer::getInstance()->nbRayAntiAliasing = i;
 }
 
-void Window::changeAmbientOcclusion(int index) {
-    unsigned int rays;
-    switch (index) {
-    default:
-    case 0:
-        rays = 0;
-        break;
-    case 1:
-        rays = 4;
-        break;
-    case 2:
-        rays = 9;
-        break;
-    }
+void Window::changeAmbientOcclusionNbRays(int index) {
+    RayTracer::getInstance()->nbRayAmbientOcclusion = index;
+    AORadiusSpinBox->setVisible(index);
+    AOMaxAngleSpinBox->setVisible(index);
+}
 
-    RayTracer::getInstance()->nbRayAmbientOcclusion = rays;
+void Window::setAmbientOcclusionMaxAngle(int i) {
+    RayTracer::getInstance()->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
+}
+
+void Window::setAmbientOcclusionRadius(double f) {
+    RayTracer::getInstance()->radiusAmbientOcclusion = f;
 }
 
 void Window::enableFocal(bool isFocal) {
@@ -287,12 +283,28 @@ void Window::initControlWidget () {
     QGroupBox * AOGroupBox = new QGroupBox ("Ambient Occlusion", rayGroupBox);
     QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
 
-    QComboBox *ambientOcclusionList = new QComboBox(AOGroupBox);
-    ambientOcclusionList->addItem("None");
-    ambientOcclusionList->addItem("Ambiant occlusion 4 rays");
-    ambientOcclusionList->addItem("Ambiant occlusion 9 rays");
-    AOLayout->addWidget(ambientOcclusionList);
-    connect(ambientOcclusionList, SIGNAL(activated(int)), this, SLOT(changeAmbientOcclusion(int)));
+    QSpinBox *AONbRaysSpinBox = new QSpinBox(AOGroupBox);
+    AONbRaysSpinBox->setSuffix(" rays");
+    AOLayout->addWidget(AONbRaysSpinBox);
+    connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeAmbientOcclusionNbRays(int)));
+
+    AOMaxAngleSpinBox = new QSpinBox(AOGroupBox);
+    AOMaxAngleSpinBox->setPrefix ("Max angle: ");
+    AOMaxAngleSpinBox->setSuffix (" degrees");
+    AOMaxAngleSpinBox->setMinimum (0);
+    AOMaxAngleSpinBox->setMaximum (180);
+    AOMaxAngleSpinBox->setVisible(false);
+    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAmbientOcclusionMaxAngle(int)));
+    AOLayout->addWidget(AOMaxAngleSpinBox);
+
+    AORadiusSpinBox = new QDoubleSpinBox(AOGroupBox);
+    AORadiusSpinBox->setPrefix("Radius: ");
+    AORadiusSpinBox->setMinimum(0);
+    AORadiusSpinBox->setSingleStep(0.1);
+    AORadiusSpinBox->setVisible(false);
+    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAmbientOcclusionRadius(double)));
+    AOLayout->addWidget(AORadiusSpinBox);
+
     rayLayout->addWidget(AOGroupBox);
 
     //  Shadows
@@ -337,6 +349,7 @@ void Window::initControlWidget () {
 
     PTMaxAngleSpinBox = new QSpinBox(PTGroupBox);
     PTMaxAngleSpinBox->setPrefix ("Max angle: ");
+    PTMaxAngleSpinBox->setSuffix (" degrees");
     PTMaxAngleSpinBox->setMinimum (0);
     PTMaxAngleSpinBox->setMaximum (180);
     PTMaxAngleSpinBox->setVisible(false);

@@ -40,7 +40,9 @@ public slots :
     void about ();
     void changeAntiAliasingType(int index);
     void setNbRayAntiAliasing(int);
-    void changeAmbientOcclusion(int index);
+    void changeAmbientOcclusionNbRays(int index);
+    void setAmbientOcclusionMaxAngle(int);
+    void setAmbientOcclusionRadius(double);
     void enableFocal(bool);
     void setFocal();
     void setDepthPathTracing(int);
@@ -62,6 +64,9 @@ private :
     QSpinBox *PTMaxAngleSpinBox;
 
     QSpinBox *AANbRaySpinBox;
+
+    QSpinBox *AOMaxAngleSpinBox;
+    QDoubleSpinBox *AORadiusSpinBox;
 
     QPushButton * selecFocusedObject;
 
