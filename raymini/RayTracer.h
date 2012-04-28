@@ -47,6 +47,7 @@ public:
     }
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
+    Shadow::Mode getShadowMode() { return shadow.mode; }
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
     /*        End Config         */
 
@@ -80,7 +81,7 @@ protected:
     inline RayTracer () :
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2),
-        typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(1),
+        typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
         nbPictures(1),
         focus(false) {}
     inline virtual ~RayTracer () {}

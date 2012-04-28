@@ -266,6 +266,7 @@ void Window::initControlWidget () {
     antiAliasingList->addItem("Uniform");
     antiAliasingList->addItem("Regular polygon");
     antiAliasingList->addItem("Stochastic");
+
     AALayout->addWidget(antiAliasingList);
     connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
 
@@ -274,6 +275,7 @@ void Window::initControlWidget () {
     AANbRaySpinBox->setMinimum(4);
     AANbRaySpinBox->setMaximum(10);
     AANbRaySpinBox->setVisible(false);
+    AANbRaySpinBox->setValue(RayTracer::getInstance()->nbRayAntiAliasing);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNbRayAntiAliasing(int)));
     AALayout->addWidget(AANbRaySpinBox);
 
@@ -285,6 +287,7 @@ void Window::initControlWidget () {
 
     QSpinBox *AONbRaysSpinBox = new QSpinBox(AOGroupBox);
     AONbRaysSpinBox->setSuffix(" rays");
+    AONbRaysSpinBox->setValue(RayTracer::getInstance()->nbRayAmbientOcclusion);
     AOLayout->addWidget(AONbRaysSpinBox);
     connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeAmbientOcclusionNbRays(int)));
 
@@ -294,6 +297,7 @@ void Window::initControlWidget () {
     AOMaxAngleSpinBox->setMinimum (0);
     AOMaxAngleSpinBox->setMaximum (180);
     AOMaxAngleSpinBox->setVisible(false);
+    AOMaxAngleSpinBox->setValue(RayTracer::getInstance()->maxAngleAmbientOcclusion*360.0/(2.0*M_PI));
     connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAmbientOcclusionMaxAngle(int)));
     AOLayout->addWidget(AOMaxAngleSpinBox);
 
@@ -301,6 +305,7 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setPrefix("Radius: ");
     AORadiusSpinBox->setMinimum(0);
     AORadiusSpinBox->setSingleStep(0.1);
+    AORadiusSpinBox->setValue(RayTracer::getInstance()->radiusAmbientOcclusion);
     AORadiusSpinBox->setVisible(false);
     connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
@@ -323,6 +328,7 @@ void Window::initControlWidget () {
     shadowSpinBox->setMinimum (2);
     shadowSpinBox->setMaximum (1000);
     shadowSpinBox->setVisible (false);
+    shadowSpinBox->setValue(RayTracer::getInstance()->getShadowMode());
     connect (shadowSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setShadowNbRays (int)));
     shadowsLayout->addWidget (shadowSpinBox);
 
@@ -336,6 +342,7 @@ void Window::initControlWidget () {
     PTDepthSpinBox->setPrefix ("Depth: ");
     PTDepthSpinBox->setMinimum (0);
     PTDepthSpinBox->setMaximum (5);
+    PTDepthSpinBox->setValue(RayTracer::getInstance()->depthPathTracing);
     connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setDepthPathTracing (int)));
     PTLayout->addWidget (PTDepthSpinBox);
 
@@ -344,6 +351,7 @@ void Window::initControlWidget () {
     PTNbRaySpinBox->setMinimum (1);
     PTNbRaySpinBox->setMaximum (1000);
     PTNbRaySpinBox->setVisible(false);
+    PTNbRaySpinBox->setValue(RayTracer::getInstance()->nbRayPathTracing);
     connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
 
@@ -353,6 +361,7 @@ void Window::initControlWidget () {
     PTMaxAngleSpinBox->setMinimum (0);
     PTMaxAngleSpinBox->setMaximum (180);
     PTMaxAngleSpinBox->setVisible(false);
+    PTMaxAngleSpinBox->setValue(RayTracer::getInstance()->maxAnglePathTracing*360.0/(2.0*M_PI));
     connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
 
