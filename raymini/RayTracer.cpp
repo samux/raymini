@@ -193,7 +193,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 
         if(bestRay.intersect()) {
             float d = bestRay.getIntersectionDistance();
-            float intensity = 1.f/(pow(1+d,3)*nbRayPathTracing);
+            float intensity = intensityPathTracing / (pow(1+d,3)*nbRayPathTracing);
 
             lights.push_back(Light(bestRay.getIntersection().getPos(),
                                    color, intensity));

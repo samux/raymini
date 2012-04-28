@@ -215,6 +215,7 @@ void Window::setDepthPathTracing(int i) {
     RayTracer::getInstance()->depthPathTracing = i;
     PTNbRaySpinBox->setVisible(i != 0);
     PTMaxAngleSpinBox->setVisible(i != 0);
+    PTIntensitySpinBox->setVisible(i != 0);
 }
 
 void Window::setNbRayPathTracing(int i) {
@@ -222,6 +223,10 @@ void Window::setNbRayPathTracing(int i) {
 }
 void Window::setMaxAnglePathTracing(int i) {
     RayTracer::getInstance()->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
+}
+
+void Window::setIntensityPathTracing(int i) {
+    RayTracer::getInstance()->intensityPathTracing = float(i);
 }
 
 void Window::setNbImagesSpinBox(int i) {
@@ -364,6 +369,15 @@ void Window::initControlWidget () {
     PTMaxAngleSpinBox->setValue(RayTracer::getInstance()->maxAnglePathTracing*360.0/(2.0*M_PI));
     connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
+
+    PTIntensitySpinBox = new QSpinBox(PTGroupBox);
+    PTIntensitySpinBox->setPrefix ("Intensity: ");
+    PTIntensitySpinBox->setMinimum (1);
+    PTIntensitySpinBox->setMaximum (1000);
+    PTIntensitySpinBox->setVisible(false);
+    PTIntensitySpinBox->setValue(RayTracer::getInstance()->intensityPathTracing);
+    connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setIntensityPathTracing (int)));
+    PTLayout->addWidget (PTIntensitySpinBox);
 
     rayLayout->addWidget (PTGroupBox);
 

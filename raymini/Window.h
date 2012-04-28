@@ -48,6 +48,7 @@ public slots :
     void setDepthPathTracing(int);
     void setNbRayPathTracing(int);
     void setMaxAnglePathTracing(int);
+    void setIntensityPathTracing(int);
     void setNbImagesSpinBox(int);
 
 private :
@@ -62,6 +63,7 @@ private :
 
     QSpinBox *PTNbRaySpinBox;
     QSpinBox *PTMaxAngleSpinBox;
+    QSpinBox *PTIntensitySpinBox;
 
     QSpinBox *AANbRaySpinBox;
 

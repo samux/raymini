@@ -29,6 +29,7 @@ public:
     unsigned depthPathTracing;
     unsigned nbRayPathTracing;
     float maxAnglePathTracing;
+    float intensityPathTracing;
 
     float radiusAmbientOcclusion;
     unsigned nbRayAmbientOcclusion;
@@ -79,8 +80,8 @@ public:
 
 protected:
     inline RayTracer () :
-        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
-        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/2),
+        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI), intensityPathTracing(255.f),
+        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
         nbPictures(1),
         focus(false) {}
