@@ -246,6 +246,77 @@ void Window::setOnlyPT(bool b) {
     RayTracer::getInstance()->onlyPathTracing = b;
 }
 
+int Window::getSelectedLightIndex() {
+    return lightsList->currentIndex()-1;
+}
+
+void Window::selectLight(int l) {
+    lightEnableCheckBox->setVisible(l != 0);
+    if (l != 0) {
+        bool enabled = Scene::getInstance()->getLights()[l-1].isEnabled();
+        lightEnableCheckBox->setChecked(enabled);
+        enableLight(enabled);
+    }
+}
+
+void Window::enableLight(bool enabled) {
+    int l = getSelectedLightIndex();
+    if (l == -1) {
+        return;
+    }
+    for (int i=0; i<3; i++) {
+        lightPosSpinBoxes[i]->setVisible(enabled);
+    }
+    lightRadiusSpinBox->setVisible(enabled);
+    lightIntensitySpinBox->setVisible(enabled);
+    Light &light = Scene::getInstance()->getLights()[l];
+    light.setEnabled(enabled);
+    viewer->updateLights();
+    if (!enabled) {
+        return;
+    }
+    Vec3Df pos = light.getPos();
+    float intensity = light.getIntensity();
+    float radius = light.getRadius();
+    for (int i=0; i<3; i++) {
+        lightPosSpinBoxes[i]->setValue(pos[i]);
+    }
+    lightIntensitySpinBox->setValue(intensity);
+    lightRadiusSpinBox->setValue(radius);
+}
+
+void Window::setLightRadius(double r) {
+    int l = getSelectedLightIndex();
+    if (l == -1) {
+        return;
+    }
+    Scene::getInstance()->getLights()[l].setRadius(r);
+    viewer->updateLights();
+}
+
+void Window::setLightIntensity(double i) {
+    int l = getSelectedLightIndex();
+    if (l == -1) {
+        return;
+    }
+    Scene::getInstance()->getLights()[l].setIntensity(i);
+    viewer->updateLights();
+}
+
+void Window::setLightPos() {
+    int l = getSelectedLightIndex();
+    if (l == -1) {
+        return;
+    }
+    Vec3Df newPos;
+    Light &light = Scene::getInstance()->getLights()[l];
+    for (int i=0; i<3; i++) {
+        newPos[i] = lightPosSpinBoxes[i]->value();
+    }
+    light.setPos(newPos);
+    viewer->updateLights();
+}
+
 void Window::initControlWidget () {
     // Control widget
     controlWidget = new QGroupBox ();
@@ -274,6 +345,59 @@ void Window::initControlWidget () {
     // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
+
+    //  Lights
+    QGroupBox *lightsGroupBox = new QGroupBox("Lights", rayGroupBox);
+    QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
+
+    lightsList = new QComboBox(lightsGroupBox);
+    lightsList->addItem("No light selected");
+    for (unsigned int i=0; i<Scene::getInstance()->getLights().size(); i++) {
+        QString name;
+        name = QString("Light #%1").arg(i);
+        lightsList->addItem(name);
+    }
+    connect(lightsList, SIGNAL(activated(int)), this, SLOT(selectLight(int)));
+    lightsLayout->addWidget(lightsList);
+
+    lightEnableCheckBox = new QCheckBox("Enable");
+    lightEnableCheckBox->setVisible(false);
+    connect(lightEnableCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableLight(bool)));
+    lightsLayout->addWidget(lightEnableCheckBox);
+
+    QHBoxLayout *lightsPosLayout = new QHBoxLayout;
+    QString axis[3] = {"X: ", "Y: ", "Z: "};
+    for (int i=0; i<3; i++) {
+        lightPosSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
+        lightPosSpinBoxes[i]->setSingleStep(0.1);
+        lightPosSpinBoxes[i]->setMinimum(-100);
+        lightPosSpinBoxes[i]->setMaximum(100);
+        lightPosSpinBoxes[i]->setVisible(false);
+        lightPosSpinBoxes[i]->setPrefix(axis[i]);
+        lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
+        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), this, SLOT(setLightPos()));
+    }
+    lightsLayout->addLayout(lightsPosLayout);
+
+    lightRadiusSpinBox = new QDoubleSpinBox(lightsGroupBox);
+    lightRadiusSpinBox->setSingleStep(0.01);
+    lightRadiusSpinBox->setMinimum(0);
+    lightRadiusSpinBox->setMaximum(100);
+    lightRadiusSpinBox->setVisible(false);
+    lightRadiusSpinBox->setPrefix ("Radius: ");
+    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLightRadius(double)));
+    lightsLayout->addWidget(lightRadiusSpinBox);
+
+    lightIntensitySpinBox = new QDoubleSpinBox(lightsGroupBox);
+    lightIntensitySpinBox->setSingleStep(0.1);
+    lightIntensitySpinBox->setMinimum(0);
+    lightIntensitySpinBox->setMaximum(100);
+    lightIntensitySpinBox->setVisible(false);
+    lightIntensitySpinBox->setPrefix("Intensity: ");
+    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLightIntensity(double)));
+    lightsLayout->addWidget(lightIntensitySpinBox);
+
+    rayLayout->addWidget(lightsGroupBox);
 
     //  Anti Aliasing
     QGroupBox * AAGroupBox = new QGroupBox ("Anti aliasing", rayGroupBox);
@@ -329,18 +453,6 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setVisible(false);
     connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
-
-    QSpinBox *AOIntensitySpinBox = new QSpinBox(AOGroupBox);
-    AOIntensitySpinBox->setPrefix ("Intensity: ");
-    AOIntensitySpinBox->setMinimum (0);
-    AOIntensitySpinBox->setMaximum (100);
-    AOIntensitySpinBox->setValue(100*RayTracer::getInstance()->intensityAmbientOcclusion);
-    connect(AOIntensitySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAmbientOcclusionIntensity(int)));
-    AOLayout->addWidget(AOIntensitySpinBox);
-
-    AOOnlyCheckBox = new QCheckBox ("Only ambient coloring", AOGroupBox);
-    connect (AOOnlyCheckBox, SIGNAL (toggled (bool)), this, SLOT (setOnlyAO (bool)));
-    AOLayout->addWidget (AOOnlyCheckBox);
 
     rayLayout->addWidget(AOGroupBox);
 

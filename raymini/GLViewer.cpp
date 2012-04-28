@@ -88,6 +88,28 @@ void GLViewer::wheelEvent (QWheelEvent * e) {
     QGLViewer::wheelEvent (e);
 }
 
+void GLViewer::updateLights() {
+    Scene * scene = Scene::getInstance ();
+    for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
+        const Light light = scene->getLights() [i];
+        GLuint glID = OpenGLLightID[i];
+        if (!light.isEnabled()) {
+            glDisable(glID);
+        }
+        else {
+            glEnable (glID);
+            const Vec3Df & p = light.getPos ();
+            float intensity = light.getIntensity ();
+            const Vec3Df & c = intensity * light.getColor ();
+            GLfloat glPos[4] = {p[0], p[1], p[2], 0};
+            GLfloat glColor[4] = {c[0], c[1], c[2], 0};
+            glLightfv (glID, GL_POSITION, glPos);
+            glLightfv (glID, GL_DIFFUSE, glColor);
+        }
+    }
+    updateGL();
+}
+
 // -----------------------------------------------
 // Drawing functions
 // -----------------------------------------------
@@ -106,9 +128,12 @@ void GLViewer::init() {
 
     glEnable (GL_LIGHTING);
     for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
+        const Light light = scene->getLights() [i];
+        if (!light.isEnabled()) {
+            continue;
+        }
         GLuint glID = OpenGLLightID[i];
         glEnable (glID);
-        const Light light = scene->getLights() [i];
         const Vec3Df & p = light.getPos ();
         float intensity = light.getIntensity ();
         const Vec3Df & c = intensity * light.getColor ();

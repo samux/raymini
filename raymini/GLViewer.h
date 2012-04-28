@@ -31,6 +31,7 @@ class GLViewer : public QGLViewer  {
     inline bool isWireframe () const { return wireframe; }
     inline int getRenderingMode () const { return renderingMode; }
     inline const QImage & getRayImage () const { return rayImage; }
+    void updateLights();
 
     class Exception  {
     public:

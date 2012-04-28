@@ -177,13 +177,18 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
 vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
     vector<Light> lights = Scene::getInstance ()->getLights();
+    vector<Light> enabledLights;
 
     for(Light &light : lights) {
+        if (!light.isEnabled()) {
+            continue;
+        }
         float visibilite = shadow(closestIntersection.getPos(), light);
         light.setIntensity(light.getIntensity() * visibilite);
+        enabledLights.push_back(light);
     }
 
-    return lights;
+    return enabledLights;
 }
 
 vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigned depth) const {

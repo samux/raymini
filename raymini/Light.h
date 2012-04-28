@@ -15,11 +15,11 @@
 
 class Light {
 public:
-    inline Light () : radius (0.f), color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f) {}
+    inline Light () : radius (0.f), color (Vec3Df (1.0f, 1.0f, 1.0f)), intensity (1.0f), enabled(true) {}
     inline Light (const Vec3Df & pos, const Vec3Df & color, float intensity)
-        : pos (pos), radius (0.f), color (color), intensity (intensity) {}
+        : pos (pos), radius (0.f), color (color), intensity (intensity), enabled(true) {}
     inline Light (const Vec3Df & pos, float radius, const Vec3Df & normal, const Vec3Df & color, float intensity)
-        : pos (pos), radius (radius), normal(normal), color (color), intensity (intensity) {}
+        : pos (pos), radius (radius), normal(normal), color (color), intensity (intensity), enabled(true) {}
     virtual ~Light () {}
 
     inline const Vec3Df & getPos () const { return pos; }
@@ -31,6 +31,10 @@ public:
     inline void setPos (const Vec3Df & p) { pos = p; }
     inline void setColor (const Vec3Df & c) { color = c; }
     inline void setIntensity (float i) { intensity = i; }
+    inline void setRadius (float r) { radius = r; }
+
+    inline void setEnabled(bool e) { enabled = e; }
+    inline bool isEnabled() const { return enabled; }
 
 private:
     Vec3Df pos;
@@ -38,6 +42,7 @@ private:
     Vec3Df normal;
     Vec3Df color;
     float intensity;
+    bool enabled;
 };
 
 

@@ -53,9 +53,16 @@ public slots :
     void setIntensityPathTracing(int);
     void setOnlyPT(bool);
     void setNbImagesSpinBox(int);
+    void selectLight(int);
+    void enableLight(bool);
+    void setLightRadius(double);
+    void setLightIntensity(double);
+    void setLightPos();
 
 private :
     void initControlWidget ();
+    // return -1 if no light selected
+    int getSelectedLightIndex();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
@@ -74,6 +81,12 @@ private :
     QSpinBox *AOMaxAngleSpinBox;
     QDoubleSpinBox *AORadiusSpinBox;
     QCheckBox *AOOnlyCheckBox;
+
+    QComboBox *lightsList;
+    QCheckBox *lightEnableCheckBox;
+    QDoubleSpinBox *lightPosSpinBoxes[3];
+    QDoubleSpinBox *lightRadiusSpinBox;
+    QDoubleSpinBox *lightIntensitySpinBox;
 
     QPushButton * selecFocusedObject;
 
