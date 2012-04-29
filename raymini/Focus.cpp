@@ -1,9 +1,7 @@
 #include <cmath>
-#include "Focus.h"
-
-// for debug
 #include <iostream>
 
+#include "Focus.h"
 
 using namespace std;
 
