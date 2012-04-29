@@ -61,12 +61,13 @@ void GLViewer::keyReleaseEvent (QKeyEvent * /*event*/) {
 
 void GLViewer::mousePressEvent (QMouseEvent * event) {
     controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    changeFocusPoint();
     QGLViewer::mousePressEvent(event);
 }
 
-
 void GLViewer::wheelEvent (QWheelEvent * e) {
     controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    changeFocusPoint();
     QGLViewer::wheelEvent (e);
 }
 
@@ -109,6 +110,29 @@ void GLViewer::update(Observable *o) {
         updateWireframe();
     }
     updateGL();
+}
+
+void GLViewer::changeFocusPoint() {
+    WindowModel *windowModel = controller->getWindowModel();
+    bool focusMode = windowModel->isFocusMode();
+    if (focusMode) {
+        RayTracer * rayTracer = controller->getRayTracer();
+        qglviewer::Camera * cam = camera ();
+        qglviewer::Vec p = cam->position ();
+        qglviewer::Vec d = cam->viewDirection ();
+        qglviewer::Vec u = cam->upVector ();
+        qglviewer::Vec r = cam->rightVector ();
+        Vec3Df rightVector (r[0], r[1], r[2]);
+        Vec3Df upVector (u[0], u[1], u[2]);
+        Vec3Df camPos (p[0], p[1], p[2]);
+        Vec3Df viewDirection (d[0], d[1], d[2]);
+        Ray focusSelect = Ray(camPos, viewDirection);
+        Object *object;
+        if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
+            // Warning, can launch infinite loop and segfault
+            controller->viewerSetFocusPoint(focusSelect.getIntersection());
+        }
+    }
 }
 
 // -----------------------------------------------
@@ -165,25 +189,9 @@ void GLViewer::draw () {
     }
     Scene * scene = controller->getScene();
     RayTracer * rayTracer = controller->getRayTracer();
-    bool focusMode = windowModel->isFocusMode();
-    if (focusMode) {
-        qglviewer::Camera * cam = camera ();
-        qglviewer::Vec p = cam->position ();
-        qglviewer::Vec d = cam->viewDirection ();
-        qglviewer::Vec u = cam->upVector ();
-        qglviewer::Vec r = cam->rightVector ();
-        Vec3Df rightVector (r[0], r[1], r[2]);
-        Vec3Df upVector (u[0], u[1], u[2]);
-        Vec3Df camPos (p[0], p[1], p[2]);
-        Vec3Df viewDirection (d[0], d[1], d[2]);
-        Ray focusSelect = Ray(camPos, viewDirection);
-        Object *object;
-        if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
-            controller->viewerSetFocusPoint(focusSelect.getIntersection());
-        }
-    }
 
-    if(focusMode || rayTracer->focusEnabled()) {
+    bool focusMode = windowModel->isFocusMode();
+    if (focusMode || rayTracer->focusEnabled()) {
         Vec3Df X, Y;
         const Vertex &focusPoint = windowModel->getFocusPoint();
         focusPoint.getNormal().getTwoOrthogonals(X,Y);

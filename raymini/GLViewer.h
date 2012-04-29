@@ -53,6 +53,8 @@ private:
 
     void updateLights();
     void updateWireframe();
+
+    void changeFocusPoint();
 };
 
 // Some Emacs-Hints -- please don't remove:
