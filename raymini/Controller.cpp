@@ -36,7 +36,6 @@ void Controller::initAll() {
 }
 
 void Controller::windowSetShadowMode(int i) {
-    RayTracer * rayTracer = RayTracer::getInstance ();
     switch(i) {
     case 0:
         rayTracer->setShadowMode(Shadow::NONE);
@@ -52,13 +51,11 @@ void Controller::windowSetShadowMode(int i) {
 }
 
 void Controller::windowSetShadowNbRays (int i) {
-    RayTracer *rayTracer = rayTracer;
     rayTracer->setShadowNbImpule(i);
 }
 
 void Controller::windowRenderRayImage () {
     qglviewer::Camera * cam = viewer->camera ();
-    RayTracer * rayTracer = RayTracer::getInstance ();
     qglviewer::Vec p = cam->position ();
     qglviewer::Vec d = cam->viewDirection ();
     qglviewer::Vec u = cam->upVector ();
@@ -84,11 +81,10 @@ void Controller::windowRenderRayImage () {
 }
 
 void Controller::windowSetBGColor () {
-    RayTracer *rayTracer = rayTracer;
     Vec3Df bg = 255*rayTracer->getBackgroundColor();
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), this);
     if (c.isValid () == true) {
-        RayTracer::getInstance ()->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
+        rayTracer->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
         viewer->setBackgroundColor (c);
         viewer->updateGL ();
     }

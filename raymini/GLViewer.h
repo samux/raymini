@@ -17,15 +17,16 @@
 #include "Scene.h"
 #include "Material.h"
 #include "Object.h"
+#include "Observer.h"
 
-class GLViewer : public QGLViewer  {
+class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT
     public:
 
     typedef enum {Smooth=0, Flat=1} RenderingMode;
     typedef enum {OpenGLDisplayMode=0, RayDisplayMode=1} DisplayMode;
 
-    GLViewer ();
+    GLViewer(Controller *);
     virtual ~GLViewer ();
 
     inline bool isWireframe () const { return wireframe; }
@@ -64,6 +65,8 @@ protected :
     virtual void wheelEvent (QWheelEvent * e);
 
 private:
+    Controller *controller;
+
     bool wireframe;
     RenderingMode renderingMode;
     DisplayMode displayMode;

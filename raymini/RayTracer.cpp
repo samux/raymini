@@ -16,21 +16,6 @@
 
 using namespace std;
 
-static RayTracer * instance = NULL;
-
-RayTracer * RayTracer::getInstance () {
-    if (instance == NULL)
-        instance = new RayTracer ();
-    return instance;
-}
-
-void RayTracer::destroyInstance () {
-    if (instance != NULL) {
-        delete instance;
-        instance = NULL;
-    }
-}
-
 inline int clamp (float f) {
     int v = static_cast<int> (255*f);
     return min(max(v, 0), 255);
@@ -44,7 +29,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           float aspectRatio,
                           unsigned int screenWidth,
                           unsigned int screenHeight) {
-    Scene *scene = Scene::getInstance();
+    Scene *scene = controller->getScene();
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     vector<Color> buffer;
     buffer.resize(screenHeight*screenWidth);
@@ -123,7 +108,7 @@ bool RayTracer::intersect(const Vec3Df & dir,
                           Ray & bestRay,
                           Object* & intersectedObject,
                           bool stopAtFirst) const {
-    Scene * scene = Scene::getInstance ();
+    Scene * scene = controller->getScene();
     bestRay = Ray();
 
     for (Object & o : scene->getObjects()) {
@@ -175,7 +160,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 }
 
 vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
-    vector<Light> lights = Scene::getInstance ()->getLights();
+    vector<Light> lights = controller->getScene()->getLights();
     vector<Light> enabledLights;
 
     for(Light &light : lights) {

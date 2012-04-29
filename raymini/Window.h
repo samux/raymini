@@ -37,7 +37,8 @@ private :
     Controller *controller;
 
     void initControlWidget ();
-    // return -1 if no light selected
+
+    /** return -1 if no light selected */
     int getSelectedLightIndex();
 
     // Update functions

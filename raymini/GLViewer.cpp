@@ -20,7 +20,7 @@ using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
 
-GLViewer::GLViewer () : QGLViewer (), focusMode(false) {
+GLViewer::GLViewer(Controller *c) : QGLViewer(), controller(c), focusMode(false) {
     wireframe = false;
     renderingMode = Smooth;
 }
@@ -89,7 +89,7 @@ void GLViewer::wheelEvent (QWheelEvent * e) {
 }
 
 void GLViewer::updateLights() {
-    Scene * scene = Scene::getInstance ();
+    Scene * scene = controller->getScene();
     for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
         const Light light = scene->getLights() [i];
         GLuint glID = OpenGLLightID[i];
@@ -122,7 +122,7 @@ void GLViewer::init() {
     glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable (GL_POINT_SMOOTH);
 
-    Scene * scene = Scene::getInstance ();
+    Scene * scene = controller->getScene();
 
     glLoadIdentity ();
 
@@ -160,8 +160,8 @@ void GLViewer::draw () {
                       rayImage.bits ());
         return;
     }
-    Scene * scene = Scene::getInstance ();
-    RayTracer * rayTracer = RayTracer::getInstance ();
+    Scene * scene = controller->getScene();
+    RayTracer * rayTracer = controller->getRayTracer();
     if (focusMode) {
         qglviewer::Camera * cam = camera ();
         qglviewer::Vec p = cam->position ();

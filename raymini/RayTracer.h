@@ -91,6 +91,7 @@ public:
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
         typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
+        shadow(c),
         nbPictures(1),
         focus(false) {}
     inline virtual ~RayTracer () {}

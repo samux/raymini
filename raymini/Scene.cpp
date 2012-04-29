@@ -35,7 +35,7 @@ void Scene::updateBoundingBox () {
 void Scene::buildDefaultScene () {
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
-    Material *groundMat = new Material(1.f, 0.f, Vec3Df (.2f, 0.6f, .2f),
+    Material *groundMat = new Material(controller, 1.f, 0.f, Vec3Df (.2f, 0.6f, .2f),
                                        [](const Vertex & v){
                                            static const Perlin perlin(0.5f, 4, 10);
                                            return perlin(v.getPos());
@@ -46,29 +46,29 @@ void Scene::buildDefaultScene () {
     Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
 
-    Material *blue = new Material(1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
+    Material *blue = new Material(controller, 1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
     //Object leftWall(wallMesh, blue);
-    Object leftWall(wallMesh, new Mirror());
+    Object leftWall(wallMesh, new Mirror(controller));
     leftWall.setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
-    Material *red = new Material(1.f, 1.f, Vec3Df (1.0f, 0.f, 0.f));
+    Material *red = new Material(controller, 1.f, 1.f, Vec3Df (1.0f, 0.f, 0.f));
     Object backWall(backWallMesh, red);
     backWall.setTrans(Vec3Df(0, 1.95251, 1.5));
     objects.push_back (backWall);
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
-    Material *ramMat = new Material(1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    Material *ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     Object ram (ramMesh, ramMat);
     ram.setTrans (Vec3Df (-1.f, -1.0f, 0.f));
     objects.push_back (ram);
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
-    Material *rhinoMat = new Material(1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f),
+    Material *rhinoMat = new Material(controller, 1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f),
                                       [](const Vertex & v) -> float{
                                           static const Perlin perlin(0.5f, 4, 5);
                                           return sqrt(fabs(sin(2 * M_PI * perlin(v.getPos()))));
@@ -79,7 +79,7 @@ void Scene::buildDefaultScene () {
 
     Mesh gargMesh;
     gargMesh.loadOFF ("models/gargoyle.off");
-    Material *gargMat = new Material(0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
+    Material *gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
     Object garg (gargMesh, gargMat);
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.f));
     objects.push_back (garg);

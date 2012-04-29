@@ -16,12 +16,12 @@ using namespace std;
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                            std::vector<Light> lights, Brdf::Type type)  const {
     float ambientOcclusionContribution = (type & Brdf::Ambient)?
-        RayTracer::getInstance()->getAmbientOcclusion(closestIntersection):
+        controller->getRayTracer()->getAmbientOcclusion(closestIntersection):
         0.f;
 
     Brdf brdf(lights,
               noise(closestIntersection)*color,
-              RayTracer::getInstance()->getBackgroundColor(),
+              controller->getRayTracer()->getBackgroundColor(),
               diffuse,
               specular,
               ambientOcclusionContribution,
@@ -40,5 +40,5 @@ Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersecti
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    return spec + RayTracer::getInstance()->getColor(dir, pos, false);
+    return spec + controller->getRayTracer()->getColor(dir, pos, false);
 }
