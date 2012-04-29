@@ -53,6 +53,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     progressDialog.show ();
 
     const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
     const Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
@@ -86,14 +87,12 @@ QImage RayTracer::render (const Vec3Df & camPos,
                                                           distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                         dir.normalize ();
                         Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
-                                                      distanceOrthogonalCameraScreen)*dir;
-                        for(int x = -1; x < 1; x++) {
-                            for(int y = -1; y < 1; y++) {
-                                Vec3Df focusMovedCamPos = camPos + x*Vec3Df(1,0,0)*0.05 + y*Vec3Df(0,1,0)*0.05;
-                                dir = focalPoint - focusMovedCamPos;
-                                dir.normalize();
-                                c += getColor(dir, focusMovedCamPos);
-                            }
+                                            distanceOrthogonalCameraScreen)*dir;
+                        for (const pair<float, float> &offset_focus : offsets_focus) {
+                            Vec3Df focusMovedCamPos = camPos + Vec3Df(1,0,0)*offset_focus.first + Vec3Df(0,1,0)*offset_focus.second;
+                            dir = focalPoint - focusMovedCamPos;
+                            dir.normalize();
+                            c += getColor(dir, focusMovedCamPos);
                         }
                     }
                     else {

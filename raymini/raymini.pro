@@ -23,6 +23,7 @@ HEADERS = Window.h \
           Shadow.h \
           SkyBoxMaterial.h \
           Texture.h \
+          Focus.h \
           Brdf.h
 
 SOURCES = Window.cpp \
@@ -46,6 +47,7 @@ SOURCES = Window.cpp \
           Texture.cpp \
           Color.cpp \
           Shadow.cpp \
+          Focus.cpp \
           Main.cpp
 
     DESTDIR=.

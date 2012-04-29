@@ -18,6 +18,7 @@
 #include "Shadow.h"
 #include "Light.h"
 #include "AntiAliasing.h"
+#include "Focus.h"
 
 class Color;
 class Object;
@@ -40,6 +41,10 @@ public:
 
     AntiAliasing::Type typeAntiAliasing;
     unsigned nbRayAntiAliasing;
+
+    Focus::Type typeFocus;
+    unsigned nbRayFocus;
+    float apertureFocus;
 
     unsigned nbPictures;
 
@@ -88,6 +93,7 @@ protected:
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
+        typeFocus(Focus::UNIFORM), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         focus(false) {}
     inline virtual ~RayTracer () {}
