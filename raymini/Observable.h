@@ -16,7 +16,6 @@ public:
     /** Remove an observer from the list */
     void removeObserver(Observer *observer);
 
-protected:
     /** Notify any observer in observers */
     void notifyAll();
 

@@ -20,6 +20,7 @@ public:
     typedef enum {OpenGLDisplayMode=0, RayDisplayMode=1} DisplayMode;
 
     inline int getSelectedLightIndex() const {return selectedLightIndex;}
+    inline void setSelectedLightIndex(int index) {selectedLightIndex = index;}
     inline bool isWireframe() const {return wireframe;}
     inline void setWireframe(bool w) {wireframe = w;}
     inline int getRenderingMode() const {return renderingMode;}

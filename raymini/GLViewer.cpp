@@ -89,22 +89,26 @@ void GLViewer::updateLights() {
             glLightfv (glID, GL_DIFFUSE, glColor);
         }
     }
-    updateGL();
 }
 
 void GLViewer::updateWireframe() {
     WindowModel *windowModel = controller->getWindowModel();
-    if (windowModel->isWireframe())
+    if (windowModel->isWireframe()) {
         glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-    else
+    }
+    else {
         glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
 
 void GLViewer::update(Observable *o) {
     if (o == controller->getScene()) {
         updateLights();
+    }
+    else if (o == controller->getWindowModel()) {
         updateWireframe();
     }
+    updateGL();
 }
 
 // -----------------------------------------------
