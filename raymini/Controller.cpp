@@ -1,55 +1,41 @@
 #include "Controller.h"
 
-#include <QPlastiqueStyle>
 #include <QStatusBar>
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "QTUtils.h"
-
 using namespace std;
 
 // TODO update corresponding model
 
-Controller::Controller(int argc, char **argv):
-    QApplication(argc, argv)
+Controller::Controller(QApplication *r):
+    raymini(r)
 {}
 
 Controller::~Controller()
 {}
 
 void Controller::initAll() {
-    cout << __LINE__ << endl;
-    setBoubekQTStyle(*this);
-
-    setStyle(new QPlastiqueStyle);
-    cout << __LINE__ << endl;
-
-    window = new Window(this);
-    window->setWindowTitle("RayMini: A minimal raytracer.");
-    connect(this, SIGNAL(lastWindowClosed()), this, SLOT(quit()));
-    cout << __LINE__ << endl;
-
-    viewer = new GLViewer(this);
-    window->setCentralWidget(viewer);
-    cout << __LINE__ << endl;
-
     scene = new Scene(this);
     scene->addObserver(window);
     scene->addObserver(viewer);
-    cout << __LINE__ << endl;
 
     rayTracer = new RayTracer(this);
     rayTracer->addObserver(window);
     rayTracer->addObserver(viewer);
-    cout << __LINE__ << endl;
 
     windowModel = new WindowModel(this);
     windowModel->addObserver(window);
     windowModel->addObserver(viewer);
 
-    cout << __LINE__ << endl;
+    window = new Window(this);
+    window->setWindowTitle("RayMini: A minimal raytracer.");
+    connect(raymini, SIGNAL(lastWindowClosed()), raymini, SLOT(quit()));
+
+    viewer = new GLViewer(this);
+    window->setCentralWidget(viewer);
+
     window->show();
 }
 

@@ -422,11 +422,11 @@ void Window::initControlWidget () {
     QVBoxLayout * globalLayout = new QVBoxLayout (globalGroupBox);
 
     QPushButton * bgColorButton  = new QPushButton ("Background Color", globalGroupBox);
-    connect (bgColorButton, SIGNAL (clicked()) , controlWidget, SLOT (windowSetBGColor()));
+    connect (bgColorButton, SIGNAL (clicked()) , controller, SLOT (windowSetBGColor()));
     globalLayout->addWidget (bgColorButton);
 
     QPushButton * aboutButton  = new QPushButton ("About", globalGroupBox);
-    connect (aboutButton, SIGNAL (clicked()) , controlWidget, SLOT (windowAbout()));
+    connect (aboutButton, SIGNAL (clicked()) , controller, SLOT (windowAbout()));
     globalLayout->addWidget (aboutButton);
 
     QPushButton * quitButton  = new QPushButton ("Quit", globalGroupBox);

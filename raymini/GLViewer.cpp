@@ -21,10 +21,13 @@ using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
 
-GLViewer::GLViewer(Controller *c) : QGLViewer(), controller(c) {}
+GLViewer::GLViewer(Controller *c):
+    QGLViewer(),
+    controller(c)
+{}
 
-GLViewer::~GLViewer () {
-}
+GLViewer::~GLViewer ()
+{}
 
 QString GLViewer::helpString() const {
     QString text("<h2>Raymini</h2>");

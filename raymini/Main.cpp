@@ -1,19 +1,17 @@
-//#include <QDir>
-//#include <QPixmap>
-//#include <QSplashScreen>
-//#include <QCleanlooksStyle>
-//#include <string>
-//#include <iostream>
+#include <QApplication>
+#include <QPlastiqueStyle>
 
 #include "Controller.h"
-
-//using namespace std;
+#include "QTUtils.h"
 
 int main (int argc, char **argv) {
     srand(time(NULL));
+    QApplication raymini(argc, argv);
+    setBoubekQTStyle (raymini);
+    QApplication::setStyle (new QPlastiqueStyle);
 
-    Controller controller(argc, argv);
+    Controller controller(&raymini);
     controller.initAll();
 
-    return controller.exec();
+    return raymini.exec ();
 }

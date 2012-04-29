@@ -5,6 +5,7 @@
 #pragma once
 
 #include <QApplication>
+#include <QObject>
 
 #include "Window.h"
 #include "WindowModel.h"
@@ -12,10 +13,11 @@
 #include "Scene.h"
 #include "GLViewer.h"
 
-class Controller: public QApplication {
+/*class Controller: public QApplication {*/
+class Controller : public QObject {
     Q_OBJECT
 public:
-    Controller(int argc, char **argv);
+    Controller(QApplication *r);
     virtual ~Controller();
 
     /** Start the whole procedure */
@@ -75,4 +77,7 @@ private:
     Scene *scene;
     RayTracer *rayTracer;
     WindowModel *windowModel;
+
+    // QApplication
+    QApplication *raymini;
 };
