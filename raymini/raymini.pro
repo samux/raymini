@@ -25,6 +25,8 @@ HEADERS = Window.h \
           Texture.h \
           Observer.h \
           Observable.h \
+          Controller.h \
+          WindowModel.h \
           Focus.h \
           Brdf.h
 
@@ -50,6 +52,8 @@ SOURCES = Window.cpp \
           Color.cpp \
           Shadow.cpp \
           Observable.cpp \
+          Controller.cpp \
+          WindowModel.cpp \
           Focus.cpp \
           Main.cpp
 

@@ -86,17 +86,15 @@ public:
     bool focusEnabled() { return focus; };
 
     inline RayTracer(Controller *c):
-        controller(c),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
         intensityPathTracing(255.f), onlyPathTracing(false),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
+        typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         controller(c),
-        typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
         shadow(c),
-        nbPictures(1),
         focus(false) {}
     inline virtual ~RayTracer () {}
 
