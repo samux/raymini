@@ -1,8 +1,14 @@
 #include "Controller.h"
 
 #include <QPlastiqueStyle>
+#include <QStatusBar>
+#include <QColorDialog>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "QTUtils.h"
+
+using namespace std;
 
 // TODO update corresponding model
 
@@ -73,9 +79,9 @@ void Controller::windowRenderRayImage () {
     unsigned int screenHeight = cam->screenHeight ();
     QTime timer;
     timer.start ();
-    viewer->setRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
+    viewerSetRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
                                            fieldOfView, aspectRatio, screenWidth, screenHeight));
-    statusBar()->showMessage(QString ("Raytracing performed in ") +
+    window->statusBar()->showMessage(QString ("Raytracing performed in ") +
                              QString::number (timer.elapsed ()) +
                              QString ("ms at ") +
                              QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
@@ -85,7 +91,7 @@ void Controller::windowRenderRayImage () {
 
 void Controller::windowSetBGColor () {
     Vec3Df bg = 255*rayTracer->getBackgroundColor();
-    QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), this);
+    QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
         rayTracer->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
         viewer->setBackgroundColor (c);
@@ -102,7 +108,7 @@ void Controller::windowExportGLImage () {
 }
 
 void Controller::windowExportRayImage () {
-    QString filename = QFileDialog::getSaveFileName (this,
+    QString filename = QFileDialog::getSaveFileName (window,
                                                      "Save ray-traced image",
                                                      ".",
                                                      "*.jpg *.bmp *.png");
@@ -114,7 +120,7 @@ void Controller::windowExportRayImage () {
 }
 
 void Controller::windowAbout () {
-    QMessageBox::about (this,
+    QMessageBox::about (window,
                         "About This Program",
                         "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
 }
@@ -139,7 +145,6 @@ void Controller::windowChangeAntiAliasingType(int index) {
             break;
         }
     rayTracer->typeAntiAliasing = type;
-    AANbRaySpinBox->setVisible(type != AntiAliasing::NONE);
 }
 
 void Controller::windowSetNbRayAntiAliasing(int i) {
@@ -148,8 +153,6 @@ void Controller::windowSetNbRayAntiAliasing(int i) {
 
 void Controller::windowChangeAmbientOcclusionNbRays(int index) {
     rayTracer->nbRayAmbientOcclusion = index;
-    AORadiusSpinBox->setVisible(index);
-    AOMaxAngleSpinBox->setVisible(index);
 }
 
 void Controller::windowSetAmbientOcclusionMaxAngle(int i) {
@@ -169,8 +172,8 @@ void Controller::windowSetOnlyAO(bool b) {
 }
 
 void Controller::windowEnableFocal(bool isFocal) {
-    selecFocusedObject->setText("Choose focused point");
-    selecFocusedObject->setVisible(isFocal);
+    // TODO
+    //selecFocusedObject->setText("Choose focused point");
     viewer->focusMode = isFocal;
     if(!isFocal)
         rayTracer->noFocus();
@@ -178,22 +181,19 @@ void Controller::windowEnableFocal(bool isFocal) {
 }
 
 void Controller::windowSetFocal() {
+    // TODO
     if(viewer->focusMode) {
         viewer->focusMode = false;
         rayTracer->setFocus(viewer->getFocusPoint());
-        selecFocusedObject->setText("Change focus point");
+        //selecFocusedObject->setText("Change focus point");
     }
     else {
-        enableFocal(true);
+        windowEnableFocal(true);
     }
 }
 
 void Controller::windowSetDepthPathTracing(int i) {
     rayTracer->depthPathTracing = i;
-    PTNbRaySpinBox->setVisible(i != 0);
-    PTMaxAngleSpinBox->setVisible(i != 0);
-    PTIntensitySpinBox->setVisible(i != 0);
-    PTOnlyCheckBox->setVisible(i !=0);
 }
 
 void Controller::windowSetNbRayPathTracing(int i) {
@@ -215,75 +215,47 @@ void Controller::windowSetOnlyPT(bool b) {
     rayTracer->onlyPathTracing = b;
 }
 
-int Controller::windowGetSelectedLightIndex() {
-    return lightsList->currentIndex()-1;
-}
-
 void Controller::windowSelectLight(int l) {
-    lightEnableCheckBox->setVisible(l != 0);
     if (l != 0) {
         bool enabled = scene->getLights()[l-1].isEnabled();
-        lightEnableCheckBox->setChecked(enabled);
-        enableLight(enabled);
+        windowEnableLight(enabled);
     }
 }
 
 void Controller::windowEnableLight(bool enabled) {
-    int l = getSelectedLightIndex();
+    int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i]->setVisible(enabled);
-    }
-    lightRadiusSpinBox->setVisible(enabled);
-    lightIntensitySpinBox->setVisible(enabled);
-    Light &light = scene->getLights()[l];
-    light.setEnabled(enabled);
-    viewer->updateLights();
-    if (!enabled) {
-        return;
-    }
-    Vec3Df pos = light.getPos();
-    float intensity = light.getIntensity();
-    float radius = light.getRadius();
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i]->setValue(pos[i]);
-    }
-    lightIntensitySpinBox->setValue(intensity);
-    lightRadiusSpinBox->setValue(radius);
+    scene->getLights()[l].setEnabled(enabled);
 }
 
 void Controller::windowSetLightRadius(double r) {
-    int l = getSelectedLightIndex();
+    int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
     scene->getLights()[l].setRadius(r);
-    viewer->updateLights();
 }
 
 void Controller::windowSetLightIntensity(double i) {
-    int l = getSelectedLightIndex();
+    int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
     scene->getLights()[l].setIntensity(i);
-    viewer->updateLights();
 }
 
 void Controller::windowSetLightPos() {
-    int l = getSelectedLightIndex();
+    int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    Vec3Df newPos;
-    Light &light = scene->getLights()[l];
-    for (int i=0; i<3; i++) {
-        newPos[i] = lightPosSpinBoxes[i]->value();
-    }
-    light.setPos(newPos);
-    viewer->updateLights();
+    scene->getLights()[l].setPos(window->getLightPos());
 }
 
 void Controller::viewerSetWireframe(bool b) {

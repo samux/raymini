@@ -20,12 +20,13 @@
 
 #include "QTUtils.h"
 #include "Observer.h"
+#include "Vec3D.h"
 
 class Controller;
 
 class Window : public QMainWindow, public Observer {
     Q_OBJECT
-    public:
+public:
     Window(Controller *);
     virtual ~Window();
 
@@ -33,18 +34,18 @@ class Window : public QMainWindow, public Observer {
 
     virtual void update(Observable *);
 
+    Vec3Df getLightPos() const;
+
 private :
     Controller *controller;
 
     void initControlWidget ();
 
-    /** return -1 if no light selected */
-    int getSelectedLightIndex();
-
     // Update functions
     void updateFromScene();
     void updateFromRayTracer();
     void updateFromWindowModel();
+    void updateLights();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;

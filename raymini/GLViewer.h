@@ -23,18 +23,9 @@ class Controller;
 
 class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT
-    public:
-
-    typedef enum {Smooth=0, Flat=1} RenderingMode;
-    typedef enum {OpenGLDisplayMode=0, RayDisplayMode=1} DisplayMode;
-
+public:
     GLViewer(Controller *);
     virtual ~GLViewer ();
-
-    inline bool isWireframe () const { return wireframe; }
-    inline int getRenderingMode () const { return renderingMode; }
-    inline const QImage & getRayImage () const { return rayImage; }
-    void updateLights();
 
     class Exception  {
     public:
@@ -46,8 +37,6 @@ class GLViewer : public QGLViewer, public Observer  {
     };
 
 public:
-    bool focusMode;
-    Vec3Df getFocusPoint() { return focusPoint.getPos(); }
     virtual void update(Observable *);
 
 protected :
@@ -63,11 +52,7 @@ protected :
 private:
     Controller *controller;
 
-    bool wireframe;
-    RenderingMode renderingMode;
-    DisplayMode displayMode;
-    QImage rayImage;
-    Vertex focusPoint;
+    void updateLights();
 };
 
 #endif // GLVIEWER_H

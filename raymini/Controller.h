@@ -58,9 +58,9 @@ public slots :
     void windowSetLightPos();
 
     void viewerSetWireframe(bool b);
-    void viewerSetRenderingMode(GLViewer::RenderingMode m);
+    void viewerSetRenderingMode(WindowModel::RenderingMode m);
     void viewerSetRenderingMode(int m);
-    void viewerSetDisplayMode(GLViewer::DisplayMode m);
+    void viewerSetDisplayMode(WindowModel::DisplayMode m);
     void viewerSetDisplayMode(int m);
     void viewerSetRayImage(const QImage & image);
 

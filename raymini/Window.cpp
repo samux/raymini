@@ -58,6 +58,14 @@ Window::~Window () {
 
 }
 
+Vec3Df Window::getLightPos() const {
+    Vec3Df newPos;
+    for (int i=0; i<3; i++) {
+        newPos[i] = lightPosSpinBoxes[i]->value();
+    }
+    return newPos;
+}
+
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
         updateFromScene();
@@ -74,13 +82,65 @@ void Window::update(Observable *observable) {
 }
 
 void Window::updateFromScene() {
+    updateLights();
 }
 
 void Window::updateFromRayTracer() {
-    shadowSpinBox->setVisible(i == 2);
+    RayTracer *rayTracer = controller->getRayTracer();
+    
+    // Shadows
+    shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
+
+    // Anti aliasing
+    AANbRaySpinBox->setVisible(rayTracer->typeAntiAliasing != AntiAliasing::NONE);
+
+    // Ambient occlusion
+    bool isAO = rayTracer->nbRayAmbientOcclusion != 0;
+    AORadiusSpinBox->setVisible(isAO);
+    AOMaxAngleSpinBox->setVisible(isAO);
+
+    // Focus
+    selecFocusedObject->setVisible(rayTracer->focusEnabled());
+
+    // Path tracing
+    bool isPT = rayTracer->depthPathTracing != 0;
+    PTNbRaySpinBox->setVisible(isPT);
+    PTMaxAngleSpinBox->setVisible(isPT);
+    PTIntensitySpinBox->setVisible(isPT);
+    PTOnlyCheckBox->setVisible(isPT);
 }
 
 void Window::updateFromWindowModel() {
+    updateLights();
+}
+
+void Window::updateLights() {
+    Scene *scene = controller->getScene();
+    WindowModel *windowModel = controller->getWindowModel();
+
+    int lightIndex = windowModel->getSelectedLightIndex();
+    bool isLightSelected = lightIndex != -1;
+    bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex].isEnabled();
+    lightEnableCheckBox->setVisible(isLightSelected);
+    for (int i=0; i<3; i++) {
+        lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+    }
+    lightRadiusSpinBox->setVisible(isLightEnabled);
+    lightIntensitySpinBox->setVisible(isLightEnabled);
+
+    if (isLightSelected) {
+        Light l = scene->getLights()[lightIndex];
+        isLightEnabled = l.isEnabled();
+        lightEnableCheckBox->setChecked(isLightEnabled);
+        Vec3Df pos = l.getPos();
+        float intensity = l.getIntensity();
+        float radius = l.getRadius();
+        for (int i=0; i<3; i++) {
+            lightPosSpinBoxes[i]->setValue(pos[i]);
+        }
+        lightIntensitySpinBox->setValue(intensity);
+        lightRadiusSpinBox->setValue(radius);
+    }
 }
 
 void Window::initControlWidget () {

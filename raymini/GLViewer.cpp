@@ -21,10 +21,7 @@ using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
 
-GLViewer::GLViewer(Controller *c) : QGLViewer(), focusMode(false), controller(c) {
-    wireframe = false;
-    renderingMode = Smooth;
-}
+GLViewer::GLViewer(Controller *c) : QGLViewer(), controller(c) {}
 
 GLViewer::~GLViewer () {
 }
@@ -60,13 +57,13 @@ void GLViewer::keyReleaseEvent (QKeyEvent * /*event*/) {
 }
 
 void GLViewer::mousePressEvent (QMouseEvent * event) {
-    controller->viewerSetDisplayMode (OpenGLDisplayMode);
+    controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     QGLViewer::mousePressEvent(event);
 }
 
 
 void GLViewer::wheelEvent (QWheelEvent * e) {
-    controller->viewerSetDisplayMode (OpenGLDisplayMode);
+    controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     QGLViewer::wheelEvent (e);
 }
 
@@ -92,8 +89,10 @@ void GLViewer::updateLights() {
     updateGL();
 }
 
-void GLViewer::update(Observable *observable) {
-    // TODO
+void GLViewer::update(Observable *o) {
+    if (o == controller->getScene()) {
+        updateLights();
+    }
 }
 
 // -----------------------------------------------
