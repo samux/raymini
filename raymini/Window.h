@@ -45,7 +45,11 @@ private :
     void updateFromScene();
     void updateFromRayTracer();
     void updateFromWindowModel();
+
+    // Updated by both WindowModel and Scene
     void updateLights();
+    // Updated by both WindowModel and RayTracer
+    void updateFocus();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;

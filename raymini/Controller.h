@@ -63,6 +63,7 @@ public slots :
     void viewerSetDisplayMode(WindowModel::DisplayMode m);
     void viewerSetDisplayMode(int m);
     void viewerSetRayImage(const QImage & image);
+    void viewerSetFocusPoint(Vertex point);
 
 private:
     // Views

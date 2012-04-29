@@ -20,9 +20,13 @@ public:
     typedef enum {OpenGLDisplayMode=0, RayDisplayMode=1} DisplayMode;
 
     inline int getSelectedLightIndex() const {return selectedLightIndex;}
-    inline bool isWireframe () const {return wireframe;}
-    inline int getRenderingMode () const {return renderingMode;}
-    inline const QImage & getRayImage () const {return rayImage;}
+    inline bool isWireframe() const {return wireframe;}
+    inline void setWireframe(bool w) {wireframe = w;}
+    inline int getRenderingMode() const {return renderingMode;}
+    inline int getDisplayMode() const {return displayMode;}
+    inline const QImage & getRayImage() const {return rayImage;}
+    inline bool isFocusMode() const {return focusMode;}
+    inline void setFocusMode(bool f) {focusMode = f;}
 
     Vec3Df getFocusPoint() { return focusPoint.getPos(); }
 

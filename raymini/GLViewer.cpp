@@ -89,9 +89,18 @@ void GLViewer::updateLights() {
     updateGL();
 }
 
+void GLViewer::updateWireframe() {
+    WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel->isWireframe())
+        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+}
+
 void GLViewer::update(Observable *o) {
     if (o == controller->getScene()) {
         updateLights();
+        updateWireframe();
     }
 }
 
@@ -137,7 +146,9 @@ void GLViewer::init() {
 }
 
 void GLViewer::draw () {
-    if (displayMode == RayDisplayMode) {
+    WindowModel *windowModel = controller->getWindowModel();
+    const QImage &rayImage = windowModel->getRayImage();
+    if (windowModel->getDisplayMode() == WindowModel::RayDisplayMode) {
         glDrawPixels (rayImage.width (),
                       rayImage.height (),
                       GL_RGB,
@@ -147,6 +158,7 @@ void GLViewer::draw () {
     }
     Scene * scene = controller->getScene();
     RayTracer * rayTracer = controller->getRayTracer();
+    bool focusMode = windowModel->isFocusMode();
     if (focusMode) {
         qglviewer::Camera * cam = camera ();
         qglviewer::Vec p = cam->position ();
@@ -160,12 +172,13 @@ void GLViewer::draw () {
         Ray focusSelect = Ray(camPos, viewDirection);
         Object *object;
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
-            focusPoint = focusSelect.getIntersection();
+            controller->viewerSetFocusPoint(focusSelect.getIntersection());
         }
     }
 
     if(focusMode || rayTracer->focusEnabled()) {
         Vec3Df X, Y;
+        const Vertex &focusPoint = windowModel->getFocusPoint();
         focusPoint.getNormal().getTwoOrthogonals(X,Y);
 
         glDisable (GL_LIGHTING);
@@ -208,7 +221,7 @@ void GLViewer::draw () {
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
         glDisable (GL_COLOR_MATERIAL);
         glEnable (GL_LIGHTING);
-        o.getMesh ().renderGL (renderingMode == Flat);
+        o.getMesh().renderGL(windowModel->getRenderingMode() == WindowModel::FLAT);
         glPopMatrix ();
     }
 }

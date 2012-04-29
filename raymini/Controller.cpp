@@ -86,7 +86,7 @@ void Controller::windowRenderRayImage () {
                              QString ("ms at ") +
                              QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
                              QString (" screen resolution"));
-    viewerSetDisplayMode(GLViewer::RayDisplayMode);
+    viewerSetDisplayMode(WindowModel::RayDisplayMode);
 }
 
 void Controller::windowSetBGColor () {
@@ -95,12 +95,11 @@ void Controller::windowSetBGColor () {
     if (c.isValid () == true) {
         rayTracer->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
         viewer->setBackgroundColor (c);
-        viewer->updateGL ();
     }
 }
 
 void Controller::windowShowRayImage () {
-    viewerSetDisplayMode(GLViewer::RayDisplayMode);
+    viewerSetDisplayMode(WindowModel::RayDisplayMode);
 }
 
 void Controller::windowExportGLImage () {
@@ -114,8 +113,8 @@ void Controller::windowExportRayImage () {
                                                      "*.jpg *.bmp *.png");
     if (!filename.isNull () && !filename.isEmpty ()) {
         // HACK: for some reason, saved image is fliped
-        QImage fliped(viewer->getRayImage().mirrored(false, true));
-        fliped.save (filename);
+        QImage fliped(windowModel->getRayImage().mirrored(false, true));
+        fliped.save(filename);
     }
 }
 
@@ -172,20 +171,16 @@ void Controller::windowSetOnlyAO(bool b) {
 }
 
 void Controller::windowEnableFocal(bool isFocal) {
-    // TODO
-    //selecFocusedObject->setText("Choose focused point");
-    viewer->focusMode = isFocal;
-    if(!isFocal)
+    windowModel->setFocusMode(isFocal);
+    if(!isFocal) {
         rayTracer->noFocus();
-    viewer->updateGL();
+    }
 }
 
 void Controller::windowSetFocal() {
-    // TODO
-    if(viewer->focusMode) {
-        viewer->focusMode = false;
-        rayTracer->setFocus(viewer->getFocusPoint());
-        //selecFocusedObject->setText("Change focus point");
+    if (windowModel->isFocusMode()) {
+        windowModel->setFocusMode(false);
+        rayTracer->setFocus(windowModel->getFocusPoint());
     }
     else {
         windowEnableFocal(true);
@@ -259,17 +254,11 @@ void Controller::windowSetLightPos() {
 }
 
 void Controller::viewerSetWireframe(bool b) {
-    wireframe = b;
-    if (wireframe)
-        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-    updateGL ();
+    windowModel->setWireframe(b);
 }
 
 void Controller::viewerSetRenderingMode(RenderingMode m) {
     renderingMode = m;
-    updateGL ();
 }
 
 void Controller::viewerSetRenderingMode(int m) {
@@ -278,7 +267,6 @@ void Controller::viewerSetRenderingMode(int m) {
 
 void Controller::viewerSetDisplayMode(DisplayMode m) {
     displayMode = m;
-    updateGL ();
 }
 
 void Controller::viewerSetDisplayMode(int m) {
@@ -287,4 +275,8 @@ void Controller::viewerSetDisplayMode(int m) {
 
 void Controller::viewerSetRayImage(const QImage & image) {
     rayImage = image;
+}
+
+void Controller::viewerSetFocusPoint(Vertex point) {
+    windowModel->setFocusPoint(point);
 }

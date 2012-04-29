@@ -42,7 +42,6 @@
 
 using namespace std;
 
-
 Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     QDockWidget * controlDockWidget = new QDockWidget (this);
     initControlWidget ();
@@ -82,6 +81,7 @@ void Window::update(Observable *observable) {
 }
 
 void Window::updateFromScene() {
+    // Lights
     updateLights();
 }
 
@@ -100,7 +100,7 @@ void Window::updateFromRayTracer() {
     AOMaxAngleSpinBox->setVisible(isAO);
 
     // Focus
-    selecFocusedObject->setVisible(rayTracer->focusEnabled());
+    updateFocus();
 
     // Path tracing
     bool isPT = rayTracer->depthPathTracing != 0;
@@ -111,7 +111,11 @@ void Window::updateFromRayTracer() {
 }
 
 void Window::updateFromWindowModel() {
+    // Lights
     updateLights();
+
+    // Focus
+    updateFocus();
 }
 
 void Window::updateLights() {
@@ -140,6 +144,22 @@ void Window::updateLights() {
         }
         lightIntensitySpinBox->setValue(intensity);
         lightRadiusSpinBox->setValue(radius);
+    }
+}
+
+void Window::updateFocus() {
+    WindowModel *windowModel = controller->getWindowModel();
+    RayTracer *rayTracer = controller->getRayTracer();
+    bool isFocus = rayTracer->focusEnabled();
+    selecFocusedObject->setVisible(isFocus);
+    if (isFocus) {
+        bool isFocusMode = windowModel->isFocusMode();
+        if (isFocusMode) {
+            selecFocusedObject->setText("Choose focused point");
+        }
+        else {
+            selecFocusedObject->setText("Change focus point");
+        }
     }
 }
 

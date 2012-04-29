@@ -53,6 +53,7 @@ private:
     Controller *controller;
 
     void updateLights();
+    void updateWireframe() {
 };
 
 #endif // GLVIEWER_H
