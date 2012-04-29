@@ -23,6 +23,8 @@ HEADERS = Window.h \
           Shadow.h \
           SkyBoxMaterial.h \
           Texture.h \
+          Observer.h \
+          Observable.h \
           Focus.h \
           Brdf.h
 
@@ -47,6 +49,7 @@ SOURCES = Window.cpp \
           Texture.cpp \
           Color.cpp \
           Shadow.cpp \
+          Observable.cpp \
           Focus.cpp \
           Main.cpp
 
