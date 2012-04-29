@@ -93,7 +93,7 @@ protected:
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
-        typeFocus(Focus::UNIFORM), nbRayFocus(9), apertureFocus(0.1),
+        typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         focus(false) {}
     inline virtual ~RayTracer () {}

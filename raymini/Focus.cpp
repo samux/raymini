@@ -1,7 +1,9 @@
 #include <cmath>
+#include "Focus.h"
+
+// for debug
 #include <iostream>
 
-#include "Focus.h"
 
 using namespace std;
 
@@ -21,7 +23,7 @@ vector<pair<float, float>> Focus::generateOffsets(Type type, float aperture, uns
                 float step = 2.0 * aperture / sqrt(2.0);
                 unsigned int count = 0;
                 float orig = -step*raysSqrt/2.0 + step/2.0; 
-                for (unsigned int i=0; i<raysSqrt && count<rays; i++) {
+                for (int i=0; i<raysSqrt && count<rays; i++) {
                     for (int j=0; j<raysSqrt && count<rays; j++) {
                         offsets.push_back(make_pair(orig + j*step, orig + i*step));
                         count++;
@@ -31,7 +33,11 @@ vector<pair<float, float>> Focus::generateOffsets(Type type, float aperture, uns
             break;
 
         case STOCHASTIC:
-            offsets.push_back(make_pair(0.0, 0.0));
+                for (unsigned int i=0; i<rays; i++) {
+                    float di = ((float)rand() / (float)RAND_MAX) - aperture/sqrt(2.0);
+                    float dj = ((float)rand() / (float)RAND_MAX) - aperture/sqrt(2.0) ;
+                    offsets.push_back(make_pair(di, dj));
+                }
             break;
     }
 
