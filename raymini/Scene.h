@@ -15,12 +15,12 @@
 #include "Light.h"
 #include "BoundingBox.h"
 #include "Vec3D.h"
+#include "Observable.h"
 
-class Scene {
+class controller;
+
+class Scene: public class Observable {
 public:
-    static Scene * getInstance ();
-    static void destroyInstance ();
-
     inline std::vector<Object> & getObjects () { return objects; }
     inline const std::vector<Object> & getObjects () const { return objects; }
 
@@ -47,11 +47,12 @@ public:
             o.reset();
     }
 
-protected:
-    Scene ();
+    Scene(Controller *);
     virtual ~Scene ();
 
 private:
+    Controller *controller;
+
     void buildDefaultScene ();
     std::vector<Object> objects;
     std::vector<Light> lights;

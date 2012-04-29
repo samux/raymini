@@ -11,22 +11,9 @@
 
 using namespace std;
 
-static Scene * instance = NULL;
-
-Scene * Scene::getInstance () {
-    if (instance == NULL)
-        instance = new Scene ();
-    return instance;
-}
-
-void Scene::destroyInstance () {
-    if (instance != NULL) {
-        delete instance;
-        instance = NULL;
-    }
-}
-
-Scene::Scene () {
+Scene::Scene(Controller *c):
+    controller(c)
+{
     buildDefaultScene ();
     updateBoundingBox ();
 }

@@ -60,9 +60,6 @@ public:
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
     /*        End Config         */
 
-    static RayTracer * getInstance ();
-    static void destroyInstance ();
-
     inline const Vec3Df & getBackgroundColor () const { return backgroundColor;}
     inline void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
 
@@ -86,8 +83,8 @@ public:
 
     bool focusEnabled() { return focus; };
 
-protected:
-    inline RayTracer () :
+    inline RayTracer(Controller *c):
+        controller(c),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
         intensityPathTracing(255.f), onlyPathTracing(false),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
@@ -99,6 +96,8 @@ protected:
     inline virtual ~RayTracer () {}
 
 private:
+    Controller *controller;
+
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001f;
     Vec3Df backgroundColor;
     Shadow shadow;

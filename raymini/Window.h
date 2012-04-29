@@ -19,50 +19,31 @@
 #include <string>
 
 #include "QTUtils.h"
+#include "Observer.h"
 
+class Controller;
 
-class Window : public QMainWindow {
+class Window : public QMainWindow, public Observer {
     Q_OBJECT
     public:
-    Window();
+    Window(Controller *);
     virtual ~Window();
 
     static void showStatusMessage (const QString & msg);
 
-public slots :
-    void renderRayImage ();
-    void setShadowMode (int);
-    void setShadowNbRays (int);
-    void setBGColor ();
-    void showRayImage ();
-    void exportGLImage ();
-    void exportRayImage ();
-    void about ();
-    void changeAntiAliasingType(int index);
-    void setNbRayAntiAliasing(int);
-    void changeAmbientOcclusionNbRays(int index);
-    void setAmbientOcclusionMaxAngle(int);
-    void setAmbientOcclusionRadius(double);
-    void setAmbientOcclusionIntensity(int);
-    void setOnlyAO(bool);
-    void enableFocal(bool);
-    void setFocal();
-    void setDepthPathTracing(int);
-    void setNbRayPathTracing(int);
-    void setMaxAnglePathTracing(int);
-    void setIntensityPathTracing(int);
-    void setOnlyPT(bool);
-    void setNbImagesSpinBox(int);
-    void selectLight(int);
-    void enableLight(bool);
-    void setLightRadius(double);
-    void setLightIntensity(double);
-    void setLightPos();
+    virtual void update(Observable *);
 
 private :
+    Controller *controller;
+
     void initControlWidget ();
     // return -1 if no light selected
     int getSelectedLightIndex();
+
+    // Update functions
+    void updateFromScene();
+    void updateFromRayTracer();
+    void updateFromWindowModel();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
@@ -89,8 +70,6 @@ private :
     QDoubleSpinBox *lightIntensitySpinBox;
 
     QPushButton * selecFocusedObject;
-
-    GLViewer * viewer;
 };
 
 #endif // WINDOW_H

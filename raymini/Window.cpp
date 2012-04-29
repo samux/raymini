@@ -42,15 +42,7 @@
 using namespace std;
 
 
-Window::Window () : QMainWindow (NULL) {
-    try {
-        viewer = new GLViewer;
-    } catch (GLViewer::Exception e) {
-        cerr << e.getMessage () << endl;
-        exit (1);
-    }
-    setCentralWidget (viewer);
-
+Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     QDockWidget * controlDockWidget = new QDockWidget (this);
     initControlWidget ();
 
@@ -65,256 +57,28 @@ Window::~Window () {
 
 }
 
-void Window::setShadowMode(int i) {
-    RayTracer * rayTracer = RayTracer::getInstance ();
-    switch(i) {
-    case 0:
-        rayTracer->setShadowMode(Shadow::NONE);
-        break;
-    case 1:
-        rayTracer->setShadowMode(Shadow::HARD);
-        break;
-    case 2:
-        rayTracer->setShadowMode(Shadow::SOFT);
-        break;
+void Window::update(Observable *observable) {
+    if (observable == Scene::getInstance()) {
+        updateFromScene();
     }
-    shadowSpinBox->setVisible(i == 2);
-}
-
-void Window::setShadowNbRays (int i) {
-    RayTracer *rayTracer = RayTracer::getInstance();
-    rayTracer->setShadowNbImpule(i);
-}
-
-void Window::renderRayImage () {
-    qglviewer::Camera * cam = viewer->camera ();
-    RayTracer * rayTracer = RayTracer::getInstance ();
-    qglviewer::Vec p = cam->position ();
-    qglviewer::Vec d = cam->viewDirection ();
-    qglviewer::Vec u = cam->upVector ();
-    qglviewer::Vec r = cam->rightVector ();
-    Vec3Df camPos (p[0], p[1], p[2]);
-    Vec3Df viewDirection (d[0], d[1], d[2]);
-    Vec3Df upVector (u[0], u[1], u[2]);
-    Vec3Df rightVector (r[0], r[1], r[2]);
-    float fieldOfView = cam->fieldOfView ();
-    float aspectRatio = cam->aspectRatio ();
-    unsigned int screenWidth = cam->screenWidth ();
-    unsigned int screenHeight = cam->screenHeight ();
-    QTime timer;
-    timer.start ();
-    viewer->setRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
-                                           fieldOfView, aspectRatio, screenWidth, screenHeight));
-    statusBar()->showMessage(QString ("Raytracing performed in ") +
-                             QString::number (timer.elapsed ()) +
-                             QString ("ms at ") +
-                             QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-                             QString (" screen resolution"));
-    viewer->setDisplayMode (GLViewer::RayDisplayMode);
-}
-
-void Window::setBGColor () {
-    RayTracer *rayTracer = RayTracer::getInstance();
-    Vec3Df bg = 255*rayTracer->getBackgroundColor();
-    QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), this);
-    if (c.isValid () == true) {
-        RayTracer::getInstance ()->setBackgroundColor (Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
-        viewer->setBackgroundColor (c);
-        viewer->updateGL ();
+    else if (observable == RayTracer::getInstance()) {
+        updateFromRayTracer();
     }
-}
-
-void Window::showRayImage () {
-    viewer->setDisplayMode (GLViewer::RayDisplayMode);
-}
-
-void Window::exportGLImage () {
-    viewer->saveSnapshot (false, false);
-}
-
-void Window::exportRayImage () {
-    QString filename = QFileDialog::getSaveFileName (this,
-                                                     "Save ray-traced image",
-                                                     ".",
-                                                     "*.jpg *.bmp *.png");
-    if (!filename.isNull () && !filename.isEmpty ()) {
-        // HACK: for some reason, saved image is fliped
-        QImage fliped(viewer->getRayImage().mirrored(false, true));
-        fliped.save (filename);
-    }
-}
-
-void Window::about () {
-    QMessageBox::about (this,
-                        "About This Program",
-                        "<b>RayMini</b> by: <br> <i>Tamy Boubekeur <br> Axel Schumacher <br> Bertrand Chazot <br> Samuel Mokrani</i>.");
-}
-
-void Window::changeAntiAliasingType(int index) {
-    AntiAliasing::Type type;
-
-    switch (index)
-        {
-        default:
-        case 0:
-            type = AntiAliasing::NONE;
-            break;
-        case 1:
-            type = AntiAliasing::UNIFORM;
-            break;
-        case 2:
-            type = AntiAliasing::POLYGONAL;
-            break;
-        case 3:
-            type = AntiAliasing::STOCHASTIC;
-            break;
-        }
-    RayTracer::getInstance()->typeAntiAliasing = type;
-    AANbRaySpinBox->setVisible(type != AntiAliasing::NONE);
-}
-
-void Window::setNbRayAntiAliasing(int i) {
-    RayTracer::getInstance()->nbRayAntiAliasing = i;
-}
-
-void Window::changeAmbientOcclusionNbRays(int index) {
-    RayTracer::getInstance()->nbRayAmbientOcclusion = index;
-    AORadiusSpinBox->setVisible(index);
-    AOMaxAngleSpinBox->setVisible(index);
-}
-
-void Window::setAmbientOcclusionMaxAngle(int i) {
-    RayTracer::getInstance()->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
-}
-
-void Window::setAmbientOcclusionRadius(double f) {
-    RayTracer::getInstance()->radiusAmbientOcclusion = f;
-}
-
-void Window::setAmbientOcclusionIntensity(int i) {
-    RayTracer::getInstance()->intensityAmbientOcclusion = float(i)/100;
-}
-
-void Window::setOnlyAO(bool b) {
-    RayTracer::getInstance()->onlyAmbientOcclusion = b;
-}
-
-void Window::enableFocal(bool isFocal) {
-    selecFocusedObject->setText("Choose focused point");
-    selecFocusedObject->setVisible(isFocal);
-    viewer->focusMode = isFocal;
-    if(!isFocal)
-        RayTracer::getInstance()->noFocus();
-    viewer->updateGL();
-}
-
-void Window::setFocal() {
-    if(viewer->focusMode) {
-        viewer->focusMode = false;
-        RayTracer::getInstance()->setFocus(viewer->getFocusPoint());
-        selecFocusedObject->setText("Change focus point");
+    else if (observable == WindowModel::getInstance()) {
+        updateFromWindowModel();
     }
     else {
-        enableFocal(true);
+        cerr << "Window::update(Observable*) has been called from an unknown source!" << endl;
     }
 }
 
-void Window::setDepthPathTracing(int i) {
-    RayTracer::getInstance()->depthPathTracing = i;
-    PTNbRaySpinBox->setVisible(i != 0);
-    PTMaxAngleSpinBox->setVisible(i != 0);
-    PTIntensitySpinBox->setVisible(i != 0);
-    PTOnlyCheckBox->setVisible(i !=0);
+void Window::updateFromScene() {
 }
 
-void Window::setNbRayPathTracing(int i) {
-    RayTracer::getInstance()->nbRayPathTracing = i;
-}
-void Window::setMaxAnglePathTracing(int i) {
-    RayTracer::getInstance()->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
+void Window::updateFromRayTracer() {
 }
 
-void Window::setIntensityPathTracing(int i) {
-    RayTracer::getInstance()->intensityPathTracing = float(i);
-}
-
-void Window::setNbImagesSpinBox(int i) {
-    RayTracer::getInstance()->nbPictures = i;
-}
-
-void Window::setOnlyPT(bool b) {
-    RayTracer::getInstance()->onlyPathTracing = b;
-}
-
-int Window::getSelectedLightIndex() {
-    return lightsList->currentIndex()-1;
-}
-
-void Window::selectLight(int l) {
-    lightEnableCheckBox->setVisible(l != 0);
-    if (l != 0) {
-        bool enabled = Scene::getInstance()->getLights()[l-1].isEnabled();
-        lightEnableCheckBox->setChecked(enabled);
-        enableLight(enabled);
-    }
-}
-
-void Window::enableLight(bool enabled) {
-    int l = getSelectedLightIndex();
-    if (l == -1) {
-        return;
-    }
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i]->setVisible(enabled);
-    }
-    lightRadiusSpinBox->setVisible(enabled);
-    lightIntensitySpinBox->setVisible(enabled);
-    Light &light = Scene::getInstance()->getLights()[l];
-    light.setEnabled(enabled);
-    viewer->updateLights();
-    if (!enabled) {
-        return;
-    }
-    Vec3Df pos = light.getPos();
-    float intensity = light.getIntensity();
-    float radius = light.getRadius();
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i]->setValue(pos[i]);
-    }
-    lightIntensitySpinBox->setValue(intensity);
-    lightRadiusSpinBox->setValue(radius);
-}
-
-void Window::setLightRadius(double r) {
-    int l = getSelectedLightIndex();
-    if (l == -1) {
-        return;
-    }
-    Scene::getInstance()->getLights()[l].setRadius(r);
-    viewer->updateLights();
-}
-
-void Window::setLightIntensity(double i) {
-    int l = getSelectedLightIndex();
-    if (l == -1) {
-        return;
-    }
-    Scene::getInstance()->getLights()[l].setIntensity(i);
-    viewer->updateLights();
-}
-
-void Window::setLightPos() {
-    int l = getSelectedLightIndex();
-    if (l == -1) {
-        return;
-    }
-    Vec3Df newPos;
-    Light &light = Scene::getInstance()->getLights()[l];
-    for (int i=0; i<3; i++) {
-        newPos[i] = lightPosSpinBoxes[i]->value();
-    }
-    light.setPos(newPos);
-    viewer->updateLights();
+void Window::updateFromWindowModel() {
 }
 
 void Window::initControlWidget () {
