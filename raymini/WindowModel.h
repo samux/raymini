@@ -23,12 +23,15 @@ public:
     inline bool isWireframe() const {return wireframe;}
     inline void setWireframe(bool w) {wireframe = w;}
     inline int getRenderingMode() const {return renderingMode;}
+    inline void setRenderingMode(RenderingMode r) {renderingMode = r;}
     inline int getDisplayMode() const {return displayMode;}
+    inline void setDisplayMode(DisplayMode d) {displayMode = d;}
     inline const QImage & getRayImage() const {return rayImage;}
+    inline void setRayImage(QImage i) {rayImage = i;}
     inline bool isFocusMode() const {return focusMode;}
     inline void setFocusMode(bool f) {focusMode = f;}
-
-    Vec3Df getFocusPoint() { return focusPoint.getPos(); }
+    inline Vec3Df getFocusPoint() { return focusPoint.getPos(); }
+    inline void setFocusPoint(Vertex f) {focusPoint = f;}
 
 private:
     Controller *controller;

@@ -6,8 +6,7 @@
 // All rights reserved.
 // *********************************************************
 
-#ifndef GLVIEWER_H
-#define GLVIEWER_H
+#pragma once
 
 #include <GL/glew.h>
 #include <QGLViewer/qglviewer.h>
@@ -53,10 +52,8 @@ private:
     Controller *controller;
 
     void updateLights();
-    void updateWireframe() {
+    void updateWireframe();
 };
-
-#endif // GLVIEWER_H
 
 // Some Emacs-Hints -- please don't remove:
 //

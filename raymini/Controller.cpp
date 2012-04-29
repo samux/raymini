@@ -257,24 +257,24 @@ void Controller::viewerSetWireframe(bool b) {
     windowModel->setWireframe(b);
 }
 
-void Controller::viewerSetRenderingMode(RenderingMode m) {
-    renderingMode = m;
+void Controller::viewerSetRenderingMode(WindowModel::RenderingMode m) {
+    windowModel->setRenderingMode(m);
 }
 
 void Controller::viewerSetRenderingMode(int m) {
-    setRenderingMode (static_cast<RenderingMode>(m));
+    windowModel->setRenderingMode(static_cast<WindowModel::RenderingMode>(m));
 }
 
-void Controller::viewerSetDisplayMode(DisplayMode m) {
-    displayMode = m;
+void Controller::viewerSetDisplayMode(WindowModel::DisplayMode m) {
+    windowModel->setDisplayMode(m);
 }
 
 void Controller::viewerSetDisplayMode(int m) {
-    setRenderingMode (static_cast<DisplayMode>(m));
+    windowModel->setDisplayMode(static_cast<WindowModel::DisplayMode>(m));
 }
 
 void Controller::viewerSetRayImage(const QImage & image) {
-    rayImage = image;
+    windowModel->setRayImage(image);
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {

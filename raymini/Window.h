@@ -1,7 +1,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "GLViewer.h"
 #include <QMainWindow>
 #include <QAction>
 #include <QToolBar>
@@ -18,6 +17,7 @@
 #include <vector>
 #include <string>
 
+#include "GLViewer.h"
 #include "QTUtils.h"
 #include "Observer.h"
 #include "Vec3D.h"

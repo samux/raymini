@@ -3,6 +3,8 @@
  */
 #pragma once
 
+#include "Observable.h"
+
 class Observer {
 public:
     /** Called whenever an Observable cals notify */
