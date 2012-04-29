@@ -15,36 +15,18 @@
 #include <string>
 
 #include "RayTracer.h"
+#include "Controller.h"
 
 using namespace std;
 
 static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7};
 
-GLViewer::GLViewer(Controller *c) : QGLViewer(), controller(c), focusMode(false) {
+GLViewer::GLViewer(Controller *c) : QGLViewer(), focusMode(false), controller(c) {
     wireframe = false;
     renderingMode = Smooth;
 }
 
 GLViewer::~GLViewer () {
-}
-
-void GLViewer::setWireframe (bool b) {
-    wireframe = b;
-    if (wireframe)
-        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-    else
-        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-    updateGL ();
-}
-
-void GLViewer::setRenderingMode (RenderingMode m) {
-    renderingMode = m;
-    updateGL ();
-}
-
-void GLViewer::setDisplayMode (DisplayMode m) {
-    displayMode = m;
-    updateGL ();
 }
 
 QString GLViewer::helpString() const {
@@ -78,13 +60,13 @@ void GLViewer::keyReleaseEvent (QKeyEvent * /*event*/) {
 }
 
 void GLViewer::mousePressEvent (QMouseEvent * event) {
-    setDisplayMode (OpenGLDisplayMode);
+    controller->viewerSetDisplayMode (OpenGLDisplayMode);
     QGLViewer::mousePressEvent(event);
 }
 
 
 void GLViewer::wheelEvent (QWheelEvent * e) {
-    setDisplayMode (OpenGLDisplayMode);
+    controller->viewerSetDisplayMode (OpenGLDisplayMode);
     QGLViewer::wheelEvent (e);
 }
 
@@ -108,6 +90,10 @@ void GLViewer::updateLights() {
         }
     }
     updateGL();
+}
+
+void GLViewer::update(Observable *observable) {
+    // TODO
 }
 
 // -----------------------------------------------
@@ -226,8 +212,4 @@ void GLViewer::draw () {
         o.getMesh ().renderGL (renderingMode == Flat);
         glPopMatrix ();
     }
-}
-
-void GLViewer::setRayImage (const QImage & image) {
-    rayImage = image;
 }

@@ -38,6 +38,7 @@
 #include "RayTracer.h"
 #include "Scene.h"
 #include "AntiAliasing.h"
+#include "Controller.h"
 
 using namespace std;
 
@@ -76,6 +77,7 @@ void Window::updateFromScene() {
 }
 
 void Window::updateFromRayTracer() {
+    shadowSpinBox->setVisible(i == 2);
 }
 
 void Window::updateFromWindowModel() {
@@ -94,14 +96,14 @@ void Window::initControlWidget () {
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
 
     QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
-    connect (wireframeCheckBox, SIGNAL (toggled (bool)), viewer, SLOT (setWireframe (bool)));
+    connect (wireframeCheckBox, SIGNAL(toggled (bool)), controller, SLOT(viewerSetWireframe(bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
     QComboBox *modeList = new QComboBox(previewGroupBox);
     modeList->addItem("Smooth");
     modeList->addItem("Flat");
     previewLayout->addWidget(modeList);
-    connect (modeList, SIGNAL (activated (int)), viewer, SLOT (setRenderingMode (int)));
+    connect (modeList, SIGNAL(activated (int)), controller, SLOT(viewerSetRenderingMode(int)));
 
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
     connect (snapshotButton, SIGNAL (clicked ()) , this, SLOT (exportGLImage ()));

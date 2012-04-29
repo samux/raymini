@@ -17,6 +17,8 @@
 
 // This model assumes a white specular color (1.0, 1.0, 1.0)
 
+class Controller;
+
 class Material {
 public:
     inline Material(Controller *c) : controller(c),

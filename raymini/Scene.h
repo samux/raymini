@@ -17,9 +17,9 @@
 #include "Vec3D.h"
 #include "Observable.h"
 
-class controller;
+class Controller;
 
-class Scene: public class Observable {
+class Scene: public Observable {
 public:
     inline std::vector<Object> & getObjects () { return objects; }
     inline const std::vector<Object> & getObjects () const { return objects; }

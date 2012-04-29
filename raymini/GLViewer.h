@@ -19,6 +19,8 @@
 #include "Object.h"
 #include "Observer.h"
 
+class Controller;
+
 class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT
     public:
@@ -43,17 +45,11 @@ class GLViewer : public QGLViewer, public Observer  {
         std::string message;
     };
 
-public slots :
-    void setWireframe (bool b);
-    void setRenderingMode (RenderingMode m);
-    void setRenderingMode (int m) { setRenderingMode (static_cast<RenderingMode>(m)); }
-    void setDisplayMode (DisplayMode m);
-    void setDisplayMode (int m) { setRenderingMode (static_cast<DisplayMode>(m)); }
-    void setRayImage (const QImage & image);
-
 public:
     bool focusMode;
     Vec3Df getFocusPoint() { return focusPoint.getPos(); }
+    virtual void update(Observable *);
+
 protected :
     void init();
     void draw ();

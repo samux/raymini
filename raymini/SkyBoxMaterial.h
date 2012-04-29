@@ -6,6 +6,8 @@
 #include "Vec3D.h"
 #include "Object.h"
 
+class Controller;
+
 enum CubeSide {
     TOP,
     BOTTOM,
@@ -19,7 +21,7 @@ enum CubeSide {
 class SkyBoxMaterial : public Material {
 
 public:
-    SkyBoxMaterial(const char* textureFileName);
+    SkyBoxMaterial(Controller *c, const char* textureFileName);
     virtual ~SkyBoxMaterial();
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,

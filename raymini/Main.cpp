@@ -1,7 +1,6 @@
 //#include <QDir>
 //#include <QPixmap>
 //#include <QSplashScreen>
-//#include <QPlastiqueStyle>
 //#include <QCleanlooksStyle>
 //#include <string>
 //#include <iostream>

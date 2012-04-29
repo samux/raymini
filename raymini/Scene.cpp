@@ -6,8 +6,10 @@
 // *********************************************************
 
 #include "Scene.h"
+
 #include "Noise.h"
 #include "SkyBoxMaterial.h"
+#include "Controller.h"
 
 using namespace std;
 

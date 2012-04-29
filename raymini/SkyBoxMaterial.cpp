@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "Controller.h"
+
 using namespace std;
 
 // Mesh dependent
@@ -85,8 +87,8 @@ Vec3Df SkyBoxMaterial::getColor(CubeSide side, int u, int v) const{
     return texture.getColor(u+offsetU, v+offsetV);
 }
 
-SkyBoxMaterial::SkyBoxMaterial(const char* textureFileName):
-    Material(1.0f, 0.0f, Vec3Df(0.0f, 0.0f, 1.0f)) // Blue for OpenGL
+SkyBoxMaterial::SkyBoxMaterial(Controller *c, const char* textureFileName):
+    Material(c, 1.0f, 0.0f, Vec3Df(0.0f, 0.0f, 1.0f)) // Blue for OpenGL
 {
     texture.loadPPM(textureFileName);
 }

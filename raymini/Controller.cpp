@@ -1,6 +1,10 @@
 #include "Controller.h"
 
+#include <QPlastiqueStyle>
+
 #include "QTUtils.h"
+
+// TODO update corresponding model
 
 Controller::Controller(int argc, char *argv[]):
     QApplication(argc, argv)
@@ -17,7 +21,7 @@ void Controller::initAll() {
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
     window->show();
-    raymini.connect(this, SIGNAL(lastWindowClosed()), this, SLOT(quit()));
+    connect(this, SIGNAL(lastWindowClosed()), this, SLOT(quit()));
 
     viewer = new GLViewer(this);
     window->setCentralWidget(viewer);
@@ -47,7 +51,6 @@ void Controller::windowSetShadowMode(int i) {
         rayTracer->setShadowMode(Shadow::SOFT);
         break;
     }
-    shadowSpinBox->setVisible(i == 2);
 }
 
 void Controller::windowSetShadowNbRays (int i) {
@@ -77,7 +80,7 @@ void Controller::windowRenderRayImage () {
                              QString ("ms at ") +
                              QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
                              QString (" screen resolution"));
-    viewer->setDisplayMode (GLViewer::RayDisplayMode);
+    viewerSetDisplayMode(GLViewer::RayDisplayMode);
 }
 
 void Controller::windowSetBGColor () {
@@ -91,7 +94,7 @@ void Controller::windowSetBGColor () {
 }
 
 void Controller::windowShowRayImage () {
-    viewer->setDisplayMode (GLViewer::RayDisplayMode);
+    viewerSetDisplayMode(GLViewer::RayDisplayMode);
 }
 
 void Controller::windowExportGLImage () {
@@ -281,4 +284,35 @@ void Controller::windowSetLightPos() {
     }
     light.setPos(newPos);
     viewer->updateLights();
+}
+
+void Controller::viewerSetWireframe(bool b) {
+    wireframe = b;
+    if (wireframe)
+        glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+    updateGL ();
+}
+
+void Controller::viewerSetRenderingMode(RenderingMode m) {
+    renderingMode = m;
+    updateGL ();
+}
+
+void Controller::viewerSetRenderingMode(int m) {
+    setRenderingMode (static_cast<RenderingMode>(m));
+}
+
+void Controller::viewerSetDisplayMode(DisplayMode m) {
+    displayMode = m;
+    updateGL ();
+}
+
+void Controller::viewerSetDisplayMode(int m) {
+    setRenderingMode (static_cast<DisplayMode>(m));
+}
+
+void Controller::viewerSetRayImage(const QImage & image) {
+    rayImage = image;
 }

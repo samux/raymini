@@ -8,6 +8,7 @@
 #include <QProgressDialog>
 #include <algorithm>
 
+#include "Controller.h"
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"

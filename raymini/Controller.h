@@ -4,6 +4,12 @@
 
 #include <QApplication>
 
+#include "Window.h"
+#include "WindowModel.h"
+#include "RayTracer.h"
+#include "Scene.h"
+#include "GLViewer.h"
+
 #pragma once
 
 class Controller: public QApplication {
@@ -50,6 +56,13 @@ public slots :
     void windowSetLightRadius(double);
     void windowSetLightIntensity(double);
     void windowSetLightPos();
+
+    void viewerSetWireframe(bool b);
+    void viewerSetRenderingMode(GLViewer::RenderingMode m);
+    void viewerSetRenderingMode(int m);
+    void viewerSetDisplayMode(GLViewer::DisplayMode m);
+    void viewerSetDisplayMode(int m);
+    void viewerSetRayImage(const QImage & image);
 
 private:
     // Views

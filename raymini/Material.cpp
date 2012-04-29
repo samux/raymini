@@ -10,6 +10,7 @@
 #include "Material.h"
 
 #include "RayTracer.h"
+#include "Controller.h"
 
 using namespace std;
 

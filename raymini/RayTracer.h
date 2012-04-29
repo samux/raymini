@@ -19,12 +19,14 @@
 #include "Light.h"
 #include "AntiAliasing.h"
 #include "Focus.h"
+#include "Observable.h"
 
 class Color;
 class Object;
 class Vertex;
+class Controller;
 
-class RayTracer {
+class RayTracer: public Observable {
 public:
     /*          Config           */
     unsigned depthPathTracing;
@@ -90,6 +92,8 @@ public:
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
+        nbPictures(1),
+        controller(c),
         typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
         shadow(c),
         nbPictures(1),
