@@ -2,6 +2,8 @@
  * Handle any model modification, via the SLOTS, to ensure coherent behaviour
  */
 
+#pragma once
+
 #include <QApplication>
 
 #include "Window.h"
@@ -10,11 +12,10 @@
 #include "Scene.h"
 #include "GLViewer.h"
 
-#pragma once
-
 class Controller: public QApplication {
+    Q_OBJECT
 public:
-    Controller(int argc, char *argv[]);
+    Controller(int argc, char **argv);
     virtual ~Controller();
 
     /** Start the whole procedure */

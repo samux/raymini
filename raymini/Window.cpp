@@ -176,7 +176,7 @@ void Window::initControlWidget () {
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
 
     QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
-    connect (wireframeCheckBox, SIGNAL(toggled (bool)), controller, SLOT(viewerSetWireframe(bool)));
+    connect(wireframeCheckBox, SIGNAL(toggled(bool)), controller, SLOT(viewerSetWireframe(bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
     QComboBox *modeList = new QComboBox(previewGroupBox);
@@ -186,7 +186,7 @@ void Window::initControlWidget () {
     connect (modeList, SIGNAL(activated (int)), controller, SLOT(viewerSetRenderingMode(int)));
 
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
-    connect (snapshotButton, SIGNAL (clicked ()) , this, SLOT (exportGLImage ()));
+    connect (snapshotButton, SIGNAL(clicked ()) ,controller, SLOT(windowExportGLImage()));
     previewLayout->addWidget (snapshotButton);
 
     layout->addWidget (previewGroupBox);
@@ -206,12 +206,12 @@ void Window::initControlWidget () {
         name = QString("Light #%1").arg(i);
         lightsList->addItem(name);
     }
-    connect(lightsList, SIGNAL(activated(int)), this, SLOT(selectLight(int)));
+    connect(lightsList, SIGNAL(activated(int)), controller, SLOT(windowSelectLight(int)));
     lightsLayout->addWidget(lightsList);
 
     lightEnableCheckBox = new QCheckBox("Enable");
     lightEnableCheckBox->setVisible(false);
-    connect(lightEnableCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableLight(bool)));
+    connect(lightEnableCheckBox, SIGNAL(toggled(bool)), controller, SLOT(windowEnableLight(bool)));
     lightsLayout->addWidget(lightEnableCheckBox);
 
     QHBoxLayout *lightsPosLayout = new QHBoxLayout;
@@ -224,7 +224,7 @@ void Window::initControlWidget () {
         lightPosSpinBoxes[i]->setVisible(false);
         lightPosSpinBoxes[i]->setPrefix(axis[i]);
         lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
-        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), this, SLOT(setLightPos()));
+        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
     }
     lightsLayout->addLayout(lightsPosLayout);
 
@@ -234,7 +234,7 @@ void Window::initControlWidget () {
     lightRadiusSpinBox->setMaximum(100);
     lightRadiusSpinBox->setVisible(false);
     lightRadiusSpinBox->setPrefix ("Radius: ");
-    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLightRadius(double)));
+    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
     lightsLayout->addWidget(lightRadiusSpinBox);
 
     lightIntensitySpinBox = new QDoubleSpinBox(lightsGroupBox);
@@ -243,7 +243,7 @@ void Window::initControlWidget () {
     lightIntensitySpinBox->setMaximum(100);
     lightIntensitySpinBox->setVisible(false);
     lightIntensitySpinBox->setPrefix("Intensity: ");
-    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLightIntensity(double)));
+    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
     lightsLayout->addWidget(lightIntensitySpinBox);
 
     rayLayout->addWidget(lightsGroupBox);
@@ -259,7 +259,7 @@ void Window::initControlWidget () {
     antiAliasingList->addItem("Stochastic");
 
     AALayout->addWidget(antiAliasingList);
-    connect(antiAliasingList, SIGNAL(activated(int)), this, SLOT(changeAntiAliasingType(int)));
+    connect(antiAliasingList, SIGNAL(activated(int)), controller, SLOT(windowChangeAntiAliasingType(int)));
 
     AANbRaySpinBox = new QSpinBox(AAGroupBox);
     AANbRaySpinBox->setSuffix(" rays");
@@ -267,7 +267,7 @@ void Window::initControlWidget () {
     AANbRaySpinBox->setMaximum(10);
     AANbRaySpinBox->setVisible(false);
     AANbRaySpinBox->setValue(rayTracer->nbRayAntiAliasing);
-    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setNbRayAntiAliasing(int)));
+    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
     AALayout->addWidget(AANbRaySpinBox);
 
     rayLayout->addWidget(AAGroupBox);
@@ -282,7 +282,7 @@ void Window::initControlWidget () {
     AONbRaysSpinBox->setMaximum(1000);
     AONbRaysSpinBox->setValue(rayTracer->nbRayAmbientOcclusion);
     AOLayout->addWidget(AONbRaysSpinBox);
-    connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeAmbientOcclusionNbRays(int)));
+    connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowChangeAmbientOcclusionNbRays(int)));
 
     AOMaxAngleSpinBox = new QSpinBox(AOGroupBox);
     AOMaxAngleSpinBox->setPrefix ("Max angle: ");
@@ -291,7 +291,7 @@ void Window::initControlWidget () {
     AOMaxAngleSpinBox->setMaximum (180);
     AOMaxAngleSpinBox->setVisible(false);
     AOMaxAngleSpinBox->setValue(rayTracer->maxAngleAmbientOcclusion*360.0/(2.0*M_PI));
-    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setAmbientOcclusionMaxAngle(int)));
+    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
     AOLayout->addWidget(AOMaxAngleSpinBox);
 
     AORadiusSpinBox = new QDoubleSpinBox(AOGroupBox);
@@ -300,7 +300,7 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setSingleStep(0.1);
     AORadiusSpinBox->setValue(rayTracer->radiusAmbientOcclusion);
     AORadiusSpinBox->setVisible(false);
-    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAmbientOcclusionRadius(double)));
+    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
 
     rayLayout->addWidget(AOGroupBox);
@@ -313,7 +313,7 @@ void Window::initControlWidget () {
     shadowTypeList->addItem("None");
     shadowTypeList->addItem("Hard shadow");
     shadowTypeList->addItem("Soft shadow");
-    connect (shadowTypeList, SIGNAL (activated (int)), this, SLOT (setShadowMode (int)));
+    connect (shadowTypeList, SIGNAL (activated (int)), controller, SLOT (windowSetShadowMode (int)));
     shadowsLayout->addWidget (shadowTypeList);
 
     shadowSpinBox = new QSpinBox(shadowsGroupBox);
@@ -322,7 +322,7 @@ void Window::initControlWidget () {
     shadowSpinBox->setMaximum (1000);
     shadowSpinBox->setVisible (false);
     shadowSpinBox->setValue(rayTracer->getShadowMode());
-    connect (shadowSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setShadowNbRays (int)));
+    connect (shadowSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetShadowNbRays (int)));
     shadowsLayout->addWidget (shadowSpinBox);
 
     rayLayout->addWidget (shadowsGroupBox);
@@ -336,7 +336,7 @@ void Window::initControlWidget () {
     PTDepthSpinBox->setMinimum (0);
     PTDepthSpinBox->setMaximum (5);
     PTDepthSpinBox->setValue(rayTracer->depthPathTracing);
-    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setDepthPathTracing (int)));
+    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
     PTLayout->addWidget (PTDepthSpinBox);
 
     PTNbRaySpinBox = new QSpinBox(PTGroupBox);
@@ -345,7 +345,7 @@ void Window::initControlWidget () {
     PTNbRaySpinBox->setMaximum (1000);
     PTNbRaySpinBox->setVisible(false);
     PTNbRaySpinBox->setValue(rayTracer->nbRayPathTracing);
-    connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbRayPathTracing (int)));
+    connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
 
     PTMaxAngleSpinBox = new QSpinBox(PTGroupBox);
@@ -355,7 +355,7 @@ void Window::initControlWidget () {
     PTMaxAngleSpinBox->setMaximum (180);
     PTMaxAngleSpinBox->setVisible(false);
     PTMaxAngleSpinBox->setValue(rayTracer->maxAnglePathTracing*360.0/(2.0*M_PI));
-    connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setMaxAnglePathTracing (int)));
+    connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
 
     PTIntensitySpinBox = new QSpinBox(PTGroupBox);
@@ -364,11 +364,11 @@ void Window::initControlWidget () {
     PTIntensitySpinBox->setMaximum (1000);
     PTIntensitySpinBox->setVisible(false);
     PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
-    connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), this, SLOT (setIntensityPathTracing (int)));
+    connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetIntensityPathTracing (int)));
     PTLayout->addWidget (PTIntensitySpinBox);
 
     PTOnlyCheckBox = new QCheckBox ("Only path tracing coloring", PTGroupBox);
-    connect (PTOnlyCheckBox, SIGNAL (toggled (bool)), this, SLOT (setOnlyPT (bool)));
+    connect (PTOnlyCheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowSetOnlyPT (bool)));
     PTOnlyCheckBox->setVisible(false);
     PTLayout->addWidget (PTOnlyCheckBox);
 
@@ -379,12 +379,12 @@ void Window::initControlWidget () {
     QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
 
     QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", focalGroupBox);
-    connect (focalCheckBox, SIGNAL (toggled (bool)), this, SLOT (enableFocal (bool)));
+    connect (focalCheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowEnableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
 
     selecFocusedObject  = new QPushButton ("", focalGroupBox);
     selecFocusedObject->setVisible(false);
-    connect (selecFocusedObject, SIGNAL (clicked ()) , this, SLOT ( setFocal()));
+    connect (selecFocusedObject, SIGNAL (clicked ()) , controller, SLOT ( windowSetFocal()));
     focalLayout->addWidget (selecFocusedObject);
 
     rayLayout->addWidget (focalGroupBox);
@@ -398,7 +398,7 @@ void Window::initControlWidget () {
         mBlurNbImagesSpinBox->setSuffix (" images");
         mBlurNbImagesSpinBox->setMinimum (1);
         mBlurNbImagesSpinBox->setMaximum (100);
-        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), this, SLOT (setNbImagesSpinBox (int)));
+        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
         mBlurLayout->addWidget (mBlurNbImagesSpinBox);
 
         rayLayout->addWidget (mBlurGroupBox);
@@ -407,12 +407,12 @@ void Window::initControlWidget () {
     // Render
     QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
     rayLayout->addWidget (rayButton);
-    connect (rayButton, SIGNAL (clicked ()), this, SLOT (renderRayImage ()));
+    connect (rayButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
     QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
     rayLayout->addWidget (showButton);
-    connect (showButton, SIGNAL (clicked ()), this, SLOT (showRayImage ()));
+    connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
     QPushButton * saveButton  = new QPushButton ("Save", rayGroupBox);
-    connect (saveButton, SIGNAL (clicked ()) , this, SLOT (exportRayImage ()));
+    connect (saveButton, SIGNAL (clicked ()) , controller, SLOT (windowExportRayImage ()));
     rayLayout->addWidget (saveButton);
 
     layout->addWidget (rayGroupBox);
@@ -422,11 +422,11 @@ void Window::initControlWidget () {
     QVBoxLayout * globalLayout = new QVBoxLayout (globalGroupBox);
 
     QPushButton * bgColorButton  = new QPushButton ("Background Color", globalGroupBox);
-    connect (bgColorButton, SIGNAL (clicked()) , this, SLOT (setBGColor()));
+    connect (bgColorButton, SIGNAL (clicked()) , controlWidget, SLOT (windowSetBGColor()));
     globalLayout->addWidget (bgColorButton);
 
     QPushButton * aboutButton  = new QPushButton ("About", globalGroupBox);
-    connect (aboutButton, SIGNAL (clicked()) , this, SLOT (about()));
+    connect (aboutButton, SIGNAL (clicked()) , controlWidget, SLOT (windowAbout()));
     globalLayout->addWidget (aboutButton);
 
     QPushButton * quitButton  = new QPushButton ("Quit", globalGroupBox);

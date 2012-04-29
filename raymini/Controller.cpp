@@ -12,37 +12,45 @@ using namespace std;
 
 // TODO update corresponding model
 
-Controller::Controller(int argc, char *argv[]):
+Controller::Controller(int argc, char **argv):
     QApplication(argc, argv)
 {}
 
-Controller::~Controller() {
-}
+Controller::~Controller()
+{}
 
 void Controller::initAll() {
+    cout << __LINE__ << endl;
     setBoubekQTStyle(*this);
 
     setStyle(new QPlastiqueStyle);
+    cout << __LINE__ << endl;
 
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
-    window->show();
     connect(this, SIGNAL(lastWindowClosed()), this, SLOT(quit()));
+    cout << __LINE__ << endl;
 
     viewer = new GLViewer(this);
     window->setCentralWidget(viewer);
+    cout << __LINE__ << endl;
 
     scene = new Scene(this);
     scene->addObserver(window);
     scene->addObserver(viewer);
+    cout << __LINE__ << endl;
 
     rayTracer = new RayTracer(this);
     rayTracer->addObserver(window);
     rayTracer->addObserver(viewer);
+    cout << __LINE__ << endl;
 
     windowModel = new WindowModel(this);
     windowModel->addObserver(window);
     windowModel->addObserver(viewer);
+
+    cout << __LINE__ << endl;
+    window->show();
 }
 
 void Controller::windowSetShadowMode(int i) {
