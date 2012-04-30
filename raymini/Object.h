@@ -20,27 +20,14 @@
 class Object {
 public:
     inline Object (std::string name = "No name") : tree(nullptr), enabled(false), name(name) {}
+
     Object (const Mesh & mesh, const Material * mat, std::string name="No name") :
         mesh (mesh), mat (mat), tree(nullptr), enabled(true), name(name) {
         updateBoundingBox ();
     }
-    inline Object (const Object & o) :
-        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile), enabled(o.enabled), name(o.name) {}
+
     virtual ~Object () {
         delete tree;
-    }
-
-    inline Object & operator= (const Object & o) {
-        mesh = o.mesh;
-        mat = o.mat;
-        bbox = o.bbox;
-        trans = o.trans;
-        origTrans = trans;
-        tree = nullptr;
-        mobile = o.mobile;
-        enabled = o.enabled;
-        name = o.name;
-        return (*this);
     }
 
     inline const Vec3Df & getTrans () const { return trans;}
