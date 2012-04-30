@@ -264,7 +264,7 @@ void GLViewer::draw () {
     }
 
     // draw octree
-    pbgi->getOctree()->exec(draw_octree);
+    //pbgi->getOctree()->exec(draw_octree);
 
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object & o = scene->getObjects ()[i];
