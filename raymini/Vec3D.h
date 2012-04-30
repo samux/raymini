@@ -317,6 +317,20 @@ public:
         return result;
     }
 
+    inline Vec3D refract(const T &n1, const Vec3D &N, const T &n2) const {
+        Vec3D incident(*this);
+        incident.normalize();
+        Vec3D rotationAxis = crossProduct(incident, N);
+        T sinTheta1 = rotationAxis.getLength();
+        rotationAxis.normalize();
+        T sinTheta2 = n1*sinTheta1/n2;
+        if (sinTheta2 > 1) {
+            return Vec3D();
+        }
+        T theta2 = asin(sinTheta2);
+        return N.rotate(rotationAxis, (T)(M_PI)-theta2);
+    }
+
     /** Scale */
     inline Vec3D scale(const T &s) const {
         Vec3D result = *this;

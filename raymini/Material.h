@@ -22,13 +22,13 @@ class Controller;
 class Material {
 public:
     inline Material(Controller *c) : controller(c),
-                         diffuse (1.f), specular (1.f), color (0.7f, 0.7f, 1.f),
-                         noise([](const Vertex &){ return 1.f; }) {}
+                                     diffuse (1.f), specular (1.f), color (0.7f, 0.7f, 1.f),
+                                     noise([](const Vertex &){ return 1.f; }) {}
     inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color)
         : controller(c), diffuse (diffuse), specular (specular), color (color),
           noise([](const Vertex &){ return 1.f; }) {}
     inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color,
-                     float (*noise)(const Vertex &))
+                    float (*noise)(const Vertex &))
         : controller(c), diffuse (diffuse), specular (specular), color (color), noise(noise) {}
 
     virtual ~Material () {}
@@ -59,6 +59,20 @@ public:
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                              std::vector<Light> lights, Brdf::Type type) const;
+};
+
+class Glass : public Material {
+public:
+    Glass(Controller *c, float coeff) :
+        Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
+
+    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
+                             std::vector<Light> lights, Brdf::Type type) const;
+    void setObject(unsigned id) { this->id = id; }
+
+private:
+    float coeff;
+    unsigned id;
 };
 
 
