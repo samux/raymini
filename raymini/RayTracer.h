@@ -92,7 +92,7 @@ public:
     inline RayTracer(Controller *c):
         mode(Mode::RAY_TRACING_MODE),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
-        intensityPathTracing(255.f), onlyPathTracing(false),
+        intensityPathTracing(25.f), onlyPathTracing(false),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),

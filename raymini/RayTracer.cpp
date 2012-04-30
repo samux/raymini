@@ -168,7 +168,8 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
             Color ptColor = mat.genColor(camPos, bestRay.getIntersection(),
                                           lights,
                                           Brdf::Diffuse);
-            if(onlyPathTracing)
+
+            if(onlyPathTracing && depth == 0)
                 color = ptColor;
             else
                 color += ptColor;
@@ -208,7 +209,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 
         if(bestRay.intersect()) {
             float d = bestRay.getIntersectionDistance();
-            float intensity = intensityPathTracing / (pow(1+d,3)*nbRayPathTracing);
+            float intensity = intensityPathTracing / pow(1+d,3);
 
             lights.push_back(Light(bestRay.getIntersection().getPos(),
                                    color, intensity));
