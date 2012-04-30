@@ -19,6 +19,9 @@ void Controller::initAll() {
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);
 
+    // do this after Scene and RayTracer
+    pbgi = new PBGI(this);
+
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
     connect(raymini, SIGNAL(lastWindowClosed()), raymini, SLOT(quit()));

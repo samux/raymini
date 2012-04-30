@@ -28,7 +28,11 @@ class Controller;
 
 class RayTracer: public Observable {
 public:
+
+    enum Mode {RAY_TRACING_MODE = 0, PBGI_MODE};
+
     /*          Config           */
+    Mode mode;
     unsigned depthPathTracing;
     unsigned nbRayPathTracing;
     float maxAnglePathTracing;
@@ -86,6 +90,7 @@ public:
     bool focusEnabled() { return focus; };
 
     inline RayTracer(Controller *c):
+        mode(Mode::PBGI_MODE),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
         intensityPathTracing(255.f), onlyPathTracing(false),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
@@ -98,6 +103,7 @@ public:
         shadow(c),
         focus(false) {}
     inline virtual ~RayTracer () {}
+
 
 private:
     Controller *controller;

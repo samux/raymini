@@ -61,7 +61,7 @@ void Scene::buildDefaultScene () {
 
     Object leftWall(wallMesh, mirrorMaterial, "Left wall");
     leftWall.setTrans(Vec3Df(-1.95251, 0, 1.5));
-    objects.push_back (leftWall);
+    //objects.push_back (leftWall);
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);

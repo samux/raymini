@@ -12,6 +12,7 @@
 #include "RayTracer.h"
 #include "Scene.h"
 #include "GLViewer.h"
+#include "PBGI.h"
 
 /*class Controller: public QApplication {*/
 class Controller : public QObject {
@@ -28,6 +29,7 @@ public:
 
     inline Scene *getScene() {return scene;}
     inline RayTracer *getRayTracer() {return rayTracer;}
+    inline PBGI *getPBGI() {return pbgi;}
     inline WindowModel *getWindowModel() {return windowModel;}
 
 public slots :
@@ -79,6 +81,7 @@ private:
     Scene *scene;
     RayTracer *rayTracer;
     WindowModel *windowModel;
+    PBGI * pbgi;
 
     // QApplication
     QApplication *raymini;

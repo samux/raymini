@@ -6,20 +6,19 @@
 #include "Brdf.h"
 #include "Material.h"
 #include "RayTracer.h"
+#include "Controller.h"
 
 using namespace std;
 
-PointCloud::PointCloud():
-    resolution(256) {
-}
+PointCloud::PointCloud(Controller * c): c(c), resolution(256) {}
 
 
 PointCloud::~PointCloud() {
 }
 
 void PointCloud::generatePoints() {
-    Scene * scene = Scene::getInstance();
-    const RayTracer *rayTracer = RayTracer::getInstance();
+    Scene * scene = c->getScene();
+    const RayTracer *rayTracer = c->getRayTracer();
 
     // For each light
     for (const Light &light : scene->getLights()) {

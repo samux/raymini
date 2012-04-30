@@ -31,7 +31,7 @@ vector<Vec3Df> Vertex::getDirectionsOnCube(unsigned int res) const {
     Vec3Df basis[3];
     float stepTan = 2;
     basis[0] = normal;
-    basis[1] = basis[0].getAnyOrthogonal();
+    basis[1] = basis[0].getOrthogonal();
     basis[2] = Vec3Df::crossProduct(basis[1], basis[0]);
     for (unsigned int basisIndex=0; basisIndex<3; basisIndex++) {
         basis[basisIndex].normalize();

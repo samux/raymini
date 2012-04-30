@@ -7,18 +7,21 @@
 #include "Scene.h"
 #include "Light.h"
 
+class Controller;
+
 /**
  * A point cloud
  */
 class PointCloud {
 private:
+    Controller * c;
     std::vector<Surfel> surfels;
     std::vector<Object> objects;
     float resolution;
 
 public:
     /** Construct point cloud from the scene */
-    PointCloud();
+    PointCloud(Controller * c);
 
     ~PointCloud();
 

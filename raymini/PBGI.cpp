@@ -1,14 +1,9 @@
 #include <vector>
 #include "PBGI.h"
 #include "Scene.h"
+#include "Controller.h"
 
 using namespace std;
-
-void PBGI::init() {
-    cloud = new PointCloud(); 
-    cloud->generatePoints();
-    octree = new Octree(*cloud);
-}
 
 vector<Light> PBGI::getLights(const Ray & r) const {
     Vec3Df color;
@@ -21,7 +16,7 @@ vector<Light> PBGI::getLights(const Ray & r) const {
                 const Octree * o = octree->intersect(rayCube);
                 if(o) {
                     Surfel s = o->getMeanSurfel();
-                    float intensity = 1.f/((pow(1.1+rayCube.getIntersectionDistance(),6))*res*res*6.0);
+                    float intensity = 1.f/(pow(1.1+rayCube.getIntersectionDistance(),6))*res*res*3;
                     light.push_back(Light(s.getPos(),
                                           s.getColor(),
                                           intensity));

@@ -112,6 +112,7 @@ bool RayTracer::intersect(const Vec3Df & dir,
     Scene * scene = controller->getScene();
     bestRay = Ray();
 
+
     for (Object & o : scene->getObjects()) {
         if (!o.isEnabled()) {
             continue;
@@ -145,12 +146,27 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
     if(intersect(dir, camPos, bestRay, intersectedObject)) {
         const Material & mat = intersectedObject->getMaterial();
+
+
+
         Vec3Df color = mat.genColor(camPos, bestRay.getIntersection(),
                                     getLights(bestRay.getIntersection()),
                                     type);
-        if(depth < depthPathTracing) {
+
+        if((depth < depthPathTracing) || (mode == PBGI_MODE)) {
+
+            vector<Light> lights;
+            switch(mode) {
+                case RAY_TRACING_MODE:
+                    lights =  getLightsPT(bestRay.getIntersection(), depth);
+                    break;
+                case PBGI_MODE:
+                    lights = controller->getPBGI()->getLights(bestRay);
+                    break;
+            }
+
             Vec3Df ptColor = mat.genColor(camPos, bestRay.getIntersection(),
-                                          getLightsPT(bestRay.getIntersection(), depth),
+                                          lights,
                                           Brdf::Diffuse);
             if(onlyPathTracing)
                 color = ptColor;

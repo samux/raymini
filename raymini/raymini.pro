@@ -18,9 +18,7 @@ HEADERS = Window.h \
           Ray.h \
           KDtree.h \
           Noise.h \
-          Model.h \
           AntiAliasing.h \
-          AmbientOcclusion.h \
           Color.h \
           Shadow.h \
           SkyBoxMaterial.h \
@@ -52,9 +50,7 @@ SOURCES = Window.cpp \
           KDtree.cpp \
           Brdf.cpp \
           Noise.cpp \
-          Model.cpp \
           AntiAliasing.cpp \
-          AmbientOcclusion.cpp \
           SkyBoxMaterial.cpp \
           Texture.cpp \
           Color.cpp \

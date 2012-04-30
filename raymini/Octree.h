@@ -8,9 +8,11 @@
 
 class PointCloud;
 class Surfel;
+class Controller;
 
 class Octree {
 protected:
+    Controller * c;
     const PointCloud & cloud;
     std::vector<unsigned> surfels;// sth only if leaf;
     std::array<Octree *, 8> sons;
@@ -19,7 +21,7 @@ public:
     static const unsigned MIN_SURFELS = 16;
     BoundingBox bBox;
 
-    Octree(const PointCloud &p);
+    Octree(Controller * c, const PointCloud &p);
 
     ~Octree() {
         for(Octree * & o:sons) {
@@ -39,9 +41,9 @@ public:
     void exec(void (*f)(const Octree * octree)) const;
 
 private:
-    Octree(const PointCloud & cloud, const std::vector<unsigned> & surfels,
+    Octree(Controller * c, const PointCloud & cloud, const std::vector<unsigned> & surfels,
            const BoundingBox & b):
-        cloud(cloud), surfels(surfels),
+        c(c), cloud(cloud), surfels(surfels),
         bBox(b) {
         for(int i = 0; i < 8; i++)
             sons[i] = nullptr;

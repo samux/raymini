@@ -19,8 +19,3 @@ void Object::updateBoundingBox () {
             bbox.extendTo (V[i].getPos ());
     }
 }
-
-Object::Object (const Mesh & mesh, const Material * mat) :
-    mesh (mesh), mat (mat), tree(nullptr){
-        updateBoundingBox ();
-    }

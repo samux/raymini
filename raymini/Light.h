@@ -26,7 +26,6 @@ public:
     inline const Vec3Df & getColor () const { return color; }
     inline const Vec3Df & getNormal () const { return normal; }
     inline float getIntensity () const { return intensity; }
-    inline Vec3Df getNormal () const { return normal; }
     inline float getRadius () const { return radius; }
 
     inline void setPos (const Vec3Df & p) { pos = p; }

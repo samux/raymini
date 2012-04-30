@@ -30,7 +30,7 @@ Object Surfel::generateObject(unsigned int precision) const{
     vertices.push_back(Vertex(position, normal));
 
     // Have basis
-    Vec3Df upVector = normal.getAnyOrthogonal();
+    Vec3Df upVector = normal.getOrthogonal();
     Vec3Df rightVector = Vec3Df::crossProduct(upVector, normal);
 
     //Handle critical case

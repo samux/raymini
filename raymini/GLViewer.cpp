@@ -16,6 +16,7 @@
 
 #include "RayTracer.h"
 #include "Controller.h"
+#include "PBGI.h"
 
 using namespace std;
 
@@ -149,6 +150,38 @@ void GLViewer::changeFocusPoint() {
 // Drawing functions
 // -----------------------------------------------
 
+
+void drawCube(const Vec3Df min, const Vec3Df max) {
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], min[2]);
+
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], max[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(min[0], max[1], max[2]);
+
+    glVertex3f(min[0], min[1], min[2]);
+    glVertex3f(min[0], min[1], max[2]);
+    glVertex3f(min[0], max[1], min[2]);
+    glVertex3f(min[0], max[1], max[2]);
+    glVertex3f(max[0], max[1], min[2]);
+    glVertex3f(max[0], max[1], max[2]);
+    glVertex3f(max[0], min[1], min[2]);
+    glVertex3f(max[0], min[1], max[2]);
+}
+
+
+
 void GLViewer::init() {
     glClearColor (0.f, 0.f, 0.f, 0.0);
     glCullFace (GL_BACK);
@@ -186,6 +219,14 @@ void GLViewer::init() {
     showEntireScene ();
 }
 
+
+void draw_octree(const Octree * t) {
+    glBegin(GL_LINES);
+    glColor3f(0.f, 0.f, 0.f);
+    drawCube(t->bBox.getMin(), t->bBox.getMax());
+    glEnd();
+}
+
 void GLViewer::draw () {
     WindowModel *windowModel = controller->getWindowModel();
     const QImage &rayImage = windowModel->getRayImage();
@@ -199,6 +240,7 @@ void GLViewer::draw () {
     }
     Scene * scene = controller->getScene();
     RayTracer * rayTracer = controller->getRayTracer();
+    PBGI * pbgi = controller->getPBGI();
 
     bool focusMode = windowModel->isFocusMode();
     if (focusMode || rayTracer->focusEnabled()) {
@@ -220,6 +262,9 @@ void GLViewer::draw () {
         minidraw( 0.2*Y);
         glEnd();
     }
+
+    // draw octree
+    pbgi->getOctree()->exec(draw_octree);
 
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object & o = scene->getObjects ()[i];
