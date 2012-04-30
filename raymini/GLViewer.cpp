@@ -66,6 +66,12 @@ void GLViewer::mousePressEvent (QMouseEvent * event) {
     QGLViewer::mousePressEvent(event);
 }
 
+void GLViewer::mouseMoveEvent(QMouseEvent *event) {
+    changeFocusPoint();
+    QGLViewer::mouseMoveEvent(event);
+}
+
+
 void GLViewer::wheelEvent (QWheelEvent * e) {
     controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     changeFocusPoint();
@@ -140,7 +146,6 @@ void GLViewer::changeFocusPoint() {
         Ray focusSelect = Ray(camPos, viewDirection);
         Object *object;
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
-            // Warning, can launch infinite loop and segfault
             controller->viewerSetFocusPoint(focusSelect.getIntersection());
         }
     }
