@@ -104,7 +104,6 @@ public:
         focus(false) {}
     inline virtual ~RayTracer () {}
 
-
 private:
     Controller *controller;
 

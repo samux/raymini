@@ -197,7 +197,7 @@ void Window::initControlWidget () {
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
 
     QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
-    connect(wireframeCheckBox, SIGNAL(toggled(bool)), controller, SLOT(viewerSetWireframe(bool)));
+    connect(wireframeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetWireframe(bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
     QComboBox *modeList = new QComboBox(previewGroupBox);
@@ -231,7 +231,7 @@ void Window::initControlWidget () {
 
     objectEnableCheckBox = new QCheckBox("Enable");
     objectEnableCheckBox->setVisible(false);
-    connect(objectEnableCheckBox, SIGNAL(toggled(bool)), controller, SLOT(windowEnableObject(bool)));
+    connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
     objectsLayout->addWidget(objectEnableCheckBox);
 
     rayLayout->addWidget(objectsGroupBox);
@@ -252,7 +252,7 @@ void Window::initControlWidget () {
 
     lightEnableCheckBox = new QCheckBox("Enable");
     lightEnableCheckBox->setVisible(false);
-    connect(lightEnableCheckBox, SIGNAL(toggled(bool)), controller, SLOT(windowEnableLight(bool)));
+    connect(lightEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableLight(bool)));
     lightsLayout->addWidget(lightEnableCheckBox);
 
     QHBoxLayout *lightsPosLayout = new QHBoxLayout;
@@ -409,12 +409,12 @@ void Window::initControlWidget () {
     PTLayout->addWidget (PTIntensitySpinBox);
 
     PTOnlyCheckBox = new QCheckBox ("Only path tracing coloring", PTGroupBox);
-    connect (PTOnlyCheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowSetOnlyPT (bool)));
+    connect (PTOnlyCheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowSetOnlyPT (bool)));
     PTOnlyCheckBox->setVisible(false);
     PTLayout->addWidget (PTOnlyCheckBox);
 
     PBGICheckBox = new QCheckBox ("PBGI mode", PTGroupBox);
-    connect (PBGICheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowSetRayTracerMode (bool)));
+    connect (PBGICheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowSetRayTracerMode (bool)));
     PBGICheckBox->setVisible(true);
     PTLayout->addWidget (PBGICheckBox);
 
@@ -425,7 +425,7 @@ void Window::initControlWidget () {
     QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
 
     QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", focalGroupBox);
-    connect (focalCheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowEnableFocal (bool)));
+    connect (focalCheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowEnableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
 
     selectFocusedObject  = new QPushButton ("", focalGroupBox);
