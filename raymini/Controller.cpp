@@ -69,7 +69,7 @@ void Controller::windowSetShadowNbRays (int i) {
 }
 
 void Controller::windowSetRayTracerMode (bool b) {
-    rayTracer->mode = RayTracer::Mode::PBGI_MODE;
+    rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::RAY_TRACING_MODE;
     rayTracer->notifyAll();
 }
 

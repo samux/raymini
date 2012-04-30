@@ -112,6 +112,7 @@ void Window::updateFromRayTracer() {
     PTMaxAngleSpinBox->setVisible(isPT);
     PTIntensitySpinBox->setVisible(isPT);
     PTOnlyCheckBox->setVisible(isPT);
+    PBGICheckBox->setVisible(!isPT);
 }
 
 void Window::updateFromWindowModel() {
