@@ -102,12 +102,22 @@ void GLViewer::updateWireframe() {
     }
 }
 
+void GLViewer::updateBackground() {
+    RayTracer *rayTracer = controller->getRayTracer();
+    Vec3Df bgc = 255.0*rayTracer->getBackgroundColor();
+    QColor c(bgc[0], bgc[1], bgc[2]);
+    setBackgroundColor(c);
+}
+
 void GLViewer::update(Observable *o) {
     if (o == controller->getScene()) {
         updateLights();
     }
     else if (o == controller->getWindowModel()) {
         updateWireframe();
+    }
+    else if (o == controller->getRayTracer()) {
+        updateBackground();
     }
     updateGL();
 }

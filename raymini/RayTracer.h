@@ -94,6 +94,7 @@ public:
         typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         controller(c),
+        backgroundColor(Vec3Df(1, 1, 1)),
         shadow(c),
         focus(false) {}
     inline virtual ~RayTracer () {}

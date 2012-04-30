@@ -53,6 +53,7 @@ private:
 
     void updateLights();
     void updateWireframe();
+    void updateBackground();
 
     void changeFocusPoint();
 };

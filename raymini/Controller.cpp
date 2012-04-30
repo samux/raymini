@@ -107,7 +107,6 @@ void Controller::windowSetBGColor () {
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
         rayTracer->setBackgroundColor(Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
-        viewer->setBackgroundColor(c);
         rayTracer->notifyAll();
     }
 }
