@@ -38,7 +38,7 @@ public:
     inline Vec3Df getColor () const { return color; }
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light> lights, Brdf::Type type = Brdf::All) const;
+                             std::vector<Light *> lights, Brdf::Type type = Brdf::All) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
@@ -58,7 +58,7 @@ public:
     Mirror(Controller *c) : Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light> lights, Brdf::Type type) const;
+                             std::vector<Light *> lights, Brdf::Type type) const;
 };
 
 class Glass : public Material {

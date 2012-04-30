@@ -17,7 +17,7 @@
 using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                           std::vector<Light> lights, Brdf::Type type) const {
+                           std::vector<Light *> lights, Brdf::Type type)  const {
     float ambientOcclusionContribution = (type & Brdf::Ambient)?
         controller->getRayTracer()->getAmbientOcclusion(closestIntersection):
         0.f;
@@ -34,7 +34,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 }
 
 Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                         std::vector<Light> lights, Brdf::Type type) const {
+                         std::vector<Light *> lights, Brdf::Type type)  const {
     Brdf brdf(lights, 1.f, 30);
 
     Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, Brdf::Type(Brdf::Specular&type));
@@ -47,17 +47,17 @@ Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersecti
 }
 
 Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                        std::vector<Light>, Brdf::Type) const {
-    Object &o= controller->getScene()->getObjects()[id];
-    float size = o.getBoundingBox().getRadius();
+                        std::vector<Light *>, Brdf::Type) const {
+    Object * o= controller->getScene()->getObjects()[id];
+    float size = o->getBoundingBox().getRadius();
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = camPos-pos;
 
     dir = dir.refract(1, closestIntersection.getNormal(), coeff);
     dir.normalize();
 
-    Ray ray(pos-o.getTrans()+2*size*dir, -dir);
-    if (!o.getKDtree().intersect(ray)) {
+    Ray ray(pos-o->getTrans()+2*size*dir, -dir);
+    if (!o->getKDtree().intersect(ray)) {
         return controller->getRayTracer()->getColor(pos+size*dir, pos-camPos);
     }
 

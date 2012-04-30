@@ -21,10 +21,10 @@ void PointCloud::generatePoints() {
     const RayTracer *rayTracer = c->getRayTracer();
 
     // For each light
-    for (const Light &light : scene->getLights()) {
-        Vertex v(light.getPos(), light.getNormal());
+    for (Light * light : scene->getLights()) {
+        Vertex v(light->getPos(), light->getNormal());
         vector<Vec3Df> directions = v.getDirectionsOnCube(resolution);
-        Vec3Df position = light.getPos();
+        Vec3Df position = light->getPos();
         // For each pixel
         for (const Vec3Df &direction : directions) {
             Ray bestRay;

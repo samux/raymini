@@ -265,7 +265,7 @@ void Controller::windowEnableObject(bool enabled) {
         return;
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    scene->getObjects()[o].setEnabled(enabled);
+    scene->getObjects()[o]->setEnabled(enabled);
     scene->notifyAll();
 }
 
@@ -281,7 +281,7 @@ void Controller::windowEnableLight(bool enabled) {
         return;
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    scene->getLights()[l].setEnabled(enabled);
+    scene->getLights()[l]->setEnabled(enabled);
     scene->notifyAll();
 }
 
@@ -292,7 +292,7 @@ void Controller::windowSetLightRadius(double r) {
         return;
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    scene->getLights()[l].setRadius(r);
+    scene->getLights()[l]->setRadius(r);
     scene->notifyAll();
 }
 
@@ -303,7 +303,7 @@ void Controller::windowSetLightIntensity(double i) {
         return;
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    scene->getLights()[l].setIntensity(i);
+    scene->getLights()[l]->setIntensity(i);
     scene->notifyAll();
 }
 
@@ -314,7 +314,7 @@ void Controller::windowSetLightPos() {
         return;
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    scene->getLights()[l].setPos(window->getLightPos());
+    scene->getLights()[l]->setPos(window->getLightPos());
     scene->notifyAll();
 }
 

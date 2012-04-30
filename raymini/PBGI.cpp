@@ -5,9 +5,9 @@
 
 using namespace std;
 
-vector<Light> PBGI::getLights(const Ray & r) const {
+vector<Light *> PBGI::getLights(const Ray & r) const {
     Vec3Df color;
-    vector<Light> light;
+    vector<Light *> light;
     vector<Vec3Df> directions = r.getIntersection().getDirectionsOnCube(res);
     for(Vec3Df & dir: directions) {
         // we look at the half hemisphere
@@ -17,7 +17,7 @@ vector<Light> PBGI::getLights(const Ray & r) const {
             if(o && rayCube.getIntersectionDistance() > 0.01) {
                 Surfel s = o->getMeanSurfel();
                 float intensity = 15.0/pow(1.0+rayCube.getIntersectionDistance(),3);
-                light.push_back(Light(s.getPos(), s.getColor(), intensity));
+                light.push_back(new Light(s.getPos(), s.getColor(), intensity));
             }
         }
     }

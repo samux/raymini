@@ -133,7 +133,7 @@ void Window::updateLights() {
     int lightIndex = windowModel->getSelectedLightIndex();
     lightsList->setCurrentIndex(lightIndex+1);
     bool isLightSelected = lightIndex != -1;
-    bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex].isEnabled();
+    bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
     lightEnableCheckBox->setVisible(isLightSelected);
     for (int i=0; i<3; i++) {
         lightPosSpinBoxes[i]->setVisible(isLightEnabled);
@@ -142,7 +142,7 @@ void Window::updateLights() {
     lightIntensitySpinBox->setVisible(isLightEnabled);
 
     if (isLightSelected) {
-        Light l = scene->getLights()[lightIndex];
+        Light l = *(scene->getLights())[lightIndex];
         isLightEnabled = l.isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
         Vec3Df pos = l.getPos();
@@ -179,7 +179,7 @@ void Window::updateObjects() {
     bool isSelected = index != -1;
     objectEnableCheckBox->setVisible(isSelected);
     if (isSelected) {
-        bool isEnabled = scene->getObjects()[index].isEnabled();
+        bool isEnabled = scene->getObjects()[index]->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
     }
 }
@@ -222,8 +222,8 @@ void Window::initControlWidget () {
 
     objectsList = new QComboBox(objectsGroupBox);
     objectsList->addItem("No object selected");
-    for (const Object &o : scene->getObjects()) {
-        QString name = QString::fromStdString(o.getName());
+    for (const Object * o : scene->getObjects()) {
+        QString name = QString::fromStdString(o->getName());
         objectsList->addItem(name);
     }
     connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));

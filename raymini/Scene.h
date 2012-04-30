@@ -21,30 +21,30 @@ class Controller;
 
 class Scene: public Observable {
 public:
-    inline std::vector<Object> & getObjects () { return objects; }
-    inline const std::vector<Object> & getObjects () const { return objects; }
+    inline std::vector<Object *> & getObjects () { return objects; }
+    inline const std::vector<Object *> & getObjects () const { return objects; }
 
-    inline std::vector<Light> & getLights () { return lights; }
-    inline const std::vector<Light> & getLights () const { return lights; }
+    inline std::vector<Light *> & getLights () { return lights; }
+    inline const std::vector<Light *> & getLights () const { return lights; }
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
     bool hasMobile() const {
-        for (const Object &o : objects)
-            if(o.isMobile())
+        for (auto o : objects)
+            if(o->isMobile())
                 return true;
         return false;
     }
 
     void move(unsigned nbImages) {
-        for (Object &o : objects)
-            o.move(nbImages);
+        for (auto o : objects)
+            o->move(nbImages);
     }
 
     void reset() {
-        for (Object &o : objects)
-            o.reset();
+        for (auto o : objects)
+            o->reset();
     }
 
     Scene(Controller *);
@@ -63,8 +63,8 @@ private:
     Material *mirrorMaterial;
 
     void buildDefaultScene ();
-    std::vector<Object> objects;
-    std::vector<Light> lights;
+    std::vector<Object *> objects;
+    std::vector<Light *> lights;
     BoundingBox bbox;
 };
 

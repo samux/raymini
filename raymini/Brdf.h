@@ -16,12 +16,12 @@ public:
         Specular = Phong,
         All = Ambient|Diffuse|Specular,
     };
-    std::vector<Light> lights;
+    std::vector<Light *> lights;
     Vec3Df color, ambientColor;
     float Kd, Ks, Ka;
     float alpha; // Phong
 
-    Brdf(std::vector<Light> lights,
+    Brdf(std::vector<Light *> lights,
          Vec3Df color, Vec3Df ambientColor,
          float Kd, float Ks, float Ka,
          float alpha):
@@ -31,7 +31,7 @@ public:
         alpha(alpha) {};
 
     //Only specular
-    Brdf(std::vector<Light> lights,
+    Brdf(std::vector<Light *> lights,
          float Ks, float alpha):
         lights(lights),
         Kd(0), Ks(Ks), Ka(0),

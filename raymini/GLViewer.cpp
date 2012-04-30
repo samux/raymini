@@ -81,16 +81,16 @@ void GLViewer::wheelEvent (QWheelEvent * e) {
 void GLViewer::updateLights() {
     Scene * scene = controller->getScene();
     for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
-        const Light light = scene->getLights() [i];
+        const Light * light = scene->getLights() [i];
         GLuint glID = OpenGLLightID[i];
-        if (!light.isEnabled()) {
+        if (!light->isEnabled()) {
             glDisable(glID);
         }
         else {
             glEnable (glID);
-            const Vec3Df & p = light.getPos ();
-            float intensity = light.getIntensity ();
-            const Vec3Df & c = intensity * light.getColor ();
+            const Vec3Df & p = light->getPos ();
+            float intensity = light->getIntensity ();
+            const Vec3Df & c = intensity * light->getColor ();
             GLfloat glPos[4] = {p[0], p[1], p[2], 0};
             GLfloat glColor[4] = {c[0], c[1], c[2], 0};
             glLightfv (glID, GL_POSITION, glPos);
@@ -201,15 +201,15 @@ void GLViewer::init() {
 
     glEnable (GL_LIGHTING);
     for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
-        const Light light = scene->getLights() [i];
-        if (!light.isEnabled()) {
+        const Light * light = scene->getLights() [i];
+        if (!light->isEnabled()) {
             continue;
         }
         GLuint glID = OpenGLLightID[i];
         glEnable (glID);
-        const Vec3Df & p = light.getPos ();
-        float intensity = light.getIntensity ();
-        const Vec3Df & c = intensity * light.getColor ();
+        const Vec3Df & p = light->getPos ();
+        float intensity = light->getIntensity ();
+        const Vec3Df & c = intensity * light->getColor ();
         GLfloat glPos[4] = {p[0], p[1], p[2], 0};
         GLfloat glColor[4] = {c[0], c[1], c[2], 0};
         glLightfv (glID, GL_POSITION, glPos);
@@ -272,14 +272,14 @@ void GLViewer::draw () {
     //pbgi->getOctree()->exec(draw_octree);
 
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
-        const Object & o = scene->getObjects ()[i];
-        if (!o.isEnabled()) {
+        const Object * o = scene->getObjects ()[i];
+        if (!o->isEnabled()) {
             continue;
         }
-        const Vec3Df & trans = o.getTrans ();
+        const Vec3Df & trans = o->getTrans ();
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
-        const Material & mat = o.getMaterial ();
+        const Material & mat = o->getMaterial ();
         const Vec3Df & color = mat.getColor ();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();
@@ -299,7 +299,7 @@ void GLViewer::draw () {
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
         glDisable (GL_COLOR_MATERIAL);
         glEnable (GL_LIGHTING);
-        o.getMesh().renderGL(windowModel->getRenderingMode() == WindowModel::FLAT);
+        o->getMesh().renderGL(windowModel->getRenderingMode() == WindowModel::FLAT);
         glPopMatrix ();
     }
 }
