@@ -67,7 +67,7 @@ public:
         Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light> lights, Brdf::Type type) const;
+                             std::vector<Light*> lights, Brdf::Type type) const;
     void setObject(unsigned id) { this->id = id; }
 
 private:

@@ -245,7 +245,6 @@ void GLViewer::draw () {
     }
     Scene * scene = controller->getScene();
     RayTracer * rayTracer = controller->getRayTracer();
-    PBGI * pbgi = controller->getPBGI();
 
     bool focusMode = windowModel->isFocusMode();
     if (focusMode || rayTracer->focusEnabled()) {
@@ -269,7 +268,8 @@ void GLViewer::draw () {
     }
 
     // draw octree
-    //pbgi->getOctree()->exec(draw_octree);
+    /*PBGI * pbgi = controller->getPBGI();
+    /pbgi->getOctree()->exec(draw_octree);*/
 
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object * o = scene->getObjects ()[i];

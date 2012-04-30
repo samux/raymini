@@ -64,5 +64,5 @@ Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersectio
     const Vertex i = ray.getIntersection();
     dir = (-dir).refract(coeff,-i.getNormal(), 1);
 
-    return controller->getRayTracer()->getColor(dir, i.getPos()+o.getTrans(), false);
+    return controller->getRayTracer()->getColor(dir, i.getPos()+o->getTrans(), false);
 }
