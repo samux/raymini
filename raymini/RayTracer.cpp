@@ -113,6 +113,9 @@ bool RayTracer::intersect(const Vec3Df & dir,
     bestRay = Ray();
 
     for (Object & o : scene->getObjects()) {
+        if (!o.isEnabled()) {
+            continue;
+        }
         Ray ray (camPos-o.getTrans ()+ DISTANCE_MIN_INTERSECT*dir, dir);
 
         if (o.getKDtree().intersect(ray) &&

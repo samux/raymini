@@ -223,6 +223,9 @@ void GLViewer::draw () {
 
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object & o = scene->getObjects ()[i];
+        if (!o.isEnabled()) {
+            continue;
+        }
         const Vec3Df & trans = o.getTrans ();
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);

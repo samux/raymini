@@ -83,6 +83,9 @@ void Window::update(Observable *observable) {
 void Window::updateFromScene() {
     // Lights
     updateLights();
+
+    // Objects
+    updateObjects();
 }
 
 void Window::updateFromRayTracer() {
@@ -116,6 +119,9 @@ void Window::updateFromWindowModel() {
 
     // Focus
     updateFocus();
+
+    // Objects
+    updateObjects();
 }
 
 void Window::updateLights() {
@@ -123,6 +129,7 @@ void Window::updateLights() {
     WindowModel *windowModel = controller->getWindowModel();
 
     int lightIndex = windowModel->getSelectedLightIndex();
+    lightsList->setCurrentIndex(lightIndex+1);
     bool isLightSelected = lightIndex != -1;
     bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex].isEnabled();
     lightEnableCheckBox->setVisible(isLightSelected);
@@ -161,6 +168,20 @@ void Window::updateFocus() {
     }
 }
 
+void Window::updateObjects() {
+    Scene *scene = controller->getScene();
+    WindowModel *windowModel = controller->getWindowModel();
+
+    int index = windowModel->getSelectedObjectIndex();
+    objectsList->setCurrentIndex(index+1);
+    bool isSelected = index != -1;
+    objectEnableCheckBox->setVisible(isSelected);
+    if (isSelected) {
+        bool isEnabled = scene->getObjects()[index].isEnabled();
+        objectEnableCheckBox->setChecked(isEnabled);
+    }
+}
+
 void Window::initControlWidget () {
     Scene *scene = controller->getScene();
     RayTracer *rayTracer = controller->getRayTracer();
@@ -192,6 +213,26 @@ void Window::initControlWidget () {
     // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
+
+    //  Objects
+    QGroupBox *objectsGroupBox = new QGroupBox("Objects", rayGroupBox);
+    QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
+
+    objectsList = new QComboBox(objectsGroupBox);
+    objectsList->addItem("No object selected");
+    for (const string &s : scene->getObjectsNames()) {
+        QString name = QString::fromStdString(s);
+        objectsList->addItem(name);
+    }
+    connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
+    objectsLayout->addWidget(objectsList);
+
+    objectEnableCheckBox = new QCheckBox("Enable");
+    objectEnableCheckBox->setVisible(false);
+    connect(objectEnableCheckBox, SIGNAL(toggled(bool)), controller, SLOT(windowEnableObject(bool)));
+    objectsLayout->addWidget(objectEnableCheckBox);
+
+    rayLayout->addWidget(objectsGroupBox);
 
     //  Lights
     QGroupBox *lightsGroupBox = new QGroupBox("Lights", rayGroupBox);

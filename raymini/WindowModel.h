@@ -21,6 +21,8 @@ public:
 
     inline int getSelectedLightIndex() const {return selectedLightIndex;}
     inline void setSelectedLightIndex(int index) {selectedLightIndex = index;}
+    inline int getSelectedObjectIndex() const {return selectedObjectIndex;}
+    inline void setSelectedObjectIndex(int index) {selectedObjectIndex = index;}
     inline bool isWireframe() const {return wireframe;}
     inline void setWireframe(bool w) {wireframe = w;}
     inline int getRenderingMode() const {return renderingMode;}
@@ -38,6 +40,7 @@ private:
     Controller *controller;
 
     int selectedLightIndex;
+    int selectedObjectIndex;
     bool wireframe;
     bool focusMode;
     RenderingMode renderingMode;

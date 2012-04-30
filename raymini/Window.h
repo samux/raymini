@@ -50,6 +50,8 @@ private :
     void updateLights();
     // Updated by both WindowModel and RayTracer
     void updateFocus();
+    // Updated by both WindowModel and Scene
+    void updateObjects();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
@@ -68,6 +70,9 @@ private :
     QSpinBox *AOMaxAngleSpinBox;
     QDoubleSpinBox *AORadiusSpinBox;
     QCheckBox *AOOnlyCheckBox;
+
+    QComboBox *objectsList;
+    QCheckBox *objectEnableCheckBox;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

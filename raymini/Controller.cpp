@@ -245,6 +245,22 @@ void Controller::windowSetOnlyPT(bool b) {
     rayTracer->notifyAll();
 }
 
+void Controller::windowSelectObject(int o) {
+    windowModel->setSelectedObjectIndex(o-1);
+    windowModel->notifyAll();
+}
+
+void Controller::windowEnableObject(bool enabled) {
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
+        return;
+    }
+    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    scene->getObjects()[o].setEnabled(enabled);
+    scene->notifyAll();
+}
+
 void Controller::windowSelectLight(int l) {
     windowModel->setSelectedLightIndex(l-1);
     windowModel->notifyAll();

@@ -101,5 +101,5 @@ Vec3Df SkyBoxMaterial::genColor(const Vec3Df &, const Vertex & closestIntersecti
     CubeSide side;
     int u, v;
     getSide(closestIntersection.getPos(), side, u, v);
-    return getColor(side, u, v);
+    return getColor(side, u, v)/256.0;
 }

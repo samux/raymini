@@ -21,11 +21,11 @@ class Object {
 public:
     inline Object () : tree(nullptr) {}
     Object (const Mesh & mesh, const Material * mat) :
-        mesh (mesh), mat (mat), tree(nullptr) {
+        mesh (mesh), mat (mat), tree(nullptr), enabled(true) {
         updateBoundingBox ();
     }
     inline Object (const Object & o) :
-        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile) {}
+        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile), enabled(o.enabled) {}
     virtual ~Object () {
         delete tree;
     }
@@ -38,6 +38,7 @@ public:
         origTrans = trans;
         tree = nullptr;
         mobile = o.mobile;
+        enabled = o.enabled;
         return (*this);
     }
 
@@ -64,6 +65,9 @@ public:
         return *tree;
     }
 
+    inline void setEnabled(bool e) { enabled = e; }
+    inline bool isEnabled() const { return enabled; }
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -75,6 +79,7 @@ private:
     Vec3Df origTrans;
     KDtree *tree;
     Vec3Df mobile;
+    bool enabled;
 };
 
 // Some Emacs-Hints -- please don't remove:

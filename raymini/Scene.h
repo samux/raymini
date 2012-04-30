@@ -27,6 +27,9 @@ public:
     inline std::vector<Light> & getLights () { return lights; }
     inline const std::vector<Light> & getLights () const { return lights; }
 
+    inline std::vector<std::string> &getObjectsNames() {return objectsNames;}
+    inline const std::vector<std::string> &getObjectsNames() const {return objectsNames;}
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -53,8 +56,18 @@ public:
 private:
     Controller *controller;
 
+    Material *groundMat;
+    Material *blue;
+    Material *red;
+    Material *ramMat;
+    Material *rhinoMat;
+    Material *gargMat;
+    Material *skyBoxMaterial;
+    Material *mirrorMaterial;
+
     void buildDefaultScene ();
     std::vector<Object> objects;
+    std::vector<std::string> objectsNames;
     std::vector<Light> lights;
     BoundingBox bbox;
 };

@@ -59,6 +59,8 @@ public slots :
     void windowSetLightRadius(double);
     void windowSetLightIntensity(double);
     void windowSetLightPos();
+    void windowSelectObject(int);
+    void windowEnableObject(bool);
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
