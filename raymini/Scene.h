@@ -27,9 +27,6 @@ public:
     inline std::vector<Light> & getLights () { return lights; }
     inline const std::vector<Light> & getLights () const { return lights; }
 
-    inline std::vector<std::string> &getObjectsNames() {return objectsNames;}
-    inline const std::vector<std::string> &getObjectsNames() const {return objectsNames;}
-
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -67,7 +64,6 @@ private:
 
     void buildDefaultScene ();
     std::vector<Object> objects;
-    std::vector<std::string> objectsNames;
     std::vector<Light> lights;
     BoundingBox bbox;
 };

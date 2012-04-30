@@ -19,13 +19,13 @@
 
 class Object {
 public:
-    inline Object () : tree(nullptr) {}
-    Object (const Mesh & mesh, const Material * mat) :
-        mesh (mesh), mat (mat), tree(nullptr), enabled(true) {
+    inline Object (std::string name = "No name") : tree(nullptr), enabled(false), name(name) {}
+    Object (const Mesh & mesh, const Material * mat, std::string name="No name") :
+        mesh (mesh), mat (mat), tree(nullptr), enabled(true), name(name) {
         updateBoundingBox ();
     }
     inline Object (const Object & o) :
-        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile), enabled(o.enabled) {}
+        mesh (o.mesh), mat (o.mat), bbox (o.bbox), trans (o.trans), origTrans(trans), tree(nullptr), mobile(o.mobile), enabled(o.enabled), name(o.name) {}
     virtual ~Object () {
         delete tree;
     }
@@ -39,6 +39,7 @@ public:
         tree = nullptr;
         mobile = o.mobile;
         enabled = o.enabled;
+        name = o.name;
         return (*this);
     }
 
@@ -68,6 +69,8 @@ public:
     inline void setEnabled(bool e) { enabled = e; }
     inline bool isEnabled() const { return enabled; }
 
+    inline const std::string &getName() const {return name;}
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -80,6 +83,7 @@ private:
     KDtree *tree;
     Vec3Df mobile;
     bool enabled;
+    std::string name;
 };
 
 // Some Emacs-Hints -- please don't remove:

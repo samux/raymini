@@ -221,8 +221,8 @@ void Window::initControlWidget () {
 
     objectsList = new QComboBox(objectsGroupBox);
     objectsList->addItem("No object selected");
-    for (const string &s : scene->getObjectsNames()) {
-        QString name = QString::fromStdString(s);
+    for (const Object &o : scene->getObjects()) {
+        QString name = QString::fromStdString(o.getName());
         objectsList->addItem(name);
     }
     connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));

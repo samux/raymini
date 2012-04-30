@@ -53,52 +53,45 @@ void Scene::buildDefaultScene () {
 
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
-    Object ground (groundMesh, groundMat);
+    Object ground (groundMesh, groundMat, "Ground");
     objects.push_back (ground);
-    objectsNames.push_back("Ground");
 
     Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
 
-    Object leftWall(wallMesh, mirrorMaterial);
+    Object leftWall(wallMesh, mirrorMaterial, "Left wall");
     leftWall.setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
-    objectsNames.push_back("Left wall");
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
-    Object backWall(backWallMesh, red);
+    Object backWall(backWallMesh, red, "Back wall");
     backWall.setTrans(Vec3Df(0, 1.95251, 1.5));
     objects.push_back (backWall);
-    objectsNames.push_back("Back wall");
 
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
-    Object ram (ramMesh, ramMat);
+    Object ram (ramMesh, ramMat, "Ram");
     ram.setTrans (Vec3Df (-1.f, -1.0f, 0.f));
     objects.push_back (ram);
-    objectsNames.push_back("Ram");
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
-    Object rhino (rhinoMesh, rhinoMat);
+    Object rhino (rhinoMesh, rhinoMat, "Rhino");
     rhino.setTrans (Vec3Df (1.f, 0.f, 0.4f));
     objects.push_back (rhino);
-    objectsNames.push_back("Rhino");
 
     Mesh gargMesh;
     gargMesh.loadOFF ("models/gargoyle.off");
-    Object garg (gargMesh, gargMat);
+    Object garg (gargMesh, gargMat, "Gargoyle");
     garg.setTrans (Vec3Df (-1.f, 1.0f, 0.f));
     objects.push_back (garg);
-    objectsNames.push_back("Gargoyle");
 
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
-    Object skyBox(skyBoxMesh, skyBoxMaterial);
+    Object skyBox(skyBoxMesh, skyBoxMaterial, "Skybox");
     skyBox.setEnabled(false);
     objects.push_back(skyBox);
-    objectsNames.push_back("Skybox");
 
     Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
