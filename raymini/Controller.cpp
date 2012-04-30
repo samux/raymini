@@ -68,6 +68,11 @@ void Controller::windowSetShadowNbRays (int i) {
     rayTracer->notifyAll();
 }
 
+void Controller::windowSetRayTracerMode (bool b) {
+    rayTracer->mode = RayTracer::Mode::PBGI_MODE;
+    rayTracer->notifyAll();
+}
+
 void Controller::windowRenderRayImage () {
     qglviewer::Camera * cam = viewer->camera ();
     qglviewer::Vec p = cam->position ();

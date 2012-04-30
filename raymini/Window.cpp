@@ -412,6 +412,11 @@ void Window::initControlWidget () {
     PTOnlyCheckBox->setVisible(false);
     PTLayout->addWidget (PTOnlyCheckBox);
 
+    PBGICheckBox = new QCheckBox ("PBGI mode", PTGroupBox);
+    connect (PBGICheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowSetRayTracerMode (bool)));
+    PBGICheckBox->setVisible(true);
+    PTLayout->addWidget (PBGICheckBox);
+
     rayLayout->addWidget (PTGroupBox);
 
     //  Focal

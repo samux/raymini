@@ -90,7 +90,7 @@ public:
     bool focusEnabled() { return focus; };
 
     inline RayTracer(Controller *c):
-        mode(Mode::PBGI_MODE),
+        mode(Mode::RAY_TRACING_MODE),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
         intensityPathTracing(255.f), onlyPathTracing(false),
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),

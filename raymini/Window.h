@@ -64,6 +64,7 @@ private :
     QSpinBox *PTMaxAngleSpinBox;
     QSpinBox *PTIntensitySpinBox;
     QCheckBox *PTOnlyCheckBox;
+    QCheckBox *PBGICheckBox;
 
     QSpinBox *AANbRaySpinBox;
 

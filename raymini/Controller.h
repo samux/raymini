@@ -34,6 +34,7 @@ public:
 
 public slots :
     void windowRenderRayImage();
+    void windowSetRayTracerMode(bool);
     void windowSetShadowMode(int);
     void windowSetShadowNbRays(int);
     void windowSetBGColor();
