@@ -46,6 +46,7 @@ Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     QDockWidget * controlDockWidget = new QDockWidget (this);
     initControlWidget ();
 
+    controlDockWidget->setFloating(true);
     controlDockWidget->setWidget (controlWidget);
     controlDockWidget->adjustSize ();
     addDockWidget (Qt::RightDockWidgetArea, controlDockWidget);
