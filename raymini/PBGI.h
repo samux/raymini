@@ -9,7 +9,7 @@ class Controller;
 
 class PBGI {
 public:
-    PBGI(Controller * c, unsigned int res = 4) : c(c), res(res){
+    PBGI(Controller * c, unsigned int res = 6) : c(c), res(res){
         cloud = new PointCloud(c);
         cloud->generatePoints();
         octree = new Octree(c, *cloud);

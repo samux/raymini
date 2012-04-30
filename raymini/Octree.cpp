@@ -90,7 +90,7 @@ const Octree * Octree::intersect(Ray &ray) const {
     if(isLeaf()) {
         for(unsigned index_surfel : surfels) {
             Surfel s = cloud.getSurfels()[index_surfel];
-            if(Vec3Df::dotProduct(s.getNormal(), ray.getDirection()) < 0.0) {
+            if(Vec3Df::dotProduct(s.getNormal(), ray.getDirection()) < -0.5) {
                 if(ray.intersectDisc(s.getPos(), s.getNormal(), s.getRadius())) {
                     return this;
                 }

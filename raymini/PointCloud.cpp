@@ -42,20 +42,22 @@ void PointCloud::generatePoints() {
                 Vec3Df normalizedDirection(direction);
                 normalizedDirection.normalize();
                 float radius = (1.0+abs(Vec3Df::crossProduct(normalizedDirection, intNorm).getLength()))*distance/(pixelDistance*resolution);
-                Vec3Df color = mat.genColor(
-                        position,
-                        intersection,
-                        {light},
-                        type);
-                Surfel surfel(
-                        intPos,
-                        intNorm,
-                        radius,
-                        color,
-                        &mat);
-                        if (bestRay.getIntersection().getNormal() == Vec3Df(1, 0, 0)) {
-                        }
-                surfels.push_back(surfel);
+                if(dynamic_cast<const Mirror *>(&mat) == nullptr) {
+                    Vec3Df color = mat.genColor(
+                            position,
+                            intersection,
+                            {light},
+                            type);
+                    Surfel surfel(
+                            intPos,
+                            intNorm,
+                            radius,
+                            color,
+                            &mat);
+                    if (bestRay.getIntersection().getNormal() == Vec3Df(1, 0, 0)) {
+                    }
+                    surfels.push_back(surfel);
+                }
             }
         }
     }
