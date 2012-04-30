@@ -8,8 +8,11 @@ private:
     unsigned number;
 
 public:
-    Color(const Vec3Df &init=Vec3Df(0, 0,0)) :
-        color(init), number(0) {}
+    Color() :
+        color(Vec3Df()), number(0) {}
+
+    Color(const Vec3Df &init) :
+        color(init), number(1) {}
 
     Color & operator+=(const Vec3Df &c) {
         add(c);

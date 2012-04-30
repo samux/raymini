@@ -59,7 +59,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbIterations);
             for (unsigned int j = 0; j < screenHeight; j++) {
 
-                Color c (backgroundColor);
+                Color c;
 
                 // For each ray in each pixel
                 for (const pair<float, float> &offset : offsets) {
@@ -149,7 +149,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
 
 
-        Vec3Df color = mat.genColor(camPos, bestRay.getIntersection(),
+        Color color = mat.genColor(camPos, bestRay.getIntersection(),
                                     getLights(bestRay.getIntersection()),
                                     type);
 
@@ -165,7 +165,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
                     break;
             }
 
-            Vec3Df ptColor = mat.genColor(camPos, bestRay.getIntersection(),
+            Color ptColor = mat.genColor(camPos, bestRay.getIntersection(),
                                           lights,
                                           Brdf::Diffuse);
             if(onlyPathTracing)
@@ -173,7 +173,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
             else
                 color += ptColor;
         }
-        return color;
+        return color();
     }
 
     return backgroundColor;
