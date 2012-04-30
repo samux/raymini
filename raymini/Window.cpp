@@ -150,16 +150,14 @@ void Window::updateLights() {
 void Window::updateFocus() {
     WindowModel *windowModel = controller->getWindowModel();
     RayTracer *rayTracer = controller->getRayTracer();
+    bool isFocusMode = windowModel->isFocusMode();
     bool isFocus = rayTracer->focusEnabled();
-    selecFocusedObject->setVisible(isFocus);
-    if (isFocus) {
-        bool isFocusMode = windowModel->isFocusMode();
-        if (isFocusMode) {
-            selecFocusedObject->setText("Choose focused point");
-        }
-        else {
-            selecFocusedObject->setText("Change focus point");
-        }
+    selectFocusedObject->setVisible(isFocusMode||isFocus);
+    if (isFocusMode) {
+        selectFocusedObject->setText("Choose focused point");
+    }
+    else {
+        selectFocusedObject->setText("Change focus point");
     }
 }
 
@@ -382,10 +380,10 @@ void Window::initControlWidget () {
     connect (focalCheckBox, SIGNAL (toggled (bool)), controller, SLOT (windowEnableFocal (bool)));
     focalLayout->addWidget (focalCheckBox);
 
-    selecFocusedObject  = new QPushButton ("", focalGroupBox);
-    selecFocusedObject->setVisible(false);
-    connect (selecFocusedObject, SIGNAL (clicked ()) , controller, SLOT ( windowSetFocal()));
-    focalLayout->addWidget (selecFocusedObject);
+    selectFocusedObject  = new QPushButton ("", focalGroupBox);
+    selectFocusedObject->setVisible(false);
+    connect (selectFocusedObject, SIGNAL (clicked ()) , controller, SLOT ( windowSetFocal()));
+    focalLayout->addWidget (selectFocusedObject);
 
     rayLayout->addWidget (focalGroupBox);
 

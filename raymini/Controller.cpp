@@ -7,8 +7,6 @@
 
 using namespace std;
 
-// TODO update corresponding model
-
 Controller::Controller(QApplication *r):
     raymini(r)
 {}
@@ -195,6 +193,7 @@ void Controller::windowSetOnlyAO(bool b) {
 }
 
 void Controller::windowEnableFocal(bool isFocal) {
+    // TODO ENHANCE
     windowModel->setFocusMode(isFocal);
     windowModel->notifyAll();
     if(!isFocal) {
@@ -204,6 +203,7 @@ void Controller::windowEnableFocal(bool isFocal) {
 }
 
 void Controller::windowSetFocal() {
+    // TODO ENHANCE
     if (windowModel->isFocusMode()) {
         windowModel->setFocusMode(false);
         windowModel->notifyAll();

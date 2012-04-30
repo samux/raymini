@@ -75,7 +75,7 @@ private :
     QDoubleSpinBox *lightRadiusSpinBox;
     QDoubleSpinBox *lightIntensitySpinBox;
 
-    QPushButton * selecFocusedObject;
+    QPushButton * selectFocusedObject;
 };
 
 #endif // WINDOW_H
