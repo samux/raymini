@@ -59,8 +59,8 @@ public:
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
     /*        End Config         */
 
-    inline const Vec3Df & getBackgroundColor () const { return backgroundColor;}
-    inline void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
+    const Vec3Df & getBackgroundColor () const { return backgroundColor;}
+    void setBackgroundColor (const Vec3Df & c) { backgroundColor = c; }
 
     QImage render (const Vec3Df & camPos,
                    const Vec3Df & viewDirection,
@@ -71,16 +71,16 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
 
-    Vec3Df computePixel(const Vec3Df & camPos,
-                        const Vec3Df & direction,
-                        const Vec3Df & upVec,
-                        const Vec3Df & rightVec,
-                        unsigned int screenWidth,
-                        unsigned int screenHeight,
-                        const std::vector<std::pair<float, float>> &offsets,
-                        const std::vector<std::pair<float, float>> &offsets_focus,
-                        float focalDistance,
-                        unsigned i, unsigned j);
+    inline Vec3Df computePixel(const Vec3Df & camPos,
+                               const Vec3Df & direction,
+                               const Vec3Df & upVec,
+                               const Vec3Df & rightVec,
+                               unsigned int screenWidth,
+                               unsigned int screenHeight,
+                               const std::vector<std::pair<float, float>> &offsets,
+                               const std::vector<std::pair<float, float>> &offsets_focus,
+                               float focalDistance,
+                               unsigned i, unsigned j);
 
     bool intersect(const Vec3Df & dir,
                    const Vec3Df & camPos,
@@ -91,7 +91,7 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;
 
-    inline RayTracer(Controller *c):
+    RayTracer(Controller *c):
         mode(Mode::RAY_TRACING_MODE),
         depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
         intensityPathTracing(25.f), onlyPathTracing(false),
@@ -103,7 +103,7 @@ public:
         controller(c),
         backgroundColor(Vec3Df(1, 1, 1)),
         shadow(c) {}
-    inline virtual ~RayTracer () {}
+    virtual ~RayTracer () {}
 
 private:
     Controller *controller;

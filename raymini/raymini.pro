@@ -1,7 +1,8 @@
 TEMPLATE = app
 TARGET   = raymini
 CONFIG  += qt opengl xml warn_on console release thread
-QMAKE_CXXFLAGS += -std=c++0x -g
+QMAKE_CXXFLAGS += -std=c++0x -g -fopenmp
+QMAKE_LFLAGS += -fopenmp
 QT *= opengl xml
 HEADERS = Window.h \
           GLViewer.h \

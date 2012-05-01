@@ -5,8 +5,11 @@
 // All rights reserved.
 // *********************************************************
 
-#include <QProgressDialog>
+#include <QImage>
+#include <iostream>
+#include <iomanip>
 #include <algorithm>
+#include <omp.h>
 
 #include "Controller.h"
 #include "RayTracer.h"
@@ -31,12 +34,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenWidth,
                           unsigned int screenHeight) {
     Scene *scene = controller->getScene();
-    QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     vector<Color> buffer;
     buffer.resize(screenHeight*screenWidth);
-
-    QProgressDialog progressDialog ("Raytracing...", "Cancel", 0, 100);
-    progressDialog.show ();
 
     const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
@@ -54,8 +53,8 @@ QImage RayTracer::render (const Vec3Df & camPos,
     for (unsigned picNumber = 0 ; picNumber < nbIterations ; picNumber++) {
 
         // For each pixel
+        #pragma omp parallel for
         for (unsigned int i = 0; i < screenWidth; i++) {
-            progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbIterations);
             for (unsigned int j = 0; j < screenHeight; j++) {
                 buffer[j*screenWidth+i] += computePixel(camPos,
                                                         direction,
@@ -73,6 +72,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
         scene->move(nbPictures);
     }
 
+    QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
         for (unsigned int j = 0; j < screenHeight; j++) {
             Color c = buffer[j*screenWidth+i];
@@ -81,7 +81,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     }
 
     scene->reset();
-    progressDialog.setValue (100);
 
     return image;
 }
