@@ -20,6 +20,7 @@
 #include "Vec3D.h"
 
 class Controller;
+class Octree;
 
 class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT
@@ -36,8 +37,9 @@ public:
         std::string message;
     };
 
-public:
     virtual void update(Observable *);
+    static void draw_octree(const Octree * t);
+    static void drawCube(const Vec3Df min, const Vec3Df max);
 
 protected :
     void init();

@@ -17,6 +17,7 @@
 #include "RayTracer.h"
 #include "Controller.h"
 #include "PBGI.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -180,7 +181,8 @@ void GLViewer::animate() {
     }
 }
 
-void drawCube(const Vec3Df min, const Vec3Df max) {
+void GLViewer::drawCube(const Vec3Df min, const Vec3Df max) {
+    glBegin(GL_LINES);
     glVertex3f(min[0], min[1], min[2]);
     glVertex3f(max[0], min[1], min[2]);
     glVertex3f(min[0], min[1], min[2]);
@@ -207,6 +209,7 @@ void drawCube(const Vec3Df min, const Vec3Df max) {
     glVertex3f(max[0], max[1], max[2]);
     glVertex3f(max[0], min[1], min[2]);
     glVertex3f(max[0], min[1], max[2]);
+    glEnd();
 }
 
 
@@ -252,15 +255,17 @@ void GLViewer::init() {
 }
 
 
-void draw_octree(const Octree * t) {
-    glBegin(GL_LINES);
+void GLViewer::draw_octree(const Octree * t) {
     glColor3f(0.f, 0.f, 0.f);
     drawCube(t->bBox.getMin(), t->bBox.getMax());
-    glEnd();
 }
 
 void GLViewer::draw () {
     WindowModel *windowModel = controller->getWindowModel();
+    Scene * scene = controller->getScene();
+    RayTracer * rayTracer = controller->getRayTracer();
+
+    // Display the rendered image
     const QImage &rayImage = windowModel->getRayImage();
     if (windowModel->getDisplayMode() == WindowModel::RayDisplayMode) {
         glDrawPixels (rayImage.width (),
@@ -270,12 +275,10 @@ void GLViewer::draw () {
                       rayImage.bits ());
         return;
     }
-    Scene * scene = controller->getScene();
-    RayTracer * rayTracer = controller->getRayTracer();
 
+    // Draw the focus
     if (rayTracer->typeFocus != Focus::NONE) {
-
-        glDisable (GL_LIGHTING);
+        //glDisable (GL_LIGHTING);
         Vec3Df focusColor;
         bool isFocusMode = windowModel->isFocusMode();
         if (isFocusMode) {
@@ -304,10 +307,21 @@ void GLViewer::draw () {
         glEnd();
     }
 
-    // draw octree
-    /*PBGI * pbgi = controller->getPBGI();
-    /pbgi->getOctree()->exec(draw_octree);*/
+    // Draw the light
+    int lightIndex = windowModel->getSelectedLightIndex();
+    if (lightIndex != -1) {
+        const Light *light = scene->getLights()[lightIndex];
+        Vec3Df lightPos = light->getPos();
+        glDisable(GL_LIGHTING);
+        Vec3Df delta = Vec3Df(0.1, 0.1, 0.1);
+        Vec3Df min = lightPos - delta;
+        Vec3Df max = lightPos + delta;
+        Vec3Df color = light->getColor();
+        glColor3f(color[0], color[1], color[2]);
+        drawCube(min, max);
+    }
 
+    // Draw the scene
     for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
         const Object * o = scene->getObjects ()[i];
         if (!o->isEnabled()) {
