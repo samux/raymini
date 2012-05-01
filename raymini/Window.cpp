@@ -216,17 +216,11 @@ void Window::initControlWidget () {
 
 
 
-
-
-
-
     // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
     QHBoxLayout * rayLayout = new QHBoxLayout (rayGroupBox);
 
-
-
-    //  Anti Aliasing
+    //  RayGroup: Anti Aliasing
     QGroupBox * AAGroupBox = new QGroupBox ("Anti aliasing", rayGroupBox);
     QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
 
@@ -250,7 +244,7 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget(AAGroupBox);
 
-    //  Ambient occlusion
+    //  RayGroup: Ambient occlusion
     QGroupBox * AOGroupBox = new QGroupBox ("Ambient Occlusion", rayGroupBox);
     QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
 
@@ -283,7 +277,7 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget(AOGroupBox);
 
-    //  Shadows
+    //  RayGroup: Shadows
     QGroupBox * shadowsGroupBox = new QGroupBox ("Shadows", rayGroupBox);
     QVBoxLayout * shadowsLayout = new QVBoxLayout (shadowsGroupBox);
 
@@ -305,7 +299,7 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget (shadowsGroupBox);
 
-    //  Path Tracing
+    //  RayGroup: Path Tracing
     QGroupBox * PTGroupBox = new QGroupBox ("Path tracing", rayGroupBox);
     QVBoxLayout * PTLayout = new QVBoxLayout (PTGroupBox);
 
@@ -357,7 +351,7 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget (PTGroupBox);
 
-    //  Focal
+    //  RayGroup: Focal
     QGroupBox * focalGroupBox = new QGroupBox("Focal", rayGroupBox);
     QVBoxLayout * focalLayout = new QVBoxLayout(focalGroupBox);
 
@@ -391,7 +385,7 @@ void Window::initControlWidget () {
 
     rayLayout->addWidget(focalGroupBox);
 
-    // Motion Blur
+    // RayGroup: Motion Blur
     if(scene->hasMobile()) {
         QGroupBox * mBlurGroupBox = new QGroupBox ("Motion blur", rayGroupBox);
         QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
@@ -415,7 +409,7 @@ void Window::initControlWidget () {
     QGroupBox * sceneGroupBox = new QGroupBox ("Scene", controlWidget);
     QHBoxLayout * sceneLayout = new QHBoxLayout (sceneGroupBox);
 
-    //  Objects
+    //  SceneGroup: Objects
     QGroupBox *objectsGroupBox = new QGroupBox("Objects", sceneGroupBox);
     QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
 
@@ -436,7 +430,7 @@ void Window::initControlWidget () {
     sceneLayout->addWidget(objectsGroupBox);
 
 
-    //  Lights
+    //  SceneGroup: Lights
     QGroupBox *lightsGroupBox = new QGroupBox("Lights", sceneGroupBox);
     QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
 
@@ -489,7 +483,7 @@ void Window::initControlWidget () {
 
     sceneLayout->addWidget(lightsGroupBox);
 
-    // Render
+    // SceneGroup: Render
     QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneGroupBox);
     QVBoxLayout * actionLayout = new QVBoxLayout (ActionGroupBox);
 
@@ -506,9 +500,6 @@ void Window::initControlWidget () {
     sceneLayout->addWidget (ActionGroupBox);
 
     layout->addWidget (sceneGroupBox, 1, 1);
-
-
-
 
 
 
@@ -529,6 +520,4 @@ void Window::initControlWidget () {
     globalLayout->addWidget (quitButton);
 
     layout->addWidget (globalGroupBox, 0, 0);
-
-    //layout->addStretch (0);
 }
