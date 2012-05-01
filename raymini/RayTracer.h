@@ -71,6 +71,17 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
 
+    Vec3Df computePixel(const Vec3Df & camPos,
+                        const Vec3Df & direction,
+                        const Vec3Df & upVec,
+                        const Vec3Df & rightVec,
+                        unsigned int screenWidth,
+                        unsigned int screenHeight,
+                        const std::vector<std::pair<float, float>> &offsets,
+                        const std::vector<std::pair<float, float>> &offsets_focus,
+                        float focalDistance,
+                        unsigned i, unsigned j);
+
     bool intersect(const Vec3Df & dir,
                    const Vec3Df & camPos,
                    Ray & bestRay,
@@ -98,6 +109,7 @@ private:
     Controller *controller;
 
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001f;
+    static constexpr float distanceOrthogonalCameraScreen = 1.0;
     Vec3Df backgroundColor;
     Shadow shadow;
 

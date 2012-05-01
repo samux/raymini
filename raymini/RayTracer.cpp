@@ -45,7 +45,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     const Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
     const Vec3Df upVec = tang * upVector / screenHeight;
 
-    const float distanceOrthogonalCameraScreen = 1.0;
     const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
@@ -58,34 +57,17 @@ QImage RayTracer::render (const Vec3Df & camPos,
         for (unsigned int i = 0; i < screenWidth; i++) {
             progressDialog.setValue (((100*i)/screenWidth + 100*picNumber)/nbIterations);
             for (unsigned int j = 0; j < screenHeight; j++) {
-
-                Color c;
-
-                // For each ray in each pixel
-                for (const pair<float, float> &offset : offsets) {
-                    Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
-                    Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
-                    Vec3Df step = stepX + stepY;
-                    Vec3Df dir = direction + step;
-                    dir.normalize();
-                    if (typeFocus != Focus::NONE) {
-                        float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
-                                                          distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
-                        dir.normalize ();
-                        Vec3Df customFocalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
-                                            distanceOrthogonalCameraScreen)*dir;
-                        for (const pair<float, float> &offset_focus : offsets_focus) {
-                            Vec3Df focusMovedCamPos = camPos + Vec3Df(1,0,0)*offset_focus.first + Vec3Df(0,1,0)*offset_focus.second;
-                            dir = customFocalPoint - focusMovedCamPos;
-                            dir.normalize();
-                            c += getColor(dir, focusMovedCamPos);
-                        }
-                    }
-                    else {
-                        c += getColor(dir, camPos);
-                    }
-                }
-                buffer[j*screenWidth+i] += c();
+                buffer[j*screenWidth+i] += computePixel(camPos,
+                                                        direction,
+                                                        upVec,
+                                                        rightVec,
+                                                        screenWidth,
+                                                        screenHeight,
+                                                        offsets,
+                                                        offsets_focus,
+                                                        focalDistance,
+                                                        i,
+                                                        j);
             }
         }
         scene->move(nbPictures);
@@ -102,6 +84,45 @@ QImage RayTracer::render (const Vec3Df & camPos,
     progressDialog.setValue (100);
 
     return image;
+}
+
+Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
+                               const Vec3Df & direction,
+                               const Vec3Df & upVec,
+                               const Vec3Df & rightVec,
+                               unsigned int screenWidth,
+                               unsigned int screenHeight,
+                               const vector<pair<float, float>> &offsets,
+                               const vector<pair<float, float>> &offsets_focus,
+                               float focalDistance,
+                               unsigned i, unsigned j) {
+    Color c;
+
+    // For each ray in each pixel
+    for (const pair<float, float> &offset : offsets) {
+        Vec3Df stepX = (float(i)+offset.first - screenWidth/2.f) * rightVec;
+        Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
+        Vec3Df step = stepX + stepY;
+        Vec3Df dir = direction + step;
+        dir.normalize();
+        if (typeFocus != Focus::NONE) {
+            float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
+                                              distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
+            dir.normalize ();
+            Vec3Df customFocalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
+                                                distanceOrthogonalCameraScreen)*dir;
+            for (const pair<float, float> &offset_focus : offsets_focus) {
+                Vec3Df focusMovedCamPos = camPos + Vec3Df(1,0,0)*offset_focus.first + Vec3Df(0,1,0)*offset_focus.second;
+                dir = customFocalPoint - focusMovedCamPos;
+                dir.normalize();
+                c += getColor(dir, focusMovedCamPos);
+            }
+        }
+        else {
+            c += getColor(dir, camPos);
+        }
+    }
+    return c();
 }
 
 bool RayTracer::intersect(const Vec3Df & dir,
@@ -150,24 +171,24 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
 
         Color color = mat.genColor(camPos, bestRay.getIntersection(),
-                                    getLights(bestRay.getIntersection()),
-                                    type);
+                                   getLights(bestRay.getIntersection()),
+                                   type);
 
         if((depth < depthPathTracing) || (mode == PBGI_MODE)) {
 
             vector<Light *> lights;
             switch(mode) {
-                case RAY_TRACING_MODE:
-                    lights =  getLightsPT(bestRay.getIntersection(), depth);
-                    break;
-                case PBGI_MODE:
-                    lights = controller->getPBGI()->getLights(bestRay);
-                    break;
+            case RAY_TRACING_MODE:
+                lights =  getLightsPT(bestRay.getIntersection(), depth);
+                break;
+            case PBGI_MODE:
+                lights = controller->getPBGI()->getLights(bestRay);
+                break;
             }
 
             Color ptColor = mat.genColor(camPos, bestRay.getIntersection(),
-                                          lights,
-                                          Brdf::Diffuse);
+                                         lights,
+                                         Brdf::Diffuse);
 
             if(onlyPathTracing && depth == 0)
                 color = ptColor;
@@ -212,7 +233,7 @@ vector<Light *> RayTracer::getLightsPT(const Vertex & closestIntersection, unsig
             float intensity = intensityPathTracing / pow(1+d,3);
 
             lights.push_back(new Light(bestRay.getIntersection().getPos(),
-                                   color, intensity));
+                                       color, intensity));
         }
     }
     return lights;
