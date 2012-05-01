@@ -41,7 +41,6 @@
 #include "displayfunc.h"
 
 /* Options */
-static int useGPU = 1;
 static int forceWorkSize = 0;
 
 /* OpenCL variables */
@@ -274,14 +273,10 @@ static void SetUpOpenCL() {
                 break;
             case CL_DEVICE_TYPE_CPU:
                 stype = "TYPE_CPU";
-                if (!useGPU && !deviceFound) {
-                    selectedDevice = devices[i];
-                    deviceFound = 1;
-                }
                 break;
             case CL_DEVICE_TYPE_GPU:
                 stype = "TYPE_GPU";
-                if (useGPU && !deviceFound) {
+                if (!deviceFound) {
                     selectedDevice = devices[i];
                     deviceFound = 1;
                 }
@@ -817,23 +812,25 @@ void ReInit(const int reallocBuffers) {
 int main(int argc, char *argv[]) {
 
     fprintf(stderr, "Usage: %s\n", argv[0]);
-    fprintf(stderr, "Usage: %s <use CPU/GPU device (0=CPU or 1=GPU)> <workgroup size (0=default value or anything > 0 and power of 2)> <kernel file name> <window width> <window height> <scene file>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <kernel file name> <scene file> <window width> <window height>\n", argv[0]);
 
-    if (argc == 7) {
-        useGPU = atoi(argv[1]);
-        forceWorkSize = atoi(argv[2]);
-        kernelFileName = argv[3];
-        width = atoi(argv[4]);
-        height = atoi(argv[5]);
-        ReadScene(argv[6]);
-    } else if (argc == 1) {
+    if (argc > 1) {
+        kernelFileName = argv[1];
+    }
+    if (argc > 2) {
+        ReadScene(argv[2]);
+    }
+    if(argc > 4) {
+        width = atoi(argv[3]);
+        height = atoi(argv[4]);
+    }
+    if (argc == 1) {
         spheres = CornellSpheres;
         sphereCount = sizeof(CornellSpheres) / sizeof(Sphere);
 
         vinit(camera.orig, 50.f, 45.f, 205.6f);
         vinit(camera.target, 50.f, 45 - 0.042612f, 204.6);
-    } else
-        exit(-1);
+    }
 
     UpdateCamera();
 
