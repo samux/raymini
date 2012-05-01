@@ -191,7 +191,7 @@ void Window::initControlWidget () {
 
     // Control widget
     controlWidget = new QGroupBox ();
-    QVBoxLayout * layout = new QVBoxLayout (controlWidget);
+    QGridLayout * layout = new QGridLayout (controlWidget);
 
     // Preview
     QGroupBox * previewGroupBox = new QGroupBox ("Preview", controlWidget);
@@ -211,84 +211,20 @@ void Window::initControlWidget () {
     connect (snapshotButton, SIGNAL(clicked ()) ,controller, SLOT(windowExportGLImage()));
     previewLayout->addWidget (snapshotButton);
 
-    layout->addWidget (previewGroupBox);
+    layout->addWidget (previewGroupBox, 1, 0);
+
+
+
+
+
+
+
 
     // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
-    QVBoxLayout * rayLayout = new QVBoxLayout (rayGroupBox);
+    QHBoxLayout * rayLayout = new QHBoxLayout (rayGroupBox);
 
-    //  Objects
-    QGroupBox *objectsGroupBox = new QGroupBox("Objects", rayGroupBox);
-    QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
 
-    objectsList = new QComboBox(objectsGroupBox);
-    objectsList->addItem("No object selected");
-    for (const Object * o : scene->getObjects()) {
-        QString name = QString::fromStdString(o->getName());
-        objectsList->addItem(name);
-    }
-    connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
-    objectsLayout->addWidget(objectsList);
-
-    objectEnableCheckBox = new QCheckBox("Enable");
-    objectEnableCheckBox->setVisible(false);
-    connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
-    objectsLayout->addWidget(objectEnableCheckBox);
-
-    rayLayout->addWidget(objectsGroupBox);
-
-    //  Lights
-    QGroupBox *lightsGroupBox = new QGroupBox("Lights", rayGroupBox);
-    QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
-
-    lightsList = new QComboBox(lightsGroupBox);
-    lightsList->addItem("No light selected");
-    for (unsigned int i=0; i<scene->getLights().size(); i++) {
-        QString name;
-        name = QString("Light #%1").arg(i);
-        lightsList->addItem(name);
-    }
-    connect(lightsList, SIGNAL(activated(int)), controller, SLOT(windowSelectLight(int)));
-    lightsLayout->addWidget(lightsList);
-
-    lightEnableCheckBox = new QCheckBox("Enable");
-    lightEnableCheckBox->setVisible(false);
-    connect(lightEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableLight(bool)));
-    lightsLayout->addWidget(lightEnableCheckBox);
-
-    QHBoxLayout *lightsPosLayout = new QHBoxLayout;
-    QString axis[3] = {"X: ", "Y: ", "Z: "};
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
-        lightPosSpinBoxes[i]->setSingleStep(0.1);
-        lightPosSpinBoxes[i]->setMinimum(-100);
-        lightPosSpinBoxes[i]->setMaximum(100);
-        lightPosSpinBoxes[i]->setVisible(false);
-        lightPosSpinBoxes[i]->setPrefix(axis[i]);
-        lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
-        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
-    }
-    lightsLayout->addLayout(lightsPosLayout);
-
-    lightRadiusSpinBox = new QDoubleSpinBox(lightsGroupBox);
-    lightRadiusSpinBox->setSingleStep(0.01);
-    lightRadiusSpinBox->setMinimum(0);
-    lightRadiusSpinBox->setMaximum(100);
-    lightRadiusSpinBox->setVisible(false);
-    lightRadiusSpinBox->setPrefix ("Radius: ");
-    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
-    lightsLayout->addWidget(lightRadiusSpinBox);
-
-    lightIntensitySpinBox = new QDoubleSpinBox(lightsGroupBox);
-    lightIntensitySpinBox->setSingleStep(0.1);
-    lightIntensitySpinBox->setMinimum(0);
-    lightIntensitySpinBox->setMaximum(100);
-    lightIntensitySpinBox->setVisible(false);
-    lightIntensitySpinBox->setPrefix("Intensity: ");
-    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
-    lightsLayout->addWidget(lightIntensitySpinBox);
-
-    rayLayout->addWidget(lightsGroupBox);
 
     //  Anti Aliasing
     QGroupBox * AAGroupBox = new QGroupBox ("Anti aliasing", rayGroupBox);
@@ -470,18 +406,111 @@ void Window::initControlWidget () {
         rayLayout->addWidget (mBlurGroupBox);
     }
 
-    // Render
-    QPushButton * rayButton = new QPushButton ("Render", rayGroupBox);
-    rayLayout->addWidget (rayButton);
-    connect (rayButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
-    QPushButton * showButton = new QPushButton ("Show", rayGroupBox);
-    rayLayout->addWidget (showButton);
-    connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
-    QPushButton * saveButton  = new QPushButton ("Save", rayGroupBox);
-    connect (saveButton, SIGNAL (clicked ()) , controller, SLOT (windowExportRayImage ()));
-    rayLayout->addWidget (saveButton);
 
-    layout->addWidget (rayGroupBox);
+    layout->addWidget (rayGroupBox, 0, 1);
+
+
+
+    // scene param
+    QGroupBox * sceneGroupBox = new QGroupBox ("Scene", controlWidget);
+    QHBoxLayout * sceneLayout = new QHBoxLayout (sceneGroupBox);
+
+    //  Objects
+    QGroupBox *objectsGroupBox = new QGroupBox("Objects", sceneGroupBox);
+    QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
+
+    objectsList = new QComboBox(objectsGroupBox);
+    objectsList->addItem("No object selected");
+    for (const Object * o : scene->getObjects()) {
+        QString name = QString::fromStdString(o->getName());
+        objectsList->addItem(name);
+    }
+    connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
+    objectsLayout->addWidget(objectsList);
+
+    objectEnableCheckBox = new QCheckBox("Enable");
+    objectEnableCheckBox->setVisible(false);
+    connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
+    objectsLayout->addWidget(objectEnableCheckBox);
+
+    sceneLayout->addWidget(objectsGroupBox);
+
+
+    //  Lights
+    QGroupBox *lightsGroupBox = new QGroupBox("Lights", sceneGroupBox);
+    QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
+
+    lightsList = new QComboBox(lightsGroupBox);
+    lightsList->addItem("No light selected");
+    for (unsigned int i=0; i<scene->getLights().size(); i++) {
+        QString name;
+        name = QString("Light #%1").arg(i);
+        lightsList->addItem(name);
+    }
+    connect(lightsList, SIGNAL(activated(int)), controller, SLOT(windowSelectLight(int)));
+    lightsLayout->addWidget(lightsList);
+
+    lightEnableCheckBox = new QCheckBox("Enable");
+    lightEnableCheckBox->setVisible(false);
+    connect(lightEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableLight(bool)));
+    lightsLayout->addWidget(lightEnableCheckBox);
+
+    QHBoxLayout *lightsPosLayout = new QHBoxLayout;
+    QString axis[3] = {"X: ", "Y: ", "Z: "};
+    for (int i=0; i<3; i++) {
+        lightPosSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
+        lightPosSpinBoxes[i]->setSingleStep(0.1);
+        lightPosSpinBoxes[i]->setMinimum(-100);
+        lightPosSpinBoxes[i]->setMaximum(100);
+        lightPosSpinBoxes[i]->setVisible(false);
+        lightPosSpinBoxes[i]->setPrefix(axis[i]);
+        lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
+        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
+    }
+    lightsLayout->addLayout(lightsPosLayout);
+
+    lightRadiusSpinBox = new QDoubleSpinBox(lightsGroupBox);
+    lightRadiusSpinBox->setSingleStep(0.01);
+    lightRadiusSpinBox->setMinimum(0);
+    lightRadiusSpinBox->setMaximum(100);
+    lightRadiusSpinBox->setVisible(false);
+    lightRadiusSpinBox->setPrefix ("Radius: ");
+    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
+    lightsLayout->addWidget(lightRadiusSpinBox);
+
+    lightIntensitySpinBox = new QDoubleSpinBox(lightsGroupBox);
+    lightIntensitySpinBox->setSingleStep(0.1);
+    lightIntensitySpinBox->setMinimum(0);
+    lightIntensitySpinBox->setMaximum(100);
+    lightIntensitySpinBox->setVisible(false);
+    lightIntensitySpinBox->setPrefix("Intensity: ");
+    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
+    lightsLayout->addWidget(lightIntensitySpinBox);
+
+    sceneLayout->addWidget(lightsGroupBox);
+
+    // Render
+    QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneGroupBox);
+    QVBoxLayout * actionLayout = new QVBoxLayout (ActionGroupBox);
+
+    QPushButton * rayButton = new QPushButton ("Render", sceneGroupBox);
+    actionLayout->addWidget (rayButton);
+    connect (rayButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+    QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
+    actionLayout->addWidget (showButton);
+    connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
+    QPushButton * saveButton  = new QPushButton ("Save", sceneGroupBox);
+    connect (saveButton, SIGNAL (clicked ()) , controller, SLOT (windowExportRayImage ()));
+    actionLayout->addWidget (saveButton);
+
+    sceneLayout->addWidget (ActionGroupBox);
+
+    layout->addWidget (sceneGroupBox, 1, 1);
+
+
+
+
+
 
     // Global settings
     QGroupBox * globalGroupBox = new QGroupBox ("Global Settings", controlWidget);
@@ -499,7 +528,7 @@ void Window::initControlWidget () {
     connect (quitButton, SIGNAL (clicked()) , qApp, SLOT (closeAllWindows()));
     globalLayout->addWidget (quitButton);
 
-    layout->addWidget (globalGroupBox);
+    layout->addWidget (globalGroupBox, 0, 0);
 
-    layout->addStretch (0);
+    //layout->addStretch (0);
 }
