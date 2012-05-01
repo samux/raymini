@@ -6,7 +6,7 @@
 #include "Object.h"
 #include "Light.h"
 
-class Controller;
+class RayTracer;
 
 class Shadow {
 public:
@@ -14,7 +14,7 @@ public:
     Mode mode;
     unsigned nbImpulse;
 
-    Shadow(Controller *c) : mode(NONE), nbImpulse(10), controller(c) {}
+    Shadow(RayTracer *rt) : mode(NONE), nbImpulse(10), rt(rt) {}
 
     inline float operator()(const Vec3Df & pos, const Light & light) const {
         if(mode == HARD)
@@ -25,7 +25,7 @@ public:
     }
 
 private:
-    Controller *controller;
+    class RayTracer *rt;
 
     bool hard(const Vec3Df & pos, const Vec3Df & light) const;
     float soft(const Vec3Df & pos, const Light & light) const;
