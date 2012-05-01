@@ -52,6 +52,8 @@ Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     addDockWidget (Qt::RightDockWidgetArea, controlDockWidget);
     controlDockWidget->setFeatures (QDockWidget::AllDockWidgetFeatures);
     statusBar()->showMessage("");
+    setWindowIcon(QIcon("textures/rayIcon.jpg"));
+    controlDockWidget->setWindowIcon(QIcon("textures/rayIcon.jpg"));
 }
 
 Window::~Window () {
