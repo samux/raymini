@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <omp.h>
+#include <chrono>
 
 #include "Controller.h"
 #include "RayTracer.h"
@@ -24,6 +25,46 @@ inline int clamp (float f) {
     int v = static_cast<int> (255*f);
     return min(max(v, 0), 255);
 }
+
+class ProgressBar {
+private:
+    unsigned max;
+    unsigned current;
+    omp_lock_t lck;
+    chrono::time_point<chrono::system_clock> start;
+
+    void lock() { omp_set_lock(&lck); }
+    void unlock() { omp_unset_lock(&lck); }
+
+public:
+    ProgressBar(unsigned nbIter) :
+        max(nbIter), current(0), start(chrono::system_clock::now()) {
+        omp_init_lock(&lck);
+        cerr << endl
+             << setw (10) << 0
+             << "% >";
+        for(unsigned i = 0 ; i < 100 ; i++)
+            cerr << ' ';
+        cerr << '<';
+    }
+
+    void operator()() {
+        lock();
+        float percent = (current*101)/max;
+        cerr << '\r'
+             << fixed << setprecision(2) << setw (10) << percent
+             << "% >";
+        for(unsigned i = 0 ; i < unsigned(percent) ; i++)
+            cerr << '*';
+        current++;
+        if(current==max) {
+            auto now = chrono::system_clock::now();
+            chrono::microseconds u = now -start;
+            cerr << "< " << u.count()/1000 << "ms ";
+        }
+        unlock();
+    }
+};
 
 QImage RayTracer::render (const Vec3Df & camPos,
                           const Vec3Df & direction,
@@ -48,6 +89,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
     const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
+    ProgressBar progressBar(nbIterations*screenWidth);
 
     // For each picture
     for (unsigned picNumber = 0 ; picNumber < nbIterations ; picNumber++) {
@@ -55,18 +97,15 @@ QImage RayTracer::render (const Vec3Df & camPos,
         // For each pixel
         #pragma omp parallel for
         for (unsigned int i = 0; i < screenWidth; i++) {
+            progressBar();
             for (unsigned int j = 0; j < screenHeight; j++) {
                 buffer[j*screenWidth+i] += computePixel(camPos,
                                                         direction,
-                                                        upVec,
-                                                        rightVec,
-                                                        screenWidth,
-                                                        screenHeight,
-                                                        offsets,
-                                                        offsets_focus,
+                                                        upVec, rightVec,
+                                                        screenWidth, screenHeight,
+                                                        offsets, offsets_focus,
                                                         focalDistance,
-                                                        i,
-                                                        j);
+                                                        i, j);
             }
         }
         scene->move(nbPictures);
