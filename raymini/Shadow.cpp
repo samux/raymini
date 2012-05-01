@@ -1,4 +1,5 @@
 #include "Shadow.h"
+#include "SkyBoxMaterial.h"
 
 #include "RayTracer.h"
 #include "Controller.h"
@@ -12,10 +13,11 @@ bool Shadow::hard(const Vec3Df & pos, const Vec3Df& light) const {
     Vec3Df dir = light - pos;
     dir.normalize();
 
-    return !controller->getRayTracer()->intersect(dir, pos, riShadow, ioShadow, true);
+    bool inter = controller->getRayTracer()->intersect(dir, pos, riShadow, ioShadow, true);
+    return !inter || (inter && riShadow.getIntersectionDistance() > (light - pos).getLength());
 }
 
-float Shadow::soft(const Vec3Df & pos, const Light * light) const {
+float Shadow::soft(const Vec3Df & pos, const Light & light) const {
     unsigned int nb_impact = 0;
     vector<Vec3Df> pulse_light = generateImpulsion(light);
 
@@ -25,7 +27,7 @@ float Shadow::soft(const Vec3Df & pos, const Light * light) const {
     return float(nbImpulse - nb_impact) / float(nbImpulse);
 }
 
-std::vector<Vec3Df> Shadow::generateImpulsion(const Light * light) const{
+std::vector<Vec3Df> Shadow::generateImpulsion(const Light & light) const{
     std::vector<Vec3Df> impulsion;
     impulsion.resize(nbImpulse);
     auto random = []() {
@@ -34,11 +36,11 @@ std::vector<Vec3Df> Shadow::generateImpulsion(const Light * light) const{
 
     for(unsigned int i = 0 ; i < nbImpulse ; i++) {
         Vec3Df r(random(), random(), random());
-        r = r.projectOn(light->getNormal());
+        r = r.projectOn(light.getNormal());
         r.normalize();
         float norm = 2*random()-1.f;
-        r = light->getRadius()*norm*r;
-        impulsion[i] = light->getPos() + r;
+        r = light.getRadius()*norm*r;
+        impulsion[i] = light.getPos() + r;
     }
     return impulsion;
 }

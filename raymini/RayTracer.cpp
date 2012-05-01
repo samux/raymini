@@ -206,11 +206,10 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
     if(intersect(dir, camPos, bestRay, intersectedObject)) {
         const Material & mat = intersectedObject->getMaterial();
-
-
+        const vector<Light> & light = getLights(bestRay.getIntersection());
 
         Color color = mat.genColor(camPos, bestRay.getIntersection(),
-                                   getLights(bestRay.getIntersection()),
+                                   light,
                                    type);
 
         if((depth < depthPathTracing) || (mode == PBGI_MODE)) {
@@ -288,7 +287,7 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     for (Vec3Df & direction : directions) {
         const Vec3Df & pos = intersection.getPos();
 
-        Object *intersectedObject;
+        const Object *intersectedObject;
         Ray bestRay;
         if (intersect(direction, pos, bestRay, intersectedObject)) {
             if (bestRay.getIntersectionDistance() < radiusAmbientOcclusion) {

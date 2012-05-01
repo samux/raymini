@@ -21,7 +21,7 @@ public:
 
     Octree * getOctree() const {return octree;}
     PointCloud * getPointCloud() const {return cloud;}
-    std::vector<Light *> getLights(const Ray & r) const;
+    std::vector<Light> getLights(const Ray & r) const;
     void setResolution(unsigned int r) {res = r;}
 
 private:

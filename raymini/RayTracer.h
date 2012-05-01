@@ -114,8 +114,8 @@ private:
     Shadow shadow;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
-    std::vector<Light *> getLights(const Vertex & closestIntersection) const;
-    std::vector<Light *> getLightsPT(const Vertex & closestIntersection, unsigned depth = 0) const;
+    std::vector<Light> getLights(const Vertex & closestIntersection) const;
+    std::vector<Light> getLightsPT(const Vertex & closestIntersection, unsigned depth = 0) const;
 };
 
 

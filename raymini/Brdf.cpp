@@ -28,7 +28,7 @@ Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
 
     for(const auto light : lights) {
         Vec3Df currentColor;
-        Vec3Df ir=(light->getPos() - p);
+        Vec3Df ir=(light.getPos() - p);
         ir.normalize();
 
         if(type&Lambert)
@@ -36,7 +36,7 @@ Vec3Df Brdf::operator()(const Vec3Df &p, const Vec3Df &n,
         if(type&Phong)
             currentColor += phong(ra, ir, n);
 
-        color += light->getIntensity()*light->getColor()*currentColor;
+        color += light.getIntensity()*light.getColor()*currentColor;
     }
 
     if(lights.size())

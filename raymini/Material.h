@@ -39,7 +39,7 @@ public:
     inline Vec3Df getColor () const { return color; }
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light *> lights, Brdf::Type type = Brdf::All) const;
+                             const std::vector<Light> & lights, Brdf::Type type = Brdf::All) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
@@ -64,7 +64,7 @@ public:
         Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light*> lights, Brdf::Type type) const;
+                             const std::vector<Light> & lights, Brdf::Type type) const;
     void setObject(const Object * o) { this->o = o; }//XXX 2bfix
 
 private:

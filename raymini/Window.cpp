@@ -156,6 +156,7 @@ void Window::updateLights() {
         Light * l = scene->getLights()[lightIndex];
         isLightEnabled = l->isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
+        Vec3Df color = l->getColor();
         Vec3Df pos = l->getPos();
         float intensity = l->getIntensity();
         float radius = l->getRadius();
