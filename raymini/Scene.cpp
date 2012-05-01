@@ -41,9 +41,11 @@ void Scene::updateBoundingBox () {
     if (objects.empty ())
         bbox = BoundingBox ();
     else {
-        bbox = objects[0]->getBoundingBox ();
-        for (unsigned int i = 1; i < objects.size (); i++)
-            bbox.extendTo (objects[i]->getBoundingBox ().translate(objects[i]->getTrans()));
+        for (const Object *o : objects) {
+            if (o->isEnabled()) {
+                bbox.extendTo(o->getBoundingBox().translate(o->getTrans()));
+            }
+        }
     }
 }
 

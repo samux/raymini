@@ -275,6 +275,7 @@ void Controller::windowEnableObject(bool enabled) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getObjects()[o]->setEnabled(enabled);
+    scene->updateBoundingBox();
     scene->notifyAll();
 }
 
