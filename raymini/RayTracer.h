@@ -101,8 +101,8 @@ public:
         typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         controller(c),
-        backgroundColor(Vec3Df(1, 1, 1)),
         shadow(c) {}
+        backgroundColor(Vec3Df(.1f, .1f, .3f)),
     virtual ~RayTracer () {}
 
 private:
