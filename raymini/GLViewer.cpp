@@ -162,7 +162,7 @@ void GLViewer::changeFocusPoint() {
         Vec3Df camPos (p[0], p[1], p[2]);
         Vec3Df viewDirection (d[0], d[1], d[2]);
         Ray focusSelect = Ray(camPos, viewDirection);
-        Object *object;
+        const Object *object;
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
             currentFocusPoint = focusSelect.getIntersection();
         }

@@ -48,7 +48,6 @@ Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersecti
 
 Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                         std::vector<Light *>, Brdf::Type) const {
-    Object * o= controller->getScene()->getObjects()[id];
     float size = o->getBoundingBox().getRadius();
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = camPos-pos;

@@ -18,6 +18,7 @@
 // This model assumes a white specular color (1.0, 1.0, 1.0)
 
 class Controller;
+class Object;
 
 class Material {
 public:
@@ -68,11 +69,11 @@ public:
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                              std::vector<Light*> lights, Brdf::Type type) const;
-    void setObject(unsigned id) { this->id = id; }
+    void setObject(const Object * o) { this->o = o; }//XXX 2bfix
 
 private:
     float coeff;
-    unsigned id;
+    const Object *o;
 };
 
 

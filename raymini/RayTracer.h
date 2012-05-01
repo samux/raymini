@@ -74,7 +74,7 @@ public:
     bool intersect(const Vec3Df & dir,
                    const Vec3Df & camPos,
                    Ray & bestRay,
-                   Object* & intersectedObject,
+                   const Object* & intersectedObject,
                    bool stopAtFirst = false) const;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;

@@ -29,7 +29,7 @@ void PointCloud::generatePoints() {
         for (const Vec3Df &direction : directions) {
             Ray bestRay;
             Brdf::Type type = Brdf::Diffuse;
-            Object *object;
+            const Object *object;
 
             // We add the surfel
             if (rayTracer->intersect(direction, position, bestRay, object)) {

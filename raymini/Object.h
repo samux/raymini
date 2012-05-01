@@ -24,6 +24,7 @@ public:
     Object (const Mesh & mesh, const Material * mat, std::string name="No name") :
         mesh (mesh), mat (mat), tree(nullptr), enabled(true), name(name) {
         updateBoundingBox ();
+        tree = new KDtree(*this);
     }
 
     virtual ~Object () {
@@ -47,11 +48,7 @@ public:
 
     inline const Material & getMaterial () const { return *mat; }
 
-    inline const KDtree & getKDtree () {
-        if(!tree)
-            tree = new KDtree(*this);
-        return *tree;
-    }
+    inline const KDtree & getKDtree () const { return *tree; }
 
     inline void setEnabled(bool e) { enabled = e; }
     inline bool isEnabled() const { return enabled; }

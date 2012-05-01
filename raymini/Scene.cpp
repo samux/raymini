@@ -65,6 +65,7 @@ void Scene::buildDefaultScene () {
     skyBoxMaterial = new SkyBoxMaterial(controller, "textures/skybox.ppm");
     mirrorMaterial = new Mirror(controller);
 
+    //---------- GROUND---------//
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
     Object * ground = new Object(groundMesh, groundMat, "Ground");
@@ -107,23 +108,21 @@ void Scene::buildDefaultScene () {
     rhino->setTrans (Vec3Df (1.f, 0.f, 0.4f));
     objects.push_back (rhino);
 
+    //---------- GARGOYLE-------//
     Mesh gargMesh;
     gargMesh.loadOFF ("models/gargoyle.off");
     Object * garg = new Object(gargMesh, gargMat, "Gargoyle");
     garg->setTrans (Vec3Df (-1.f, 1.0f, 0.f));
     objects.push_back (garg);
 
+    //---------- SKY BOX--------//
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
     Object * skyBox = new Object(skyBoxMesh, skyBoxMaterial, "Skybox");
     skyBox->setEnabled(false);
     objects.push_back(skyBox);
 
-    // build KDtree for every object
-    for(Object * o: objects)
-        o->getKDtree();
 
-    //Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     Light * l = new Light(Vec3Df (0, 0, 3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
     Light * l1 = new Light(Vec3Df (.5f, 3.f, 2.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
