@@ -101,7 +101,7 @@ void Window::updateFromScene() {
 
 void Window::updateFromRayTracer() {
     RayTracer *rayTracer = controller->getRayTracer();
-    
+
     // Shadows
     shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
 
@@ -287,6 +287,10 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setVisible(false);
     connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
+
+    QCheckBox * AOOnlyCheckBox = new QCheckBox ("Only ambient coloring", AOGroupBox);
+    connect (AOOnlyCheckBox, SIGNAL (toggled (bool)), controller, SLOT(windowSetOnlyAO (bool)));
+    AOLayout->addWidget (AOOnlyCheckBox);
 
     rayLayout->addWidget(AOGroupBox);
 
