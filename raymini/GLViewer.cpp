@@ -137,6 +137,7 @@ void GLViewer::updateFocus() {
 void GLViewer::update(Observable *o) {
     if (o == controller->getScene()) {
         updateLights();
+        updateBoundingBox();
     }
     else if (o == controller->getWindowModel()) {
         updateWireframe();
@@ -146,6 +147,15 @@ void GLViewer::update(Observable *o) {
         updateBackground();
     }
     updateGL();
+}
+
+void GLViewer::updateBoundingBox() {
+    Scene *scene = controller->getScene();
+    const BoundingBox & sceneBBox = scene->getBoundingBox();
+    Vec3Df c = sceneBBox.getCenter ();
+    float r = sceneBBox.getRadius ();
+    setSceneCenter(qglviewer::Vec (c[0], c[1], c[2]));
+    setSceneRadius(r);
 }
 
 void GLViewer::changeFocusPoint() {
@@ -225,15 +235,8 @@ void GLViewer::init() {
     // Set a FPS to 2
     setAnimationPeriod(msBetweenAnimation);
 
-    Scene * scene = controller->getScene();
-
     glLoadIdentity ();
-
-    const BoundingBox & sceneBBox = scene->getBoundingBox();
-    Vec3Df c = sceneBBox.getCenter ();
-    float r = sceneBBox.getRadius ();
-    setSceneCenter(qglviewer::Vec (c[0], c[1], c[2]));
-    setSceneRadius(r);
+    updateBoundingBox();
     showEntireScene();
 }
 

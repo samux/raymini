@@ -61,6 +61,7 @@ private:
     void updateWireframe();
     void updateBackground();
     void updateFocus();
+    void updateBoundingBox();
 
     /** Ray trace from the camera to update local focus point */
     void changeFocusPoint();
