@@ -68,6 +68,14 @@ Vec3Df Window::getLightPos() const {
     return newPos;
 }
 
+Vec3Df Window::getLightColor() const {
+    Vec3Df newColor;
+    for (int i=0; i<3; i++) {
+        newColor[i] = lightColorSpinBoxes[i]->value();
+    }
+    return newColor;
+}
+
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
         updateFromScene();
@@ -139,6 +147,7 @@ void Window::updateLights() {
     lightEnableCheckBox->setVisible(isLightSelected);
     for (int i=0; i<3; i++) {
         lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+        lightColorSpinBoxes[i]->setVisible(isLightEnabled);
     }
     lightRadiusSpinBox->setVisible(isLightEnabled);
     lightIntensitySpinBox->setVisible(isLightEnabled);
@@ -147,11 +156,13 @@ void Window::updateLights() {
         Light l = *(scene->getLights())[lightIndex];
         isLightEnabled = l.isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
+        Vec3Df color = l.getColor();
         Vec3Df pos = l.getPos();
         float intensity = l.getIntensity();
         float radius = l.getRadius();
         for (int i=0; i<3; i++) {
             lightPosSpinBoxes[i]->setValue(pos[i]);
+            lightColorSpinBoxes[i]->setValue(color[i]);
         }
         lightIntensitySpinBox->setValue(intensity);
         lightRadiusSpinBox->setValue(radius);
@@ -452,7 +463,9 @@ void Window::initControlWidget () {
     lightsLayout->addWidget(lightEnableCheckBox);
 
     QHBoxLayout *lightsPosLayout = new QHBoxLayout;
+    QHBoxLayout *lightsColorLayout = new QHBoxLayout;
     QString axis[3] = {"X: ", "Y: ", "Z: "};
+    QString colors[3] = {"R: ", "G: ", "B: "};
     for (int i=0; i<3; i++) {
         lightPosSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
         lightPosSpinBoxes[i]->setSingleStep(0.1);
@@ -462,8 +475,17 @@ void Window::initControlWidget () {
         lightPosSpinBoxes[i]->setPrefix(axis[i]);
         lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
         connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
+        lightColorSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
+        lightColorSpinBoxes[i]->setSingleStep(0.01);
+        lightColorSpinBoxes[i]->setMinimum(0);
+        lightColorSpinBoxes[i]->setMaximum(1);
+        lightColorSpinBoxes[i]->setVisible(false);
+        lightColorSpinBoxes[i]->setPrefix(colors[i]);
+        lightsColorLayout->addWidget(lightColorSpinBoxes[i]);
+        connect(lightColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightColor()));
     }
     lightsLayout->addLayout(lightsPosLayout);
+    lightsLayout->addLayout(lightsColorLayout);
 
     lightRadiusSpinBox = new QDoubleSpinBox(lightsGroupBox);
     lightRadiusSpinBox->setSingleStep(0.01);

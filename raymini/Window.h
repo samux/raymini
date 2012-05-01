@@ -35,6 +35,7 @@ public:
     virtual void update(Observable *);
 
     Vec3Df getLightPos() const;
+    Vec3Df getLightColor() const;
 
 private :
     Controller *controller;
@@ -78,6 +79,7 @@ private :
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;
     QDoubleSpinBox *lightPosSpinBoxes[3];
+    QDoubleSpinBox *lightColorSpinBoxes[3];
     QDoubleSpinBox *lightRadiusSpinBox;
     QDoubleSpinBox *lightIntensitySpinBox;
 

@@ -325,8 +325,16 @@ void Controller::windowSetLightPos() {
     }
     scene->getLights()[l]->setPos(window->getLightPos());
     scene->notifyAll();
-    // Has to be ATER the rest of the function
-    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+}
+
+void Controller::windowSetLightColor() {
+    int l = windowModel->getSelectedLightIndex();
+    if (l == -1) {
+        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
+        return;
+    }
+    scene->getLights()[l]->setColor(window->getLightColor());
+    scene->notifyAll();
 }
 
 void Controller::viewerSetWireframe(bool b) {

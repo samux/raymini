@@ -64,6 +64,7 @@ public slots :
     void windowSetLightRadius(double);
     void windowSetLightIntensity(double);
     void windowSetLightPos();
+    void windowSetLightColor();
     void windowSelectObject(int);
     void windowEnableObject(bool);
 
