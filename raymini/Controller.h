@@ -76,6 +76,8 @@ public slots :
     void viewerSetRayImage(const QImage & image);
     void viewerSetFocusPoint(Vertex point);
 
+    void threadRenderRayImage();
+
 private:
     // Views
     Window *window;
@@ -89,4 +91,7 @@ private:
 
     // QApplication
     QApplication *raymini;
+
+    // Render thread
+    RenderThread *renderThread;
 };

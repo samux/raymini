@@ -31,6 +31,7 @@ HEADERS = Window.h \
           Focus.h \
           Surfel.h \
           PointCloud.h \
+          RenderThread.h \
           Brdf.h \
           PBGI.h \
           Octree.h

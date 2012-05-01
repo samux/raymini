@@ -12,7 +12,11 @@ Controller::Controller(QApplication *r):
 {}
 
 Controller::~Controller()
-{}
+{
+    delete scene;
+    delete rayTracer;
+    delete windowModel;
+}
 
 void Controller::initAll(int argc, char **argv) {
     scene = new Scene(this, argc, argv);
@@ -42,6 +46,10 @@ void Controller::initAll(int argc, char **argv) {
     scene->notifyAll();
     rayTracer->notifyAll();
     windowModel->notifyAll();
+
+    renderThread = new RenderThread();
+    renderThread->controller = this;
+    connect(renderThread, SIGNAL(finished()), this, SLOT(threadRenderRayImage()));
 }
 
 /******************************************
@@ -73,7 +81,27 @@ void Controller::windowSetRayTracerMode (bool b) {
     rayTracer->notifyAll();
 }
 
+    // TODO move to view
+    //QTime timer;
+    //timer.start ();
+
+
+    //window->statusBar()->showMessage(QString ("Raytracing performed in ") +
+                             //QString::number (timer.elapsed ()) +
+                             //QString ("ms at ") +
+                             //QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
+                             //QString (" screen resolution"));
+
+void Controller::threadRenderRayImage() {
+    viewerSetRayImage(renderThread->resultImage);
+    viewerSetDisplayMode(WindowModel::RayDisplayMode);
+}
+
 void Controller::windowRenderRayImage () {
+    if (renderThread->isRunning()) {
+        cout << "Already generating an image !\n";
+        return;
+    }
     qglviewer::Camera * cam = viewer->camera ();
     qglviewer::Vec p = cam->position ();
     qglviewer::Vec d = cam->viewDirection ();
@@ -87,25 +115,9 @@ void Controller::windowRenderRayImage () {
     float aspectRatio = cam->aspectRatio ();
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
-    // TODO move to view
-    QTime timer;
-    timer.start ();
-
-    // Will notify
-    viewerSetRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
-                                           fieldOfView, aspectRatio, screenWidth, screenHeight));
-
-    window->statusBar()->showMessage(QString ("Raytracing performed in ") +
-                             QString::number (timer.elapsed ()) +
-                             QString ("ms at ") +
-                             QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-                             QString (" screen resolution"));
-
-    // Will notify
-    viewerSetDisplayMode(WindowModel::RayDisplayMode);
-
-    windowModel->notifyAll();
-    rayTracer->notifyAll();
+    renderThread->prepare(camPos, viewDirection, upVector, rightVector,
+            fieldOfView, aspectRatio, screenWidth, screenHeight);
+    renderThread->start();
 }
 
 void Controller::windowSetBGColor () {
