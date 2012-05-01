@@ -29,6 +29,7 @@ Features
 - Hard and soft shadows
 - Ambient occlusion
 - Mirror materials
+- Prism materials
 - Path tracing and Point-Based Global Illumination
 - Motion blur
 - Focal effect
