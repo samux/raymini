@@ -58,6 +58,11 @@ protected:
     float glossyRatio;
 };
 
+class Mirror : public Material {
+public:
+    Mirror(Controller *c) : Material(c, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f){}
+};
+
 class Glass : public Material {
 public:
     Glass(Controller *c, float coeff) :

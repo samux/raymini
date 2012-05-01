@@ -22,25 +22,31 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
         controller->getRayTracer()->getAmbientOcclusion(closestIntersection):
         0.f;
 
-    Brdf brdf(lights,
-              noise(closestIntersection)*color,
-              controller->getRayTracer()->getBackgroundColor(),
-              diffuse,
-              specular,
-              ambientOcclusionContribution,
-              1.5);
+    const Brdf brdf(lights,
+                    noise(closestIntersection)*color,
+                    controller->getRayTracer()->getBackgroundColor(),
+                    diffuse,
+                    specular,
+                    ambientOcclusionContribution,
+                    1.5);
 
-    Vec3Df normalColor = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, type);
+    if(glossyRatio == 0)
+        return brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, type);
 
-    if (glossyRatio == 0) {
-        return normalColor;
-    }
-
+    /* Glossy Material */
+    const Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos,
+                             Brdf::Type(Brdf::Specular&type));
+    const Vec3Df color = glossyRatio<=1?
+        brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos,
+             Brdf::Type((Brdf::Ambient|Brdf::Diffuse)&type)):
+        Vec3Df();
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    return Vec3Df::interpolate(normalColor, controller->getRayTracer()->getColor(dir, pos, false), glossyRatio);
+    const Vec3Df reflectedColor = controller->getRayTracer()->getColor(dir, pos, false);
+
+    return spec + Vec3Df::interpolate(color, reflectedColor, glossyRatio);
 }
 
 Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
