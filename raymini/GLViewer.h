@@ -17,6 +17,7 @@
 #include "Material.h"
 #include "Object.h"
 #include "Observer.h"
+#include "Vec3D.h"
 
 class Controller;
 
@@ -47,7 +48,9 @@ protected :
     virtual void keyReleaseEvent (QKeyEvent * event);
     virtual void mousePressEvent (QMouseEvent * event);
     virtual void mouseMoveEvent (QMouseEvent *event);
+    virtual void mouseReleaseEvent (QMouseEvent *event);
     virtual void wheelEvent (QWheelEvent * e);
+    virtual void animate();
 
 private:
     Controller *controller;
@@ -55,8 +58,20 @@ private:
     void updateLights();
     void updateWireframe();
     void updateBackground();
+    void updateFocus();
 
+    /** Ray trace from the camera to update local focus point */
     void changeFocusPoint();
+
+    bool focusBlinkOn;
+    QTime time;
+    Vertex currentFocusPoint;
+
+    static Vec3Df focusBlinkOnColor() {return Vec3Df(1, 0, 0);}
+    static Vec3Df focusBlinkOffColor() {return Vec3Df(0, 0, 0);}
+    static Vec3Df focusFixedColor() {return Vec3Df(1, 1, 1);}
+
+    static int constexpr msBetweenAnimation = 500;
 };
 
 // Some Emacs-Hints -- please don't remove:

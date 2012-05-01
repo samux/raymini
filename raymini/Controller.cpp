@@ -217,7 +217,7 @@ void Controller::windowSetFocusAperture(double a) {
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
     if (rayTracer->typeFocus == Focus::NONE) {
-        cerr <<__FUNCTION__<< "There is no point to change WindowModel focus mode !"<<endl;
+        cerr <<__FUNCTION__<< ": There is no point to change WindowModel focus mode !"<<endl;
         return;
     }
     windowModel->setFocusMode(!isFocusMode);
@@ -226,7 +226,7 @@ void Controller::windowSetFocalFixing(bool isFocusMode) {
 
 void Controller::viewerSetFocusPoint(Vertex point) {
     if (rayTracer->typeFocus == Focus::NONE || !windowModel->isFocusMode()) {
-        cerr <<__FUNCTION__<< "There is no point to define a focal !"<<endl;
+        cerr <<__FUNCTION__<< ": There is no point to define a focal !"<<endl;
         return;
     }
     windowModel->setFocusPoint(point);

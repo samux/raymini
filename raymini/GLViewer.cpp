@@ -24,7 +24,8 @@ static const GLuint OpenGLLightID[] = {GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT
 
 GLViewer::GLViewer(Controller *c):
     QGLViewer(),
-    controller(c)
+    controller(c),
+    focusBlinkOn(true)
 {}
 
 GLViewer::~GLViewer ()
@@ -62,19 +63,25 @@ void GLViewer::keyReleaseEvent (QKeyEvent * /*event*/) {
 
 void GLViewer::mousePressEvent (QMouseEvent * event) {
     controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    changeFocusPoint();
     QGLViewer::mousePressEvent(event);
 }
 
+void GLViewer::mouseReleaseEvent (QMouseEvent *event) {
+    RayTracer *rayTracer = controller->getRayTracer();
+    WindowModel *windowModel = controller->getWindowModel();
+    if (rayTracer->typeFocus != Focus::NONE && windowModel->isFocusMode()) {
+        controller->viewerSetFocusPoint(currentFocusPoint);
+    }
+    QGLViewer::mouseReleaseEvent(event);
+}
+
 void GLViewer::mouseMoveEvent(QMouseEvent *event) {
-    changeFocusPoint();
     QGLViewer::mouseMoveEvent(event);
 }
 
 
 void GLViewer::wheelEvent (QWheelEvent * e) {
     controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
-    changeFocusPoint();
     QGLViewer::wheelEvent (e);
 }
 
@@ -116,12 +123,23 @@ void GLViewer::updateBackground() {
     setBackgroundColor(c);
 }
 
+void GLViewer::updateFocus() {
+    WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel->isFocusMode()) {
+        startAnimation();
+    }
+    else {
+        stopAnimation();
+    }
+}
+
 void GLViewer::update(Observable *o) {
     if (o == controller->getScene()) {
         updateLights();
     }
     else if (o == controller->getWindowModel()) {
         updateWireframe();
+        updateFocus();
     }
     else if (o == controller->getRayTracer()) {
         updateBackground();
@@ -146,7 +164,7 @@ void GLViewer::changeFocusPoint() {
         Ray focusSelect = Ray(camPos, viewDirection);
         Object *object;
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
-            controller->viewerSetFocusPoint(focusSelect.getIntersection());
+            currentFocusPoint = focusSelect.getIntersection();
         }
     }
 }
@@ -155,6 +173,12 @@ void GLViewer::changeFocusPoint() {
 // Drawing functions
 // -----------------------------------------------
 
+void GLViewer::animate() {
+    if (time.elapsed() > msBetweenAnimation) {
+        time.restart();
+        focusBlinkOn = !focusBlinkOn;
+    }
+}
 
 void drawCube(const Vec3Df min, const Vec3Df max) {
     glVertex3f(min[0], min[1], min[2]);
@@ -194,6 +218,9 @@ void GLViewer::init() {
     glDepthFunc (GL_LEQUAL);
     glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable (GL_POINT_SMOOTH);
+
+    // Set a FPS to 2
+    setAnimationPeriod(msBetweenAnimation);
 
     Scene * scene = controller->getScene();
 
@@ -247,14 +274,25 @@ void GLViewer::draw () {
     RayTracer * rayTracer = controller->getRayTracer();
 
     if (rayTracer->typeFocus != Focus::NONE) {
-        Vec3Df X, Y;
-        const Vertex &focusPoint = windowModel->getFocusPoint();
-        focusPoint.getNormal().getTwoOrthogonals(X,Y);
 
         glDisable (GL_LIGHTING);
-        glColor3f(1, 1, 1);
-        auto minidraw = [&focusPoint](const Vec3Df & delta) {
-            const Vec3Df pos = focusPoint.getPos() + 0.01*focusPoint.getNormal();
+        Vec3Df focusColor;
+        bool isFocusMode = windowModel->isFocusMode();
+        if (isFocusMode) {
+            changeFocusPoint();
+            if (focusBlinkOn) {
+                focusColor = focusBlinkOnColor();
+            } else {
+                focusColor = focusBlinkOffColor();
+            }
+        } else {
+            focusColor = focusFixedColor();
+        }
+        Vec3Df X, Y;
+        currentFocusPoint.getNormal().getTwoOrthogonals(X,Y);
+        glColor3f(focusColor[0], focusColor[1], focusColor[2]);
+        auto minidraw = [&currentFocusPoint](const Vec3Df & delta) {
+            const Vec3Df pos = currentFocusPoint.getPos() + 0.01*currentFocusPoint.getNormal();
             Vec3Df tmp = pos + delta;
             glVertex3f(tmp[0], tmp[1], tmp[2]);
         };
