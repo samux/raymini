@@ -11,7 +11,7 @@ int main (int argc, char **argv) {
     QApplication::setStyle (new QPlastiqueStyle);
 
     Controller controller(&raymini);
-    controller.initAll();
+    controller.initAll(argc, argv);
 
     return raymini.exec ();
 }

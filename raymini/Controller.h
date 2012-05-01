@@ -22,7 +22,7 @@ public:
     virtual ~Controller();
 
     /** Start the whole procedure */
-    void initAll();
+    void initAll(int argc, char **argv);
 
     inline Window *getWindow() {return window;}
     inline GLViewer *getViewer() {return viewer;}

@@ -21,8 +21,9 @@ class Object {
 public:
     inline Object (std::string name = "No name") : tree(nullptr), enabled(false), name(name) {}
 
-    Object (const Mesh & mesh, const Material * mat, std::string name="No name") :
-        mesh (mesh), mat (mat), tree(nullptr), enabled(true), name(name) {
+    Object (const Mesh & mesh, const Material * mat, std::string name="No name", const Vec3Df &trans=Vec3Df()) :
+        mesh (mesh), mat (mat), trans(trans), origTrans(trans),
+        tree(nullptr), enabled(true), name(name) {
         updateBoundingBox ();
         tree = new KDtree(*this);
     }

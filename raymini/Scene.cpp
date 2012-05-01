@@ -5,30 +5,63 @@
 // All rights reserved.
 // *********************************************************
 
+#include <iostream>
+#include <string>
+
 #include "Scene.h"
 
 #include "Noise.h"
 #include "SkyBoxMaterial.h"
-#include "Controller.h"
 
 using namespace std;
 
-Scene::Scene(Controller *c):
-    controller(c)
-{
-    buildDefaultScene ();
+void printUsage() {
+    cout << "Using default scene. "
+         << "Other possibilities are: " << endl
+         << "room: simple room" << endl
+         << "rs: room with sphere" << endl
+         << "rsm: room with mirror sphere" << endl
+         << "rsglas: room with glass sphere" << endl
+         << "rsglos: room with glossy sphere" << endl
+         << endl;
+}
+
+Scene::Scene(Controller *c, int argc, char **argv) :
+    red      ({c, 1.f, 1.f, {1.f, 0.f, 0.f}}),
+    green    ({c, 1.f, 1.f, {0.f, 1.f, 0.f}}),
+    blue     ({c, 1.f, 1.f, {.0f, 0.f, 1.f}}),
+    white    ({c, 1.f, 1.f, {1.f, 1.f, 1.f}}),
+    black    ({c, 1.f, 1.f, {0.f, 0.f, 0.f}}),
+    mirrorMat(new Mirror(c)),
+    glossyMat(new Material(c, 1.f, 1.f, {1.f, 0.f, 0.f}, .1f)),
+    groundMat(new Material(c, 1.f, 0.f, {.2f, .6f, .2f},
+                           [](const Vertex & v) -> float {
+                               return Perlin(0.5f, 4, 10)(v.getPos());
+                           })),
+    rhinoMat (new Material(c, 1.f, 0.2f, {.6f, .6f, .7f},
+                           [](const Vertex & v) -> float {
+                               return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
+                           })),
+    skyBoxMaterial(new SkyBoxMaterial(c, "textures/skybox.ppm")),
+    controller(c) {
+
+    string id(argc>1?argv[1]:"");
+
+    if(!id.compare("room")) buildRoom();
+    else if(!id.compare("rs")) buildRoom(&red);
+    else if(!id.compare("rsm")) buildRoom(mirrorMat);
+    else if(!id.compare("rsglas")) buildRoom(new Glass(c, 1.1f));
+    else if(!id.compare("rsglos")) buildRoom(glossyMat);
+    else buildDefaultScene();
+
     updateBoundingBox ();
 }
 
 Scene::~Scene () {
+    delete mirrorMat;
+    delete glossyMat;
     delete groundMat;
-    delete blue;
-    delete red;
-    delete ramMat;
     delete rhinoMat;
-    delete gargMat;
-    delete skyBoxMaterial;
-    delete mirrorMaterial;
 
     for(auto o : objects)
         delete o;
@@ -49,23 +82,47 @@ void Scene::updateBoundingBox () {
     }
 }
 
+void Scene::buildRoom(Material *sphereMat) {
+    Mesh groundMesh;
+    groundMesh.loadOFF("models/ground.off");
+
+    objects.push_back(new Object(groundMesh, &white, "Ground"));
+
+    groundMesh.rotate({0,1,0}, M_PI);
+    objects.push_back(new Object(groundMesh, &white, "Ceiling", {0, 0, 4}));
+
+    groundMesh.rotate({0,1,0}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &red, "Right Wall", {2, 0, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &green, "Back Wall", {0, 2, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &blue, "Left Wall", {-2, 0, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &black, "Front Wall", {0, -2, 2}));
+
+
+    if(sphereMat) {
+        Mesh sphereMesh;
+        sphereMesh.loadOFF("models/sphere.off");
+        auto sphere = new Object(sphereMesh, sphereMat, "Sphere", {0, 0, 1});
+        auto glass = dynamic_cast<Glass*>(sphereMat);
+        if(glass) glass->setObject(sphere);
+        objects.push_back(sphere);
+    }
+
+    lights.push_back(new Light(Vec3Df (0, 0, 3), 0.01, Vec3Df(0, 0, 1),
+                               Vec3Df (1.f, 1.f, 1.f), 1.0f));
+
+}
+
 void Scene::buildDefaultScene () {
-    groundMat = new Material(controller, 1.f, 0.f, Vec3Df (.2f, 0.6f, .2f),
-                                       [](const Vertex & v){
-                                           static const Perlin perlin(0.5f, 4, 10);
-                                           return perlin(v.getPos());
-                                       });
-    blue = new Material(controller, 1.f, 1.f, Vec3Df (.0f, 0.f, 1.f));
-    red = new Material(controller, 1.f, 1.f, Vec3Df (1.0f, 0.f, 0.f));
-    ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
-    rhinoMat = new Material(controller, 1.0f, 0.2f, Vec3Df (0.6f, 0.6f, 0.7f),
-                                      [](const Vertex & v) -> float{
-                                          static const Perlin perlin(0.5f, 4, 5);
-                                          return sqrt(fabs(sin(2 * M_PI * perlin(v.getPos()))));
-                                      });
-    gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
-    skyBoxMaterial = new SkyBoxMaterial(controller, "textures/skybox.ppm");
-    mirrorMaterial = new Material(controller, 1, 1, Vec3Df(0.5, 0.5, 0.5), 0.5f);
+    printUsage();
+
+    auto ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    auto gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
 
     //---------- GROUND---------//
     Mesh groundMesh;
@@ -78,7 +135,7 @@ void Scene::buildDefaultScene () {
     ceilingMesh.loadOFF ("models/window.off");
     ceilingMesh.rotate(Vec3Df(0,1,0), M_PI);
 
-    Object * ceiling = new Object(ceilingMesh, blue, "Ceiling");
+    Object * ceiling = new Object(ceilingMesh, &blue, "Ceiling");
     ceiling->setTrans(Vec3Df(0, 0, 3.0));
     objects.push_back (ceiling);
 
@@ -86,13 +143,13 @@ void Scene::buildDefaultScene () {
     Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
 
-    Object * leftWall = new Object(wallMesh, mirrorMaterial, "Left wall");
+    Object * leftWall = new Object(wallMesh, mirrorMat, "Left wall");
     leftWall->setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
-    Object * backWall = new Object(backWallMesh, red, "Back wall");
+    Object * backWall = new Object(backWallMesh, &red, "Back wall");
     backWall->setTrans(Vec3Df(0, 1.95251, 1.5));
     objects.push_back (backWall);
 

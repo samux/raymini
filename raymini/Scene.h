@@ -47,22 +47,20 @@ public:
             o->reset();
     }
 
-    Scene(Controller *);
+    Scene(Controller *, int argc, char **argv);
     virtual ~Scene ();
 
 private:
+    Material red, green, blue, white, black;
+    Material *mirrorMat, *glossyMat;
+    Material *groundMat;
+    Material *rhinoMat;
+    Material *skyBoxMaterial;
+
     Controller *controller;
 
-    Material *groundMat;
-    Material *blue;
-    Material *red;
-    Material *ramMat;
-    Material *rhinoMat;
-    Material *gargMat;
-    Material *skyBoxMaterial;
-    Material *mirrorMaterial;
-
     void buildDefaultScene ();
+    void buildRoom (Material *sphereMat=nullptr);
     std::vector<Object *> objects;
     std::vector<Light *> lights;
     BoundingBox bbox;

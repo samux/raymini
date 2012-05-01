@@ -14,8 +14,8 @@ Controller::Controller(QApplication *r):
 Controller::~Controller()
 {}
 
-void Controller::initAll() {
-    scene = new Scene(this);
+void Controller::initAll(int argc, char **argv) {
+    scene = new Scene(this, argc, argv);
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);
 
