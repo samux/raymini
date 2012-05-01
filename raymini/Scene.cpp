@@ -70,6 +70,16 @@ void Scene::buildDefaultScene () {
     Object * ground = new Object(groundMesh, groundMat, "Ground");
     objects.push_back (ground);
 
+    //-------- CEILING---------//
+    Mesh ceilingMesh;
+    ceilingMesh.loadOFF ("models/window.off");
+    ceilingMesh.rotate(Vec3Df(0,1,0), M_PI);
+
+    Object * ceiling = new Object(ceilingMesh, blue, "Ceiling");
+    ceiling->setTrans(Vec3Df(0, 0, 3.0));
+    objects.push_back (ceiling);
+
+    //---------- WALLS----------//
     Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
 
@@ -83,13 +93,14 @@ void Scene::buildDefaultScene () {
     backWall->setTrans(Vec3Df(0, 1.95251, 1.5));
     objects.push_back (backWall);
 
+    //---------- RAM-----------//
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
     Object * ram = new Object(ramMesh, ramMat, "Ram");
     ram->setTrans (Vec3Df (-1.f, -1.0f, 0.f));
     objects.push_back (ram);
 
-
+    //---------- RHINO----------//
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
     Object * rhino = new Object(rhinoMesh, rhinoMat, "Rhino");
@@ -113,8 +124,8 @@ void Scene::buildDefaultScene () {
         o->getKDtree();
 
     //Light l (Vec3Df (.5f, -3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
-    Light * l = new Light(Vec3Df (0, 0, 5), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
+    Light * l = new Light(Vec3Df (0, 0, 3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
-    //Light * l1 = new Light(Vec3Df (.5f, 3.f, 5.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
-    //lights.push_back (l1);
+    Light * l1 = new Light(Vec3Df (.5f, 3.f, 2.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
+    lights.push_back (l1);
 }
