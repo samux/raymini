@@ -42,7 +42,7 @@ void PointCloud::generatePoints() {
                 Vec3Df normalizedDirection(direction);
                 normalizedDirection.normalize();
                 float radius = (1.0+abs(Vec3Df::crossProduct(normalizedDirection, intNorm).getLength()))*distance/(pixelDistance*resolution);
-                if(dynamic_cast<const Mirror *>(&mat) == nullptr) {
+                if(!mat.isGlossy()) {
                     Vec3Df color = mat.genColor(
                             position,
                             intersection,

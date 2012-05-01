@@ -65,7 +65,7 @@ void Scene::buildDefaultScene () {
                                       });
     gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
     skyBoxMaterial = new SkyBoxMaterial(controller, "textures/skybox.ppm");
-    mirrorMaterial = new Mirror(controller);
+    mirrorMaterial = new Material(controller, 1, 1, Vec3Df(0.5, 0.5, 0.5), 0.5f);
 
     //---------- GROUND---------//
     Mesh groundMesh;

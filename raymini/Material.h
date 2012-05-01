@@ -24,13 +24,13 @@ class Material {
 public:
     inline Material(Controller *c) : controller(c),
                                      diffuse (1.f), specular (1.f), color (0.7f, 0.7f, 1.f),
-                                     noise([](const Vertex &){ return 1.f; }) {}
-    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color)
+                                     noise([](const Vertex &){ return 1.f; }), glossyRatio(0) {}
+    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color, float glossyRatio=0)
         : controller(c), diffuse (diffuse), specular (specular), color (color),
-          noise([](const Vertex &){ return 1.f; }) {}
+          noise([](const Vertex &){ return 1.f; }), glossyRatio(glossyRatio) {}
     inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color,
-                    float (*noise)(const Vertex &))
-        : controller(c), diffuse (diffuse), specular (specular), color (color), noise(noise) {}
+                    float (*noise)(const Vertex &), float glossyRatio=0)
+        : controller(c), diffuse (diffuse), specular (specular), color (color), noise(noise), glossyRatio(glossyRatio) {}
 
     virtual ~Material () {}
 
@@ -45,6 +45,9 @@ public:
     inline void setSpecular (float s) { specular = s; }
     inline void setColor (const Vec3Df & c) { color = c; }
 
+    inline float getGlossyRatio() const {return glossyRatio;}
+    inline bool isGlossy() const {return glossyRatio!=0;}
+
 protected:
     Controller *controller;
 
@@ -52,14 +55,7 @@ protected:
     float specular;
     Vec3Df color;
     float (*noise)(const Vertex &);
-};
-
-class Mirror : public Material {
-public:
-    Mirror(Controller *c) : Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}) {}
-
-    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                             std::vector<Light *> lights, Brdf::Type type) const;
+    float glossyRatio;
 };
 
 class Glass : public Material {

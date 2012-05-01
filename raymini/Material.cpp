@@ -30,20 +30,17 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
               ambientOcclusionContribution,
               1.5);
 
-    return brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, type);
-}
+    Vec3Df normalColor = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, type);
 
-Vec3Df Mirror::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                         std::vector<Light *> lights, Brdf::Type type)  const {
-    Brdf brdf(lights, 1.f, 30);
-
-    Vec3Df spec = brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, Brdf::Type(Brdf::Specular&type));
+    if (glossyRatio == 0) {
+        return normalColor;
+    }
 
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = (camPos-pos).reflect(closestIntersection.getNormal());
     dir.normalize();
 
-    return spec + controller->getRayTracer()->getColor(dir, pos, false);
+    return Vec3Df::interpolate(normalColor, controller->getRayTracer()->getColor(dir, pos, false), glossyRatio);
 }
 
 Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
