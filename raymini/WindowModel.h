@@ -33,7 +33,7 @@ public:
     inline void setRayImage(QImage i) {rayImage = i;}
     inline bool isFocusMode() const {return focusMode;}
     inline void setFocusMode(bool f) {focusMode = f;}
-    inline Vec3Df getFocusPoint() { return focusPoint.getPos(); }
+    inline Vertex getFocusPoint() { return focusPoint; }
     inline void setFocusPoint(Vertex f) {focusPoint = f;}
 
 private:

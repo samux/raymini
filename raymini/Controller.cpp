@@ -201,7 +201,6 @@ void Controller::windowSetOnlyAO(bool b) {
 }
 
 void Controller::windowEnableFocal(bool isFocal) {
-    // TODO ENHANCE
     windowModel->setFocusMode(isFocal);
     windowModel->notifyAll();
     if(!isFocal) {
@@ -211,17 +210,21 @@ void Controller::windowEnableFocal(bool isFocal) {
 }
 
 void Controller::windowSetFocal() {
-    // TODO ENHANCE
     if (windowModel->isFocusMode()) {
         windowModel->setFocusMode(false);
         windowModel->notifyAll();
-        rayTracer->setFocus(windowModel->getFocusPoint());
-        rayTracer->notifyAll();
     }
     else {
         // Will notify
         windowEnableFocal(true);
     }
+}
+
+void Controller::viewerSetFocusPoint(Vertex point) {
+    windowModel->setFocusPoint(point);
+    windowModel->notifyAll();
+    rayTracer->setFocus(point.getPos());
+    rayTracer->notifyAll();
 }
 
 void Controller::windowSetDepthPathTracing(int i) {
@@ -345,10 +348,5 @@ void Controller::viewerSetDisplayMode(int m) {
 
 void Controller::viewerSetRayImage(const QImage & image) {
     windowModel->setRayImage(image);
-    windowModel->notifyAll();
-}
-
-void Controller::viewerSetFocusPoint(Vertex point) {
-    windowModel->setFocusPoint(point);
     windowModel->notifyAll();
 }
