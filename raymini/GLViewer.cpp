@@ -99,7 +99,7 @@ void GLViewer::updateLights() {
             const Vec3Df & p = light->getPos ();
             float intensity = light->getIntensity ();
             const Vec3Df & c = intensity * light->getColor ();
-            GLfloat glPos[4] = {p[0], p[1], p[2], 0};
+            GLfloat glPos[4] = {p[0], p[1], p[2], 1};
             GLfloat glColor[4] = {c[0], c[1], c[2], 0};
             glLightfv (glID, GL_POSITION, glPos);
             glLightfv (glID, GL_DIFFUSE, glColor);
@@ -216,11 +216,11 @@ void GLViewer::drawCube(const Vec3Df min, const Vec3Df max) {
 
 void GLViewer::init() {
     glClearColor (0.f, 0.f, 0.f, 0.0);
-    glCullFace (GL_BACK);
-    glEnable (GL_CULL_FACE);
-    glDepthFunc (GL_LEQUAL);
-    glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    glEnable (GL_POINT_SMOOTH);
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glDepthFunc(GL_LEQUAL);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_POINT_SMOOTH);
 
     // Set a FPS to 2
     setAnimationPeriod(msBetweenAnimation);
@@ -229,29 +229,12 @@ void GLViewer::init() {
 
     glLoadIdentity ();
 
-    glEnable (GL_LIGHTING);
-    for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
-        const Light * light = scene->getLights() [i];
-        if (!light->isEnabled()) {
-            continue;
-        }
-        GLuint glID = OpenGLLightID[i];
-        glEnable (glID);
-        const Vec3Df & p = light->getPos ();
-        float intensity = light->getIntensity ();
-        const Vec3Df & c = intensity * light->getColor ();
-        GLfloat glPos[4] = {p[0], p[1], p[2], 0};
-        GLfloat glColor[4] = {c[0], c[1], c[2], 0};
-        glLightfv (glID, GL_POSITION, glPos);
-        glLightfv (glID, GL_DIFFUSE, glColor);
-    }
-
-    const BoundingBox & sceneBBox = scene->getBoundingBox ();
+    const BoundingBox & sceneBBox = scene->getBoundingBox();
     Vec3Df c = sceneBBox.getCenter ();
     float r = sceneBBox.getRadius ();
-    setSceneCenter (qglviewer::Vec (c[0], c[1], c[2]));
-    setSceneRadius (r);
-    showEntireScene ();
+    setSceneCenter(qglviewer::Vec (c[0], c[1], c[2]));
+    setSceneRadius(r);
+    showEntireScene();
 }
 
 
@@ -278,7 +261,6 @@ void GLViewer::draw () {
 
     // Draw the focus
     if (rayTracer->typeFocus != Focus::NONE) {
-        //glDisable (GL_LIGHTING);
         Vec3Df focusColor;
         bool isFocusMode = windowModel->isFocusMode();
         if (isFocusMode) {
@@ -293,6 +275,7 @@ void GLViewer::draw () {
         }
         Vec3Df X, Y;
         currentFocusPoint.getNormal().getTwoOrthogonals(X,Y);
+        glDisable (GL_LIGHTING);
         glColor3f(focusColor[0], focusColor[1], focusColor[2]);
         auto minidraw = [&currentFocusPoint](const Vec3Df & delta) {
             const Vec3Df pos = currentFocusPoint.getPos() + 0.01*currentFocusPoint.getNormal();
@@ -348,7 +331,7 @@ void GLViewer::draw () {
         glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, glMatSpec);
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, glMatAmb);
         glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128);
-        glDisable (GL_COLOR_MATERIAL);
+        glDisable(GL_COLOR_MATERIAL);
         glEnable (GL_LIGHTING);
         o->getMesh().renderGL(windowModel->getRenderingMode() == WindowModel::FLAT);
         glPopMatrix ();
