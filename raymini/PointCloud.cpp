@@ -46,7 +46,7 @@ void PointCloud::generatePoints() {
                     Vec3Df color = mat.genColor(
                             position,
                             intersection,
-                            {light},
+                            {*light},
                             type);
                     Surfel surfel(
                             intPos,

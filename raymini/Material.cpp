@@ -17,7 +17,7 @@
 using namespace std;
 
 Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                           std::vector<Light *> lights, Brdf::Type type)  const {
+                           std::vector<Light> lights, Brdf::Type type) const {
     float ambientOcclusionContribution = (type & Brdf::Ambient)?
         controller->getRayTracer()->getAmbientOcclusion(closestIntersection):
         0.f;
@@ -44,7 +44,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
 }
 
 Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
-                        std::vector<Light *>, Brdf::Type) const {
+                        std::vector<Light>, Brdf::Type) const {
     float size = o->getBoundingBox().getRadius();
     const Vec3Df & pos = closestIntersection.getPos();
     Vec3Df dir = camPos-pos;

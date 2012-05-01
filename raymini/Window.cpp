@@ -153,13 +153,12 @@ void Window::updateLights() {
     lightIntensitySpinBox->setVisible(isLightEnabled);
 
     if (isLightSelected) {
-        Light l = *(scene->getLights())[lightIndex];
-        isLightEnabled = l.isEnabled();
+        Light * l = scene->getLights()[lightIndex];
+        isLightEnabled = l->isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
-        Vec3Df color = l.getColor();
-        Vec3Df pos = l.getPos();
-        float intensity = l.getIntensity();
-        float radius = l.getRadius();
+        Vec3Df pos = l->getPos();
+        float intensity = l->getIntensity();
+        float radius = l->getRadius();
         for (int i=0; i<3; i++) {
             lightPosSpinBoxes[i]->setValue(pos[i]);
             lightColorSpinBoxes[i]->setValue(color[i]);
