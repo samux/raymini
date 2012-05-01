@@ -1,4 +1,5 @@
 #include "WindowModel.h"
+#include "Controller.h"
 
 WindowModel::WindowModel(Controller *c):
     controller(c),
@@ -12,4 +13,8 @@ WindowModel::WindowModel(Controller *c):
 {}
 
 WindowModel::~WindowModel() {
+}
+
+void WindowModel::setFocusMode(bool f) {
+    focusMode = (f && controller->getRayTracer()->isFocus());
 }

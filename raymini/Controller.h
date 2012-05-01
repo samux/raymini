@@ -50,7 +50,7 @@ public slots :
     void windowSetAmbientOcclusionIntensity(int);
     void windowSetOnlyAO(bool);
     void windowEnableFocal(bool);
-    void windowSetFocal();
+    void windowSetFocalFixing(bool);
     void windowSetDepthPathTracing(int);
     void windowSetNbRayPathTracing(int);
     void windowSetMaxAnglePathTracing(int);

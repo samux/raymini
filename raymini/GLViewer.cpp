@@ -246,8 +246,7 @@ void GLViewer::draw () {
     Scene * scene = controller->getScene();
     RayTracer * rayTracer = controller->getRayTracer();
 
-    bool focusMode = windowModel->isFocusMode();
-    if (focusMode || rayTracer->focusEnabled()) {
+    if (rayTracer->isFocus()) {
         Vec3Df X, Y;
         const Vertex &focusPoint = windowModel->getFocusPoint();
         focusPoint.getNormal().getTwoOrthogonals(X,Y);

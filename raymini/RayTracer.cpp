@@ -46,7 +46,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     const Vec3Df upVec = tang * upVector / screenHeight;
 
     const float distanceOrthogonalCameraScreen = 1.0;
-    const Vec3Df camToObject = focalPoint - camPos;
+    const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
     const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
@@ -72,11 +72,11 @@ QImage RayTracer::render (const Vec3Df & camPos,
                         float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
                                                           distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                         dir.normalize ();
-                        Vec3Df focalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
+                        Vec3Df customFocalPoint = camPos + (distanceCameraScreen*(distanceOrthogonalCameraScreen + focalDistance)/
                                             distanceOrthogonalCameraScreen)*dir;
                         for (const pair<float, float> &offset_focus : offsets_focus) {
                             Vec3Df focusMovedCamPos = camPos + Vec3Df(1,0,0)*offset_focus.first + Vec3Df(0,1,0)*offset_focus.second;
-                            dir = focalPoint - focusMovedCamPos;
+                            dir = customFocalPoint - focusMovedCamPos;
                             dir.normalize();
                             c += getColor(dir, focusMovedCamPos);
                         }

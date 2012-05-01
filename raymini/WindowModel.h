@@ -32,9 +32,10 @@ public:
     inline const QImage & getRayImage() const {return rayImage;}
     inline void setRayImage(QImage i) {rayImage = i;}
     inline bool isFocusMode() const {return focusMode;}
-    inline void setFocusMode(bool f) {focusMode = f;}
     inline Vertex getFocusPoint() { return focusPoint; }
     inline void setFocusPoint(Vertex f) {focusPoint = f;}
+
+    void setFocusMode(bool f);
 
 private:
     Controller *controller;

@@ -201,30 +201,26 @@ void Controller::windowSetOnlyAO(bool b) {
 }
 
 void Controller::windowEnableFocal(bool isFocal) {
-    windowModel->setFocusMode(isFocal);
-    windowModel->notifyAll();
-    if(!isFocal) {
-        rayTracer->noFocus();
-        rayTracer->notifyAll();
-    }
+    rayTracer->setFocus(isFocal);
+    rayTracer->notifyAll();
 }
 
-void Controller::windowSetFocal() {
-    if (windowModel->isFocusMode()) {
-        windowModel->setFocusMode(false);
-        windowModel->notifyAll();
+void Controller::windowSetFocalFixing(bool isFocusMode) {
+    if (!rayTracer->isFocus()) {
+        cerr <<__FUNCTION__<< "There is no point to change WindowModel focus mode !"<<endl;
+        return;
     }
-    else {
-        // Will notify
-        windowEnableFocal(true);
-    }
+    windowModel->setFocusMode(!isFocusMode);
+    windowModel->notifyAll();
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {
+    if (!rayTracer->isFocus() || !windowModel->isFocusMode()) {
+        cerr <<__FUNCTION__<< "There is no point to define a focal !"<<endl;
+        return;
+    }
     windowModel->setFocusPoint(point);
     windowModel->notifyAll();
-    rayTracer->setFocus(point.getPos());
-    rayTracer->notifyAll();
 }
 
 void Controller::windowSetDepthPathTracing(int i) {

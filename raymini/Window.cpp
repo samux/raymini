@@ -159,15 +159,11 @@ void Window::updateLights() {
 void Window::updateFocus() {
     WindowModel *windowModel = controller->getWindowModel();
     RayTracer *rayTracer = controller->getRayTracer();
+    bool isFocus = rayTracer->isFocus();
+    focalCheckBox->setChecked(isFocus);
+    changeFocusFixingCheckBox->setVisible(isFocus);
     bool isFocusMode = windowModel->isFocusMode();
-    bool isFocus = rayTracer->focusEnabled();
-    selectFocusedObject->setVisible(isFocusMode||isFocus);
-    if (isFocusMode) {
-        selectFocusedObject->setText("Choose focused point");
-    }
-    else {
-        selectFocusedObject->setText("Change focus point");
-    }
+    changeFocusFixingCheckBox->setChecked(!isFocusMode);
 }
 
 void Window::updateObjects() {
@@ -421,19 +417,19 @@ void Window::initControlWidget () {
     rayLayout->addWidget (PTGroupBox);
 
     //  Focal
-    QGroupBox * focalGroupBox = new QGroupBox ("Focal", rayGroupBox);
-    QVBoxLayout * focalLayout = new QVBoxLayout (focalGroupBox);
+    QGroupBox * focalGroupBox = new QGroupBox("Focal", rayGroupBox);
+    QVBoxLayout * focalLayout = new QVBoxLayout(focalGroupBox);
 
-    QCheckBox * focalCheckBox = new QCheckBox ("Enable Focus", focalGroupBox);
-    connect (focalCheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowEnableFocal (bool)));
-    focalLayout->addWidget (focalCheckBox);
+    focalCheckBox = new QCheckBox("Enable Focus", focalGroupBox);
+    connect(focalCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableFocal(bool)));
+    focalLayout->addWidget(focalCheckBox);
 
-    selectFocusedObject  = new QPushButton ("", focalGroupBox);
-    selectFocusedObject->setVisible(false);
-    connect (selectFocusedObject, SIGNAL (clicked ()) , controller, SLOT ( windowSetFocal()));
-    focalLayout->addWidget (selectFocusedObject);
+    changeFocusFixingCheckBox  = new QCheckBox("Focal point is fixed", focalGroupBox);
+    changeFocusFixingCheckBox->setVisible(false);
+    connect(changeFocusFixingCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetFocalFixing(bool)));
+    focalLayout->addWidget(changeFocusFixingCheckBox);
 
-    rayLayout->addWidget (focalGroupBox);
+    rayLayout->addWidget(focalGroupBox);
 
     // Motion Blur
     if(scene->hasMobile()) {
