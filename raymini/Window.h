@@ -81,8 +81,10 @@ private :
     QDoubleSpinBox *lightRadiusSpinBox;
     QDoubleSpinBox *lightIntensitySpinBox;
 
-    QCheckBox *focalCheckBox;
+    QComboBox *focusTypeComboBox;
     QCheckBox *changeFocusFixingCheckBox;
+    QSpinBox *focusNbRaysSpinBox;
+    QDoubleSpinBox *focusApertureSpinBox;
 };
 
 #endif // WINDOW_H

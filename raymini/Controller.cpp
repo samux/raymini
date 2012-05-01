@@ -200,13 +200,23 @@ void Controller::windowSetOnlyAO(bool b) {
     rayTracer->notifyAll();
 }
 
-void Controller::windowEnableFocal(bool isFocal) {
-    rayTracer->setFocus(isFocal);
+void Controller::windowSetFocusType(int type) {
+    rayTracer->typeFocus = static_cast<Focus::Type>(type);
+    rayTracer->notifyAll();
+}
+
+void Controller::windowSetFocusNbRays(int n) {
+    rayTracer->nbRayFocus = n;
+    rayTracer->notifyAll();
+}
+
+void Controller::windowSetFocusAperture(double a) {
+    rayTracer->apertureFocus = a;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
-    if (!rayTracer->isFocus()) {
+    if (rayTracer->typeFocus == Focus::NONE) {
         cerr <<__FUNCTION__<< "There is no point to change WindowModel focus mode !"<<endl;
         return;
     }
@@ -215,7 +225,7 @@ void Controller::windowSetFocalFixing(bool isFocusMode) {
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {
-    if (!rayTracer->isFocus() || !windowModel->isFocusMode()) {
+    if (rayTracer->typeFocus == Focus::NONE || !windowModel->isFocusMode()) {
         cerr <<__FUNCTION__<< "There is no point to define a focal !"<<endl;
         return;
     }

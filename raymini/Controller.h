@@ -49,7 +49,9 @@ public slots :
     void windowSetAmbientOcclusionRadius(double);
     void windowSetAmbientOcclusionIntensity(int);
     void windowSetOnlyAO(bool);
-    void windowEnableFocal(bool);
+    void windowSetFocusType(int);
+    void windowSetFocusNbRays(int);
+    void windowSetFocusAperture(double);
     void windowSetFocalFixing(bool);
     void windowSetDepthPathTracing(int);
     void windowSetNbRayPathTracing(int);

@@ -68,7 +68,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
                     Vec3Df step = stepX + stepY;
                     Vec3Df dir = direction + step;
                     dir.normalize();
-                    if (focus) {
+                    if (typeFocus != Focus::NONE) {
                         float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
                                                           distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
                         dir.normalize ();

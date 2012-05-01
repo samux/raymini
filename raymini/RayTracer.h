@@ -54,9 +54,6 @@ public:
 
     unsigned nbPictures;
 
-    void setFocus(bool f) { focus = f; }
-    bool isFocus() { return focus; };
-
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     Shadow::Mode getShadowMode() { return shadow.mode; }
     void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
@@ -90,12 +87,11 @@ public:
         radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
-        typeFocus(Focus::STOCHASTIC), nbRayFocus(9), apertureFocus(0.1),
+        typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
         nbPictures(1),
         controller(c),
         backgroundColor(Vec3Df(1, 1, 1)),
-        shadow(c),
-        focus(false) {}
+        shadow(c) {}
     inline virtual ~RayTracer () {}
 
 private:
@@ -104,7 +100,6 @@ private:
     static constexpr float DISTANCE_MIN_INTERSECT = 0.000001f;
     Vec3Df backgroundColor;
     Shadow shadow;
-    bool focus;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light *> getLights(const Vertex & closestIntersection) const;

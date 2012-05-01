@@ -16,5 +16,5 @@ WindowModel::~WindowModel() {
 }
 
 void WindowModel::setFocusMode(bool f) {
-    focusMode = (f && controller->getRayTracer()->isFocus());
+    focusMode = (f && controller->getRayTracer()->typeFocus != Focus::NONE);
 }

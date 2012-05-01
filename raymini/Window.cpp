@@ -159,11 +159,16 @@ void Window::updateLights() {
 void Window::updateFocus() {
     WindowModel *windowModel = controller->getWindowModel();
     RayTracer *rayTracer = controller->getRayTracer();
-    bool isFocus = rayTracer->isFocus();
-    focalCheckBox->setChecked(isFocus);
+    Focus::Type type = rayTracer->typeFocus;
+    focusTypeComboBox->setCurrentIndex(type);
+    bool isFocus = type != Focus::NONE;
     changeFocusFixingCheckBox->setVisible(isFocus);
+    focusNbRaysSpinBox->setVisible(isFocus);
+    focusApertureSpinBox->setVisible(isFocus);
     bool isFocusMode = windowModel->isFocusMode();
     changeFocusFixingCheckBox->setChecked(!isFocusMode);
+    focusNbRaysSpinBox->setValue(rayTracer->nbRayFocus);
+    focusApertureSpinBox->setValue(rayTracer->apertureFocus);
 }
 
 void Window::updateObjects() {
@@ -420,14 +425,33 @@ void Window::initControlWidget () {
     QGroupBox * focalGroupBox = new QGroupBox("Focal", rayGroupBox);
     QVBoxLayout * focalLayout = new QVBoxLayout(focalGroupBox);
 
-    focalCheckBox = new QCheckBox("Enable Focus", focalGroupBox);
-    connect(focalCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableFocal(bool)));
-    focalLayout->addWidget(focalCheckBox);
+    focusTypeComboBox = new QComboBox(focalGroupBox);
+    focusTypeComboBox->addItem("No focus");
+    focusTypeComboBox->addItem("Uniform");
+    focusTypeComboBox->addItem("Stochastic");
+    connect(focusTypeComboBox, SIGNAL(activated(int)), controller, SLOT(windowSetFocusType(int)));
+    focalLayout->addWidget(focusTypeComboBox);
 
-    changeFocusFixingCheckBox  = new QCheckBox("Focal point is fixed", focalGroupBox);
+    changeFocusFixingCheckBox = new QCheckBox("Focal point is fixed", focalGroupBox);
     changeFocusFixingCheckBox->setVisible(false);
     connect(changeFocusFixingCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetFocalFixing(bool)));
     focalLayout->addWidget(changeFocusFixingCheckBox);
+
+    focusNbRaysSpinBox = new QSpinBox(focalGroupBox);
+    focusNbRaysSpinBox->setSuffix(" rays");
+    focusNbRaysSpinBox->setMinimum(1);
+    focusNbRaysSpinBox->setVisible(false);
+    connect(focusNbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetFocusNbRays(int)));
+    focalLayout->addWidget(focusNbRaysSpinBox);
+
+    focusApertureSpinBox = new QDoubleSpinBox(focalGroupBox);
+    focusApertureSpinBox->setPrefix("Aperture: ");
+    focusApertureSpinBox->setMinimum(0.01);
+    focusApertureSpinBox->setMaximum(0.3);
+    focusApertureSpinBox->setSingleStep(0.01);
+    focusApertureSpinBox->setVisible(false);
+    connect(focusApertureSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetFocusAperture(double)));
+    focalLayout->addWidget(focusApertureSpinBox);
 
     rayLayout->addWidget(focalGroupBox);
 
