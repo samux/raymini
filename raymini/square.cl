@@ -24,9 +24,9 @@ Vert addVert(Vert a, Vert b) {
     return res;
 }
 
-void addVert_(Vert a, Vert b) {
+void addVert_(Vert * a, Vert b) {
     for(unsigned int i = 0; i < 3; i++)
-        a.v[i] = a.v[i] + b.v[i];
+        a->v[i] = a->v[i] + b.v[i];
 }
 
 Vert mul(Vert a, float b) {
@@ -50,7 +50,10 @@ __kernel void squareArray(__constant Vert * vert,
     Vert right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
     Vert up = mul(cam->upVector, tang / (*height));
 
-    printf("up: (%f)\n", up.v[1]);
+    Vert stepX = mul(right, (float)x - (*width)/(float)2);
+    Vert stepY = mul(up, (float)y - (*height)/(float)2);
+    addVert_(&stepX, stepY);
+    addVert_(&stepX, cam->dir);
 
     pix[y*(*width) + x] = 0;
     pix[y*(*width) + x] |= (0<<8);

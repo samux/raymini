@@ -122,7 +122,7 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         kernel->setArg(4, heightBuffer);
         kernel->setArg(5, camBuffer);
 
-        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(4));
+        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(64));
         cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);
 
         std::cout << "Finished!\n";

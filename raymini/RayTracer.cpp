@@ -82,7 +82,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     unsigned int pix[screenWidth*screenHeight];
     cl.getImage(camPos, direction, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight, pix);
 
-    /*const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
@@ -99,7 +99,6 @@ QImage RayTracer::render (const Vec3Df & camPos,
     for (unsigned picNumber = 0 ; picNumber < nbIterations ; picNumber++) {
 
         // For each pixel
-        #pragma omp parallel for
         for (unsigned int i = 0; i < screenWidth; i++) {
             progressBar();
             for (unsigned int j = 0; j < screenHeight; j++) {
@@ -113,7 +112,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             }
         }
         scene->move(nbPictures);
-    }*/
+    }
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
@@ -149,6 +148,12 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
         Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
         Vec3Df step = stepX + stepY;
         Vec3Df dir = direction + step;
+        cout << "i: " << i << " j: " << j << " dir: " << dir << endl;
+        if(i == 0 && j == 0)
+            while(1);
+        cout << rightVec << endl;
+        cout << upVec << endl;
+        cout << camPos << endl;
         dir.normalize();
         if (typeFocus != Focus::NONE) {
             float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
