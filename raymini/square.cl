@@ -2,7 +2,7 @@ typedef struct {
     float v1;
     float v2;
     float v3;
-} Vect;
+} Vert;
 
 typedef struct {
     unsigned int v1;
@@ -12,7 +12,7 @@ typedef struct {
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-__kernel void squareArray(__constant Vect * vert,
+__kernel void squareArray(__constant Vert * vert,
                           __constant Tri * tri,
                           __global unsigned int * pix) {
     int idx = get_global_id(0);

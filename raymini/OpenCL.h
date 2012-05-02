@@ -5,6 +5,18 @@
 #define __CL_ENABLE_EXCEPTIONS
 #include "CL/cl.hpp"
 
+typedef struct {
+    float v1;
+    float v2;
+    float v3;
+} Vert;
+
+typedef struct {
+    unsigned int v1;
+    unsigned int v2;
+    unsigned int v3;
+} Tri;
+
 class Controller;
 
 class OpenCL {
@@ -25,5 +37,12 @@ private:
     cl::Context * context;
     cl::Program * program;
     cl::Kernel * kernel;
-    cl:: CommandQueue cmdQ;
+    cl::CommandQueue * cmdQ;
+
+    std::vector<Vert> vertices;
+    std::vector<Tri> triangles;
+
+    cl::Buffer * vertBuffer;
+    cl::Buffer * triBuffer;
+    
 };

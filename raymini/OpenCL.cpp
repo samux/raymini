@@ -6,9 +6,7 @@
 #include <utility>
 #include <algorithm>
 
-
 using namespace cl;
-
 
 OpenCL::OpenCL(Controller * c): c(c) {
     try {
@@ -36,32 +34,28 @@ OpenCL::OpenCL(Controller * c): c(c) {
 
         kernel = new Kernel(*program, "squareArray");
 
-        cmdQ = new CommandQueue(context, devices[0]);
+        cmdQ = new CommandQueue(*context, devices[0]);
 
-        /*std::vector<Vect> v = mesh.getV();
-        std::vector<Tri> t = mesh.getT();
+        std::vector<Vertex> vs = c->getScene()->getObjects()[0]->getMesh().getVertices();
+        vertices.resize(vs.size());
+        for(unsigned int i = 0; i < vs.size(); i++) {
+            vertices[i].v1 = vs[i].getPos()[0];
+            vertices[i].v2 = vs[i].getPos()[1];
+            vertices[i].v3 = vs[i].getPos()[2];
+        }
 
-        pixels = (unsigned int *)malloc(sizeof(unsigned int) * pixelCount);
-        for(unsigned int i = 0; i < pixelCount; ++i)
-            pixels[i] = 0;
+        std::vector<Triangle> ts = c->getScene()->getObjects()[0]->getMesh().getTriangles();
+        triangles.resize(ts.size());
+        for(unsigned int i = 0; i < ts.size(); i++) {
+            triangles[i].v1 = ts[i].getVertex(0);
+            triangles[i].v2 = ts[i].getVertex(1);
+            triangles[i].v3 = ts[i].getVertex(2);
+        }
 
-        
-
-        cl::Buffer vertBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(Vect) * v.size(), &v[0]);
-        cl::Buffer triBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(Tri) * t.size(), &t[0]);
-        cl::Buffer pixBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, sizeof(unsigned int) * pixelCount, &pixels[0]);
-
-
-        kernel.setArg(0, vertBuffer);
-        kernel.setArg(1, triBuffer);
-        kernel.setArg(2, pixBuffer);
-        cmdQ.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(pixelCount), cl::NDRange(4));
-
-
-        cmdQ.enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixels[0]);
-
-        std::cout << "Finished!\n";
-        return;*/
+        vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Vert) * vertices.size(), &vertices[0]);
+        triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Tri) * triangles.size(), &triangles[0]);
     }
     catch (Error& err)
     {
@@ -73,15 +67,34 @@ OpenCL::OpenCL(Controller * c): c(c) {
 }
 
 void OpenCL::getImage ( const Vec3Df & camPos,
-                        const Vec3Df & viewDirection,
-                        const Vec3Df & upVector,
-                        const Vec3Df & rightVector,
-                        float fieldOfView,
-                        float aspectRatio,
-                        unsigned int screenWidth,
-                        unsigned int screenHeight,
-                        unsigned int * pixBuffer) {
+        const Vec3Df & viewDirection,
+        const Vec3Df & upVector,
+        const Vec3Df & rightVector,
+        float fieldOfView,
+        float aspectRatio,
+        unsigned int screenWidth,
+        unsigned int screenHeight,
+        unsigned int * pixBuf) {
 
+    unsigned int pixelCount = screenHeight*screenWidth;
 
+    try {
+        Buffer pixBuffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
+                        sizeof(unsigned int) * pixelCount, &pixBuf[0]);
+
+        kernel->setArg(0, *vertBuffer);
+        kernel->setArg(1, *triBuffer);
+        kernel->setArg(2, pixBuffer);
+
+        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(4));
+        cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);
+
+        std::cout << "Finished!\n";
+    }
+    catch (Error& err) {
+        std::cerr << "An OpenCL error occured, " << err.what()
+            << "\nError num of " << err.err() << "\n";
+        return;
+    }
 }
 
