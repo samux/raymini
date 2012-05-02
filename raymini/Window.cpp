@@ -207,7 +207,6 @@ void Window::updateObjects() {
 void Window::updateProgressBar() {
     RenderThread *renderThread = controller->getRenderThread();
     bool isRendering = renderThread->isRendering();
-    renderProgressBar->setVisible(isRendering);
     stopRenderButton->setVisible(isRendering);
     renderButton->setVisible(!isRendering);
     if (isRendering) {
@@ -550,7 +549,6 @@ void Window::initControlWidget () {
     renderProgressBar->setMinimum(0);
     renderProgressBar->setMaximum(100);
     actionLayout->addWidget(renderProgressBar);
-    renderProgressBar->setVisible(false);
     realTimeCheckBox = new QCheckBox("Real time", sceneGroupBox);
     connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
     actionLayout->addWidget(realTimeCheckBox);

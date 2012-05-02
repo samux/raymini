@@ -37,9 +37,7 @@ RayTracer::RayTracer(Controller *c):
     controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
     shadow(this)
-{
-    //connect(&renderThread, SIGNAL(finished()), controller, SLOT(threadRenderRayImage()));
-}
+{}
 
 QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                           const Vec3Df & direction,

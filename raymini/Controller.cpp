@@ -54,7 +54,6 @@ void Controller::initAll(int argc, char **argv) {
 void Controller::ensureThreadStopped() {
     if (renderThread->isRendering()) {
         renderThread->stopRendering();
-        cout << "Stopped render\n";
     }
 }
 
@@ -102,12 +101,12 @@ void Controller::windowSetRayTracerMode (bool b) {
                              //QString (" screen resolution"));
 
 void Controller::threadRenderRayImage() {
-    cout<<"\ndone"<<endl;
-    windowModel->handleRealTime();
+    // To avoid dark bands
     if (!renderThread->isEmergencyStop()) {
         viewerSetRayImage(renderThread->getLastRendered());
         viewerSetDisplayMode(WindowModel::RayDisplayMode);
     }
+    windowModel->handleRealTime();
     renderThread->notifyAll();
 }
 
