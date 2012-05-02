@@ -32,37 +32,32 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     blue     ({c, 1.f, 1.f, {.0f, 0.f, 1.f}}),
     white    ({c, 1.f, 1.f, {1.f, 1.f, 1.f}}),
     black    ({c, 1.f, 1.f, {0.f, 0.f, 0.f}}),
-    mirrorMat(new Mirror(c)),
-    glossyMat(new Material(c, 1.f, 1.f, {1.f, 0.f, 0.f}, .1f)),
-    groundMat(new Material(c, 1.f, 0.f, {.2f, .6f, .2f},
-                           [](const Vertex & v) -> float {
-                               return Perlin(0.5f, 4, 10)(v.getPos());
-                           })),
-    rhinoMat (new Material(c, 1.f, 0.2f, {.6f, .6f, .7f},
-                           [](const Vertex & v) -> float {
-                               return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
-                           })),
-    skyBoxMaterial(new SkyBoxMaterial(c, "textures/skybox.ppm")),
+    glossyMat({c, 1.f, 1.f, {1.f, 0.f, 0.f}, .1f}),
+    groundMat({c, 1.f, 0.f, {.2f, .6f, .2f},
+                [](const Vertex & v) -> float {
+                    return Perlin(0.5f, 4, 10)(v.getPos());
+                }}),
+    rhinoMat ({c, 1.f, 0.2f, {.6f, .6f, .7f},
+                [](const Vertex & v) -> float {
+                    return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
+                }}),
+    mirrorMat({c}),
+    skyBoxMaterial({c, "textures/skybox.ppm"}),
     controller(c) {
 
     string id(argc>1?argv[1]:"");
 
     if(!id.compare("room")) buildRoom();
     else if(!id.compare("rs")) buildRoom(&red);
-    else if(!id.compare("rsm")) buildRoom(mirrorMat);
+    else if(!id.compare("rsm")) buildRoom(&mirrorMat);
     else if(!id.compare("rsglas")) buildRoom(new Glass(c, 1.1f));
-    else if(!id.compare("rsglos")) buildRoom(glossyMat);
+    else if(!id.compare("rsglos")) buildRoom(&glossyMat);
     else buildDefaultScene();
 
     updateBoundingBox ();
 }
 
 Scene::~Scene () {
-    delete mirrorMat;
-    delete glossyMat;
-    delete groundMat;
-    delete rhinoMat;
-
     for(auto o : objects)
         delete o;
 
@@ -127,7 +122,7 @@ void Scene::buildDefaultScene () {
     //---------- GROUND---------//
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
-    Object * ground = new Object(groundMesh, groundMat, "Ground");
+    Object * ground = new Object(groundMesh, &groundMat, "Ground");
     objects.push_back (ground);
 
     //-------- CEILING---------//
@@ -143,7 +138,7 @@ void Scene::buildDefaultScene () {
     Mesh wallMesh;
     wallMesh.loadOFF ("models/wall.off");
 
-    Object * leftWall = new Object(wallMesh, mirrorMat, "Left wall");
+    Object * leftWall = new Object(wallMesh, &mirrorMat, "Left wall");
     leftWall->setTrans(Vec3Df(-1.95251, 0, 1.5));
     objects.push_back (leftWall);
 
@@ -163,7 +158,7 @@ void Scene::buildDefaultScene () {
     //---------- RHINO----------//
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
-    Object * rhino = new Object(rhinoMesh, rhinoMat, "Rhino");
+    Object * rhino = new Object(rhinoMesh, &rhinoMat, "Rhino");
     rhino->setTrans (Vec3Df (1.f, 0.f, 0.4f));
     objects.push_back (rhino);
 
@@ -177,7 +172,7 @@ void Scene::buildDefaultScene () {
     //---------- SKY BOX--------//
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
-    Object * skyBox = new Object(skyBoxMesh, skyBoxMaterial, "Skybox");
+    Object * skyBox = new Object(skyBoxMesh, &skyBoxMaterial, "Skybox");
     skyBox->setEnabled(false);
     objects.push_back(skyBox);
 
