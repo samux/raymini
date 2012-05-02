@@ -95,13 +95,20 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         cam.FoV = fieldOfView;
         cam.aspectRatio = aspectRatio;
 
-        std::cout << rightVector << std::endl;
-        std::cout << upVector << std::endl;
+        unsigned int nb_vert = vertices.size();
+        unsigned int nb_tri = triangles.size();
 
         Buffer vertBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
                                 sizeof(Vert) * vertices.size(), &vertices[0]);
+
+        Buffer nb_vertBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_vert);
+
         Buffer triBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
                                 sizeof(Tri) * triangles.size(), &triangles[0]);
+
+        Buffer nb_triBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_tri);
 
         Buffer pixBuffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
                         sizeof(unsigned int) * pixelCount, &pixBuf[0]);
@@ -116,11 +123,13 @@ void OpenCL::getImage ( const Vec3Df & camPos,
                         sizeof(Cam), &cam);
 
         kernel->setArg(0, vertBuffer);
-        kernel->setArg(1, triBuffer);
-        kernel->setArg(2, pixBuffer);
-        kernel->setArg(3, widthBuffer);
-        kernel->setArg(4, heightBuffer);
-        kernel->setArg(5, camBuffer);
+        kernel->setArg(1, nb_vertBuffer);
+        kernel->setArg(2, triBuffer);
+        kernel->setArg(3, nb_triBuffer);
+        kernel->setArg(4, pixBuffer);
+        kernel->setArg(5, widthBuffer);
+        kernel->setArg(6, heightBuffer);
+        kernel->setArg(7, camBuffer);
 
         cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(64));
         cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);

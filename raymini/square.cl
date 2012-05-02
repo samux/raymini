@@ -37,7 +37,9 @@ Vert mul(Vert a, float b) {
 }
 
 __kernel void squareArray(__constant Vert * vert,
+                          __constant unsigned int * nb_vert,
                           __constant Tri * tri,
+                          __constant unsigned int * nb_tri,
                           __global unsigned int * pix,
                           __constant unsigned int * width,
                           __constant unsigned int * height,
