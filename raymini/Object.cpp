@@ -9,7 +9,8 @@
 
 using namespace std;
 
-void Object::updateBoundingBox () {
+BoundingBox Object::computeBoundingBox(const Mesh & mesh) {
+    BoundingBox bbox;
     const vector<Vertex> & V = mesh.getVertices ();
     if (V.empty ())
         bbox = BoundingBox ();
@@ -18,4 +19,5 @@ void Object::updateBoundingBox () {
         for (unsigned int i = 1; i < V.size (); i++)
             bbox.extendTo (V[i].getPos ());
     }
+    return bbox;
 }

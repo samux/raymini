@@ -57,7 +57,8 @@ public:
     inline const std::string &getName() const {return name;}
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
-    void updateBoundingBox ();
+    void updateBoundingBox () { bbox = computeBoundingBox(mesh); }
+    static BoundingBox computeBoundingBox(const Mesh & mesh);
 
 private:
     Mesh mesh;
