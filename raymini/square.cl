@@ -1,13 +1,9 @@
 typedef struct {
-    float v1;
-    float v2;
-    float v3;
+    float v[3];
 } Vert;
 
 typedef struct {
-    unsigned int v1;
-    unsigned int v2;
-    unsigned int v3;
+    unsigned int t[3];
 } Tri;
 
 typedef struct {
@@ -21,6 +17,25 @@ typedef struct {
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
+Vert addVert(Vert a, Vert b) {
+    Vert res;
+    for(unsigned int i = 0; i < 3; i++)
+        res.v[i] = a.v[i] + b.v[i];
+    return res;
+}
+
+void addVert_(Vert a, Vert b) {
+    for(unsigned int i = 0; i < 3; i++)
+        a.v[i] = a.v[i] + b.v[i];
+}
+
+Vert mul(Vert a, float b) {
+    Vert res;
+    for(unsigned int i = 0; i < 3; i++)
+        res.v[i] = a.v[i] * b;
+    return res;
+}
+
 __kernel void squareArray(__constant Vert * vert,
                           __constant Tri * tri,
                           __global unsigned int * pix,
@@ -30,6 +45,12 @@ __kernel void squareArray(__constant Vert * vert,
     const int gid = get_global_id(0);
     const int x = gid % *width;
     const int y = gid / *width;
+
+    const float tang = tan(cam->FoV);
+    Vert right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
+    Vert up = mul(cam->upVector, tang / (*height));
+
+    printf("up: (%f)\n", up.v[1]);
 
     pix[y*(*width) + x] = 0;
     pix[y*(*width) + x] |= (0<<8);

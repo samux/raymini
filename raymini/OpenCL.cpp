@@ -42,6 +42,7 @@ OpenCL::OpenCL(Controller * c): c(c) {
             vertices[i].v1 = vs[i].getPos()[0];
             vertices[i].v2 = vs[i].getPos()[1];
             vertices[i].v3 = vs[i].getPos()[2];
+            std::cout << vertices[i].v2 << std::endl;
         }
 
         std::vector<Triangle> ts = c->getScene()->getObjects()[0]->getMesh().getTriangles();
@@ -51,11 +52,6 @@ OpenCL::OpenCL(Controller * c): c(c) {
             triangles[i].v2 = ts[i].getVertex(1);
             triangles[i].v3 = ts[i].getVertex(2);
         }
-
-        vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Vert) * vertices.size(), &vertices[0]);
-        triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Tri) * triangles.size(), &triangles[0]);
     }
     catch (Error& err)
     {
@@ -99,6 +95,14 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         cam.FoV = fieldOfView;
         cam.aspectRatio = aspectRatio;
 
+        std::cout << rightVector << std::endl;
+        std::cout << upVector << std::endl;
+
+        Buffer vertBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Vert) * vertices.size(), &vertices[0]);
+        Buffer triBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Tri) * triangles.size(), &triangles[0]);
+
         Buffer pixBuffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
                         sizeof(unsigned int) * pixelCount, &pixBuf[0]);
 
@@ -111,14 +115,14 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         Buffer camBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(Cam), &cam);
 
-        kernel->setArg(0, *vertBuffer);
-        kernel->setArg(1, *triBuffer);
+        kernel->setArg(0, vertBuffer);
+        kernel->setArg(1, triBuffer);
         kernel->setArg(2, pixBuffer);
         kernel->setArg(3, widthBuffer);
         kernel->setArg(4, heightBuffer);
         kernel->setArg(5, camBuffer);
 
-        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(64));
+        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(4));
         cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);
 
         std::cout << "Finished!\n";

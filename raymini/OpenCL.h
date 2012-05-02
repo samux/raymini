@@ -51,7 +51,4 @@ private:
     std::vector<Vert> vertices;
     std::vector<Tri> triangles;
 
-    cl::Buffer * vertBuffer;
-    cl::Buffer * triBuffer;
-    
 };
