@@ -63,7 +63,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
     const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
-    ProgressBar progressBar(nbIterations*screenWidth);
+    ProgressBar progressBar(controller, nbIterations*screenWidth);
     //connect(&progressBar, SIGNAL(hasProgressed(float)), controller, SLOT(rayTracerProgressed(float)));
 
     // For each picture

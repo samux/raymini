@@ -13,6 +13,7 @@
 #include <QImage>
 #include <QLabel>
 #include <QPushButton>
+#include <QProgressBar>
 
 #include <vector>
 #include <string>
@@ -53,12 +54,18 @@ private :
     void updateFocus();
     // Updated by both WindowModel and Scene
     void updateObjects();
+    // Updated by RenderThread
+    void updateProgressBar();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
     QString currentDirectory;
 
     // Needed for further actions
+    QPushButton *stopRenderButton;
+    QPushButton *renderButton;
+    QProgressBar *renderProgressBar;
+
     QSpinBox *shadowSpinBox;
 
     QSpinBox *PTNbRaySpinBox;

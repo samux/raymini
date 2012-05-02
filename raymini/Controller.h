@@ -35,6 +35,7 @@ public:
 
 public slots :
     void windowRenderRayImage();
+    void windowStopRendering();
     void windowSetRayTracerMode(bool);
     void windowSetShadowMode(int);
     void windowSetShadowNbRays(int);
@@ -79,7 +80,7 @@ public slots :
 
     void threadRenderRayImage();
 
-    void rayTracerProgressed(float);
+    void renderProgressed(float);
 
 private:
     /** Stop thread if running */

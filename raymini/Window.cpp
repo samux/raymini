@@ -86,6 +86,9 @@ void Window::update(Observable *observable) {
     else if (observable == controller->getWindowModel()) {
         updateFromWindowModel();
     }
+    else if (observable == controller->getRenderThread()) {
+        updateProgressBar();
+    }
     else {
         cerr << "Window::update(Observable*) has been called from an unknown source!" << endl;
     }
@@ -195,6 +198,18 @@ void Window::updateObjects() {
     if (isSelected) {
         bool isEnabled = scene->getObjects()[index]->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
+    }
+}
+
+void Window::updateProgressBar() {
+    RenderThread *renderThread = controller->getRenderThread();
+    bool isRendering = renderThread->isRendering();
+    renderProgressBar->setVisible(isRendering);
+    stopRenderButton->setVisible(isRendering);
+    renderButton->setVisible(!isRendering);
+    if (isRendering) {
+        float percent = renderThread->getPercent();
+        renderProgressBar->setValue(percent);
     }
 }
 
@@ -515,9 +530,18 @@ void Window::initControlWidget () {
     QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneGroupBox);
     QVBoxLayout * actionLayout = new QVBoxLayout (ActionGroupBox);
 
-    QPushButton * rayButton = new QPushButton ("Render", sceneGroupBox);
-    actionLayout->addWidget (rayButton);
-    connect (rayButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+    stopRenderButton = new QPushButton("Stop", sceneGroupBox);
+    actionLayout->addWidget(stopRenderButton);
+    stopRenderButton->setVisible(false);
+    connect(stopRenderButton, SIGNAL(clicked()), controller, SLOT(windowStopRendering()));
+    renderButton = new QPushButton ("Render", sceneGroupBox);
+    actionLayout->addWidget (renderButton);
+    connect (renderButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+    renderProgressBar = new QProgressBar(sceneGroupBox);
+    renderProgressBar->setMinimum(0);
+    renderProgressBar->setMaximum(100);
+    actionLayout->addWidget(renderProgressBar);
+    renderProgressBar->setVisible(false);
     QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
     actionLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));

@@ -106,9 +106,15 @@ void Controller::threadRenderRayImage() {
         viewerSetRayImage(renderThread->getLastRendered());
         viewerSetDisplayMode(WindowModel::RayDisplayMode);
     }
+    renderThread->notifyAll();
 }
 
-void Controller::rayTracerProgressed(float percent) {
+void Controller::windowStopRendering() {
+    ensureThreadStopped();
+    renderThread->notifyAll();
+}
+
+void Controller::renderProgressed(float percent) {
     renderThread->setPercent(percent);
     renderThread->notifyAll();
 }
