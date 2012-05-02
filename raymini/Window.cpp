@@ -206,12 +206,18 @@ void Window::updateObjects() {
 
 void Window::updateProgressBar() {
     RenderThread *renderThread = controller->getRenderThread();
+    WindowModel *windowModel = controller->getWindowModel();
     bool isRendering = renderThread->isRendering();
-    stopRenderButton->setVisible(isRendering);
-    renderButton->setVisible(!isRendering);
+    bool isRealTime = windowModel->isRealTime();
+    stopRenderButton->setVisible(isRendering||isRealTime);
+    renderButton->setVisible(!isRendering && !isRealTime);
+    renderProgressBar->setVisible(isRendering || isRealTime);
     if (isRendering) {
         float percent = renderThread->getPercent();
         renderProgressBar->setValue(percent);
+    }
+    else {
+        renderProgressBar->setValue(100);
     }
 }
 

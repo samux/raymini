@@ -112,6 +112,7 @@ void Controller::threadRenderRayImage() {
 
 void Controller::windowStopRendering() {
     ensureThreadStopped();
+    windowSetRealTime(false);
     renderThread->notifyAll();
 }
 
