@@ -61,8 +61,10 @@ private:
 
     Controller *controller;
 
-    void buildDefaultScene ();
-    void buildRoom (Material *sphereMat=nullptr);
+    void buildRoom(Material *sphereMat=nullptr);
+    void buildMultiLights();
+    void buildMultiMeshs();
+    void buildOutdor();
     void buildMesh(const std::string & path, Material *mat);
     std::vector<Object *> objects;
     std::vector<Light *> lights;

@@ -15,24 +15,29 @@
 
 using namespace std;
 
-void printUsage() {
-    cout << "Using default scene. "
-         << "Other possibilities are: " << endl
-         << "room: simple room" << endl
-         << "rs: room with sphere" << endl
-         << "rsm: room with mirror sphere" << endl
-         << "rsglas: room with glass sphere" << endl
-         << "rsglos: room with glossy sphere" << endl
-         << "mesh <mesh_path>" << endl
+void printUsage(char * name) {
+    cout << endl
+         << "Choose a scene: " << name << " <scene>" << endl
+         << "Possibilities are: " << endl
+         << "\troom: simple room" << endl
+         << "\trs: room with sphere" << endl
+         << "\trsm: room with mirror sphere" << endl
+         << "\trsglas: room with glass sphere" << endl
+         << "\trsglos: room with glossy sphere" << endl
+         << "\tlights: severals light and a ram" << endl
+         << "\tmeshs: severals meshs and a light (moving ram)" << endl
+         << "\toutdoor" << endl
+         << "\tmesh <mesh_path>" << endl
          << endl;
+    exit(1);
 }
 
 Scene::Scene(Controller *c, int argc, char **argv) :
-    red      ({c, 1.f, 1.f, {1.f, 0.f, 0.f}}),
-    green    ({c, 1.f, 1.f, {0.f, 1.f, 0.f}}),
-    blue     ({c, 1.f, 1.f, {.0f, 0.f, 1.f}}),
-    white    ({c, 1.f, 1.f, {1.f, 1.f, 1.f}}),
-    black    ({c, 1.f, 1.f, {0.f, 0.f, 0.f}}),
+    red      ({c, 1.f, .5f, {1.f, 0.f, 0.f}}),
+    green    ({c, 1.f, .5f, {0.f, 1.f, 0.f}}),
+    blue     ({c, 1.f, .5f, {.0f, 0.f, 1.f}}),
+    white    ({c, 1.f, .5f, {1.f, 1.f, 1.f}}),
+    black    ({c, 1.f, .5f, {0.f, 0.f, 0.f}}),
     glossyMat({c, 1.f, 1.f, {1.f, 0.f, 0.f}, .1f}),
     groundMat({c, 1.f, 0.f, {.2f, .6f, .2f},
                 [](const Vertex & v) -> float {
@@ -54,12 +59,15 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     else if(!id.compare("rsm")) buildRoom(&mirrorMat);
     else if(!id.compare("rsglas")) buildRoom(new Glass(c, 1.1f));
     else if(!id.compare("rsglos")) buildRoom(&glossyMat);
+    else if(!id.compare("lights")) buildMultiLights();
+    else if(!id.compare("meshs")) buildMultiMeshs();
+    else if(!id.compare("outdoor")) buildOutdor();
     else if(!id.compare("mesh"))
         buildMesh(meshPath, new Material(c, 1.f, 1.f, Vec3Df (1.f, .6f, .2f)));
-    else buildDefaultScene();
+    else printUsage(argv[0]);
 
     updateBoundingBox ();
-}
+    }
 
 Scene::~Scene () {
     for(auto o : objects)
@@ -108,11 +116,12 @@ void Scene::buildRoom(Material *sphereMat) {
         auto sphere = new Object(sphereMesh, sphereMat, "Sphere", {0, 0, 1});
         auto glass = dynamic_cast<Glass*>(sphereMat);
         if(glass) glass->setObject(sphere);
+        if(dynamic_cast<Mirror*>(sphereMat))sphere->setTrans({0,0,0});
         objects.push_back(sphere);
     }
 
     lights.push_back(new Light({0.f, 0.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
-                               {1.f, 1.f, 1.f}, 1.f));
+                               {1.f, 1.f, 1.f}, .7f));
 }
 
 void Scene::buildMesh(const std::string & path, Material *mat) {
@@ -125,72 +134,74 @@ void Scene::buildMesh(const std::string & path, Material *mat) {
                                {1.f, 1.f, 1.f}, 1.f));
 }
 
-void Scene::buildDefaultScene () {
-    printUsage();
+void Scene::buildMultiLights() {
+    auto ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
 
+    Mesh groundMesh;
+    groundMesh.loadOFF("models/ground.off");
+    objects.push_back(new Object(groundMesh, &white, "Ground"));
+
+    Mesh ramMesh;
+    ramMesh.loadOFF("models/ram.off");
+    objects.push_back(new Object(ramMesh, ramMat, "Ram"));
+
+    lights.push_back(new Light({0.f, -3.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 0.f, 0.f}, 1.f));
+    lights.push_back(new Light({-2.f, 2.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
+                               {0.f, 1.f, 0.f}, 1.f));
+    lights.push_back(new Light({2.f, 2.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
+                               {0.f, 0.f, 1.f}, 1.f));
+}
+
+void Scene::buildMultiMeshs() {
     auto ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
     auto gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
 
-    //---------- GROUND---------//
     Mesh groundMesh;
-    groundMesh.loadOFF ("models/ground.off");
-    Object * ground = new Object(groundMesh, &groundMat, "Ground");
-    objects.push_back (ground);
+    groundMesh.loadOFF("models/ground.off");
+    objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
 
-    //-------- CEILING---------//
-    Mesh ceilingMesh;
-    ceilingMesh.loadOFF ("models/window.off");
-    ceilingMesh.rotate(Vec3Df(0,1,0), M_PI);
-
-    Object * ceiling = new Object(ceilingMesh, &blue, "Ceiling");
-    ceiling->setTrans(Vec3Df(0, 0, 3.0));
-    objects.push_back (ceiling);
-
-    //---------- WALLS----------//
     Mesh wallMesh;
-    wallMesh.loadOFF ("models/wall.off");
+    wallMesh.loadOFF("models/wall.off");
+    objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-1.9f, 0.f, 1.5f}));
 
-    Object * leftWall = new Object(wallMesh, &mirrorMat, "Left wall");
-    leftWall->setTrans(Vec3Df(-1.95251, 0, 1.5));
-    objects.push_back (leftWall);
+    wallMesh.rotate({0.f, 0.f, 1.f}, 3*M_PI/2);
+    objects.push_back(new Object(wallMesh, &red, "Back wall", {0.f, 1.9f, 1.5}));
 
-    Mesh backWallMesh(wallMesh);
-    backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
-    Object * backWall = new Object(backWallMesh, &red, "Back wall");
-    backWall->setTrans(Vec3Df(0, 1.95251, 1.5));
-    objects.push_back (backWall);
-
-    //---------- RAM-----------//
     Mesh ramMesh;
-    ramMesh.loadOFF ("models/ram.off");
-    Object * ram = new Object(ramMesh, ramMat, "Ram");
-    ram->setTrans (Vec3Df (-1.f, -1.0f, 0.f));
-    objects.push_back (ram);
+    ramMesh.loadOFF("models/ram.off");
+    objects.push_back(new Object(ramMesh, ramMat, "Ram", {-1.f, 0.f, 0.f}, {0,-.5,0}));
 
-    //---------- RHINO----------//
-    Mesh rhinoMesh;
-    rhinoMesh.loadOFF ("models/rhino.off");
-    Object * rhino = new Object(rhinoMesh, &rhinoMat, "Rhino");
-    rhino->setTrans (Vec3Df (1.f, 0.f, 0.4f));
-    objects.push_back (rhino);
-
-    //---------- GARGOYLE-------//
     Mesh gargMesh;
-    gargMesh.loadOFF ("models/gargoyle.off");
-    Object * garg = new Object(gargMesh, gargMat, "Gargoyle");
-    garg->setTrans (Vec3Df (-1.f, 1.0f, 0.f));
-    objects.push_back (garg);
+    gargMesh.loadOFF("models/gargoyle.off");
+    objects.push_back(new Object(gargMesh, gargMat, "Gargoyle", {-1.f, 1.0f, 0.f}));
 
-    //---------- SKY BOX--------//
+    Mesh rhinoMesh;
+    rhinoMesh.loadOFF("models/rhino.off");
+    objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
+
+    lights.push_back(new Light({2.f, -3.f, 5.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, 1.f));
+}
+
+void Scene::buildOutdor() {
+    Mesh groundMesh;
+    groundMesh.loadOFF("models/ground.off");
+    groundMesh.scale(5);
+    objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
+
+    Mesh wallMesh;
+    wallMesh.loadOFF("models/wall.off");
+    objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-2.f, 0.f, 1.5f}));
+
+    Mesh rhinoMesh;
+    rhinoMesh.loadOFF("models/rhino.off");
+    objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
+
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
-    Object * skyBox = new Object(skyBoxMesh, &skyBoxMaterial, "Skybox");
-    skyBox->setEnabled(false);
-    objects.push_back(skyBox);
+    objects.push_back(new Object(skyBoxMesh, &skyBoxMaterial, "Skybox"));
 
-
-    Light * l = new Light(Vec3Df (0, 0, 3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
-    lights.push_back (l);
-    Light * l1 = new Light(Vec3Df (.5f, 3.f, 2.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
-    lights.push_back (l1);
+    lights.push_back(new Light({9.f, 9.f, 9.f}, 5.f, {1.f, 1.f, 1.f},
+                               {1.f, 1.f, .4f}, 1.f));
 }
