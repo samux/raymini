@@ -10,7 +10,8 @@ WindowModel::WindowModel(Controller *c):
     renderingMode(SMOOTH),
     displayMode(OpenGLDisplayMode),
     focusPoint(Vec3Df(), Vec3Df(0, 0, 1)),
-    realTime(false)
+    realTime(false),
+    elapsedTime(0)
 {}
 
 WindowModel::~WindowModel() {

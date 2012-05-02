@@ -9,6 +9,8 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 }
 
 void RenderThread::run() {
+    time.restart();
+    time.start();
     resultImage = controller->getRayTracer()->render(
             camPos,
             viewDirection,
@@ -18,6 +20,7 @@ void RenderThread::run() {
             aspectRatio,
             screenWidth,
             screenHeight);
+    controller->threadSetElapsed(time.elapsed());
 }
 
 void RenderThread::startRendering(const Vec3Df & camPos,

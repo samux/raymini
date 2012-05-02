@@ -41,7 +41,6 @@ void Controller::initAll(int argc, char **argv) {
     windowModel->addObserver(window);
     windowModel->addObserver(viewer);
     renderThread->addObserver(window);
-    renderThread->addObserver(viewer);
 
     window->show();
 
@@ -89,17 +88,6 @@ void Controller::windowSetRayTracerMode (bool b) {
     rayTracer->notifyAll();
 }
 
-    // TODO move to view
-    //QTime timer;
-    //timer.start ();
-
-
-    //window->statusBar()->showMessage(QString ("Raytracing performed in ") +
-                             //QString::number (timer.elapsed ()) +
-                             //QString ("ms at ") +
-                             //QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-                             //QString (" screen resolution"));
-
 void Controller::threadRenderRayImage() {
     // To avoid dark bands
     if (!renderThread->isEmergencyStop()) {
@@ -108,6 +96,10 @@ void Controller::threadRenderRayImage() {
     }
     windowModel->handleRealTime();
     renderThread->notifyAll();
+}
+
+void Controller::threadSetElapsed(int e)  {
+    windowModel->setElapsedTime(e);
 }
 
 void Controller::windowStopRendering() {

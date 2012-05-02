@@ -58,6 +58,7 @@ private :
     void updateProgressBar();
     // Updated by WindowModel
     void updateRealTime();
+    void updateStatus();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;

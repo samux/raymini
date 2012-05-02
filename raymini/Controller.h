@@ -80,6 +80,7 @@ public slots :
     void viewerSetFocusPoint(Vertex point);
 
     void threadRenderRayImage();
+    void threadSetElapsed(int);
 
     void renderProgressed(float);
 

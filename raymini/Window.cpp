@@ -140,6 +140,9 @@ void Window::updateFromWindowModel() {
 
     // Real time
     updateRealTime();
+
+    // Status
+    updateStatus();
 }
 
 void Window::updateLights() {
@@ -225,6 +228,25 @@ void Window::updateRealTime() {
     WindowModel *windowModel = controller->getWindowModel();
     bool isRealTime = windowModel->isRealTime();
     realTimeCheckBox->setChecked(isRealTime);
+}
+
+void Window::updateStatus() {
+    WindowModel *windowModel = controller->getWindowModel();
+    int elapsed = windowModel->getElapsedTime();
+    qglviewer::Camera * cam = controller->getViewer()->camera ();
+    unsigned int screenWidth = cam->screenWidth ();
+    unsigned int screenHeight = cam->screenHeight ();
+    if (elapsed != 0) {
+        int FPS = 1000/elapsed;
+        statusBar()->showMessage(
+                QString("[")+
+                QString::number(screenWidth) + QString ("x") + QString::number (screenHeight) +
+                QString("] ")+
+                QString::number(elapsed) +
+                QString ("ms (") +
+                QString::number(FPS)+
+                QString(" fps)"));
+    }
 }
 
 void Window::initControlWidget () {

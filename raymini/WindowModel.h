@@ -42,6 +42,9 @@ public:
 
     void handleRealTime();
 
+    inline void setElapsedTime(int e) {elapsedTime = e;}
+    inline int getElapsedTime() const {return elapsedTime;}
+
 private:
     Controller *controller;
 
@@ -54,4 +57,5 @@ private:
     QImage rayImage;
     Vertex focusPoint;
     bool realTime;
+    int elapsedTime;
 };

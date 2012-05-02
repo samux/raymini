@@ -2,6 +2,7 @@
 
 #include <QThread>
 #include <QImage>
+#include <QTime>
 
 #include "Vec3D.h"
 #include "Observable.h"
@@ -48,7 +49,9 @@ private:
     unsigned int screenHeight;
     float percent;
 
+    // Thread attributes
     bool emergencyStop;
+    QTime time;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,
