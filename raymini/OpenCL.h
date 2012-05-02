@@ -17,6 +17,15 @@ typedef struct {
     unsigned int v3;
 } Tri;
 
+typedef struct {
+    Vert pos;
+    Vert dir;
+    Vert upVector;
+    Vert rightVector;
+    float FoV;
+    float aspectRatio;
+} Cam;
+
 class Controller;
 
 class OpenCL {

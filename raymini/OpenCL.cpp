@@ -79,14 +79,46 @@ void OpenCL::getImage ( const Vec3Df & camPos,
     unsigned int pixelCount = screenHeight*screenWidth;
 
     try {
+        Cam cam;
+        cam.pos.v1 = camPos[0];
+        cam.pos.v2 = camPos[1];
+        cam.pos.v3 = camPos[2];
+
+        cam.dir.v1 = viewDirection[0];
+        cam.dir.v2 = viewDirection[1];
+        cam.dir.v3 = viewDirection[2];
+
+        cam.upVector.v1 = upVector[0];
+        cam.upVector.v2 = upVector[1];
+        cam.upVector.v3 = upVector[2];
+
+        cam.rightVector.v1 = rightVector[0];
+        cam.rightVector.v2 = rightVector[1];
+        cam.rightVector.v3 = rightVector[2];
+
+        cam.FoV = fieldOfView;
+        cam.aspectRatio = aspectRatio;
+
         Buffer pixBuffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
                         sizeof(unsigned int) * pixelCount, &pixBuf[0]);
+
+        Buffer widthBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &screenWidth);
+
+        Buffer heightBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &screenHeight);
+
+        Buffer camBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(Cam), &cam);
 
         kernel->setArg(0, *vertBuffer);
         kernel->setArg(1, *triBuffer);
         kernel->setArg(2, pixBuffer);
+        kernel->setArg(3, widthBuffer);
+        kernel->setArg(4, heightBuffer);
+        kernel->setArg(5, camBuffer);
 
-        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(4));
+        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(64));
         cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);
 
         std::cout << "Finished!\n";
