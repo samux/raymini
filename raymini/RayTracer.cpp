@@ -33,6 +33,7 @@ RayTracer::RayTracer(Controller *c):
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
     nbPictures(1),
+    quality(Quality::OPTIMAL),
     controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
     shadow(this)
@@ -50,34 +51,43 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     Scene *scene = controller->getScene();
     vector<Color> buffer;
-    buffer.resize(screenHeight*screenWidth);
+    unsigned int computedScreenWidth = screenWidth;
+    unsigned int computedScreenHeight = screenHeight;
+    if (quality == Quality::ONE_OVER_4) {
+        computedScreenWidth /= 2;
+        computedScreenHeight /= 2;
+    }
+    else if (quality == Quality::ONE_OVER_9) {
+        computedScreenWidth /= 3;
+        computedScreenHeight /= 3;
+    }
+    buffer.resize(computedScreenHeight*computedScreenWidth);
 
     const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
-    const Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
-    const Vec3Df upVec = tang * upVector / screenHeight;
+    const Vec3Df rightVec = tang * aspectRatio * rightVector / computedScreenWidth;
+    const Vec3Df upVec = tang * upVector / computedScreenHeight;
 
     const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
     const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
-    ProgressBar progressBar(controller, nbIterations*screenWidth);
-    //connect(&progressBar, SIGNAL(hasProgressed(float)), controller, SLOT(rayTracerProgressed(float)));
+    ProgressBar progressBar(controller, nbIterations*computedScreenWidth);
 
     // For each picture
-    for (unsigned picNumber = 0 ; picNumber < nbIterations && !controller->getRenderThread()->isEmergencyStop(); picNumber++) {
+    for (unsigned picNumber = 0 ; picNumber < nbIterations; picNumber++) {
 
         // For each pixel
         #pragma omp parallel for
-        for (unsigned int i = 0; i < screenWidth; i++) {
+        for (unsigned int i = 0; i < computedScreenWidth; i++) {
             progressBar();
-            for (unsigned int j = 0; j < screenHeight && !controller->getRenderThread()->isEmergencyStop(); j++) {
-                buffer[j*screenWidth+i] += computePixel(camPos,
+            for (unsigned int j = 0; j < computedScreenHeight && !controller->getRenderThread()->isEmergencyStop(); j++) {
+                buffer[j*computedScreenWidth+i] += computePixel(camPos,
                                                         direction,
                                                         upVec, rightVec,
-                                                        screenWidth, screenHeight,
+                                                        computedScreenWidth, computedScreenHeight,
                                                         offsets, offsets_focus,
                                                         focalDistance,
                                                         i, j);
@@ -87,9 +97,21 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     }
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
+    //QImage image (QSize (computedScreenWidth, computedScreenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
         for (unsigned int j = 0; j < screenHeight; j++) {
-            Color c = buffer[j*screenWidth+i];
+            //for (unsigned int i = 0; i < computedScreenWidth; i++) {
+            //for (unsigned int j = 0; j < computedScreenHeight; j++) {
+            unsigned int computedI = i;
+            unsigned int computedJ = j;
+            if (quality == Quality::ONE_OVER_4) {
+                computedI /= 2;
+                computedJ /= 2;
+            } else if (quality == Quality::ONE_OVER_9) {
+                computedI /= 3;
+                computedJ /= 3;
+            }
+            Color c = buffer[computedJ*computedScreenWidth+computedI];
             image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
     }
