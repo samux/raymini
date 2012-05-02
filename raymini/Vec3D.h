@@ -340,13 +340,13 @@ public:
 
     inline Vec3D randRotate(const float & maxAngle) const {
         auto random = []() -> T {
-            return T(rand())/T(RAND_MAX);
-        };//rand in [0,1[
+            return T(rand())/T(RAND_MAX/2)-1;
+        };//rand in [-1,1[
 
         Vec3D rVect(random(), random(), random());
         rVect.projectOn(*this);
         rVect.normalize();
-        rVect = *this + T(tan((2*random()-1.f)*maxAngle))*rVect;
+        rVect = *this + T(tan(float(rand())/float(RAND_MAX)*maxAngle))*rVect;
         rVect.normalize();
 
         return rVect;

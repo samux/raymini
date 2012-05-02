@@ -93,9 +93,9 @@ public:
 
     RayTracer(Controller *c):
         mode(Mode::RAY_TRACING_MODE),
-        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
-        intensityPathTracing(25.f), onlyPathTracing(false),
-        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
+        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
+        intensityPathTracing(10.f), onlyPathTracing(false),
+        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/3),
         intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
         typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
         typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
