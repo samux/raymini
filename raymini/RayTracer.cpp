@@ -97,11 +97,8 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     }
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
-    //QImage image (QSize (computedScreenWidth, computedScreenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
         for (unsigned int j = 0; j < screenHeight; j++) {
-            //for (unsigned int i = 0; i < computedScreenWidth; i++) {
-            //for (unsigned int j = 0; j < computedScreenHeight; j++) {
             unsigned int computedI = i;
             unsigned int computedJ = j;
             if (quality == Quality::ONE_OVER_4) {

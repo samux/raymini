@@ -69,6 +69,7 @@ public slots :
     void windowSetLightColor();
     void windowSelectObject(int);
     void windowEnableObject(bool);
+    void windowSetRealTime(bool);
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);

@@ -102,6 +102,8 @@ void Controller::windowSetRayTracerMode (bool b) {
                              //QString (" screen resolution"));
 
 void Controller::threadRenderRayImage() {
+    cout<<"\ndone"<<endl;
+    windowModel->handleRealTime();
     if (!renderThread->isEmergencyStop()) {
         viewerSetRayImage(renderThread->getLastRendered());
         viewerSetDisplayMode(WindowModel::RayDisplayMode);
@@ -390,6 +392,11 @@ void Controller::windowSetLightColor() {
     }
     scene->getLights()[l]->setColor(window->getLightColor());
     scene->notifyAll();
+}
+
+void Controller::windowSetRealTime(bool r) {
+    windowModel->setRealTime(r);
+    windowModel->notifyAll();
 }
 
 void Controller::viewerSetWireframe(bool b) {

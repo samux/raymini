@@ -2,6 +2,8 @@
 
 #include "Controller.h"
 
+using namespace std;
+
 RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
     connect(this, SIGNAL(finished()), controller, SLOT(threadRenderRayImage()));
 }
@@ -26,6 +28,7 @@ void RenderThread::startRendering(const Vec3Df & camPos,
                                   float aspectRatio,
                                   unsigned int screenWidth,
                                   unsigned int screenHeight) {
+    cout << "Started\n";
     emergencyStop = false;
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
     start();

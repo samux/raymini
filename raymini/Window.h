@@ -56,6 +56,8 @@ private :
     void updateObjects();
     // Updated by RenderThread
     void updateProgressBar();
+    // Updated by WindowModel
+    void updateRealTime();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
@@ -65,6 +67,7 @@ private :
     QPushButton *stopRenderButton;
     QPushButton *renderButton;
     QProgressBar *renderProgressBar;
+    QCheckBox *realTimeCheckBox;
 
     QSpinBox *shadowSpinBox;
 

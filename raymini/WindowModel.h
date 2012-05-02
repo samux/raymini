@@ -37,6 +37,11 @@ public:
 
     void setFocusMode(bool f);
 
+    inline void setRealTime(bool r) {realTime = r;}
+    inline bool isRealTime() const {return realTime;}
+
+    void handleRealTime();
+
 private:
     Controller *controller;
 
@@ -48,4 +53,5 @@ private:
     DisplayMode displayMode;
     QImage rayImage;
     Vertex focusPoint;
+    bool realTime;
 };

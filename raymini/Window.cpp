@@ -137,6 +137,9 @@ void Window::updateFromWindowModel() {
 
     // Objects
     updateObjects();
+
+    // Real time
+    updateRealTime();
 }
 
 void Window::updateLights() {
@@ -211,6 +214,12 @@ void Window::updateProgressBar() {
         float percent = renderThread->getPercent();
         renderProgressBar->setValue(percent);
     }
+}
+
+void Window::updateRealTime() {
+    WindowModel *windowModel = controller->getWindowModel();
+    bool isRealTime = windowModel->isRealTime();
+    realTimeCheckBox->setChecked(isRealTime);
 }
 
 void Window::initControlWidget () {
@@ -542,6 +551,9 @@ void Window::initControlWidget () {
     renderProgressBar->setMaximum(100);
     actionLayout->addWidget(renderProgressBar);
     renderProgressBar->setVisible(false);
+    realTimeCheckBox = new QCheckBox("Real time", sceneGroupBox);
+    connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
+    actionLayout->addWidget(realTimeCheckBox);
     QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
     actionLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
