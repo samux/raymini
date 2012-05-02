@@ -167,8 +167,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
 bool RayTracer::intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
                           Ray & bestRay,
-                          const Object* & intersectedObject,
-                          bool stopAtFirst) const {
+                          const Object* & intersectedObject) const {
     Scene * scene = controller->getScene();
     bestRay = Ray();
 
@@ -180,11 +179,9 @@ bool RayTracer::intersect(const Vec3Df & dir,
         Ray ray (camPos - o->getTrans ()+ DISTANCE_MIN_INTERSECT*dir, dir);
 
         if (o->getKDtree().intersect(ray) &&
-            ray.getIntersectionDistance() < bestRay.getIntersectionDistance() &&
-            ray.getIntersectionDistance() > DISTANCE_MIN_INTERSECT) {
+            ray.getIntersectionDistance() < bestRay.getIntersectionDistance()) {
             intersectedObject = o;
             bestRay = ray;
-            if(stopAtFirst) return true;
         }
     }
 
@@ -217,7 +214,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
             vector<Light> lights;
             switch(mode) {
                 case RAY_TRACING_MODE:
-                    lights =  getLightsPT(bestRay.getIntersection(), depth);
+                    lights = getLightsPT(bestRay.getIntersection(), depth);
                     break;
                 case PBGI_MODE:
                     lights = controller->getPBGI()->getLights(bestRay);

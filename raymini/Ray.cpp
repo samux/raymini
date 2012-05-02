@@ -70,11 +70,7 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     Vec3Df u = v1.getPos() - v3.getPos();
     Vec3Df v = v2.getPos() - v3.getPos();
     Vec3Df nn = Vec3Df::crossProduct(u, v);
-    if(Vec3Df::dotProduct(nn, v1.getNormal()) < 0) {
-        nn = -nn;
-    }
     Vec3Df Otr = origin - v3.getPos();
-
     float norm = Vec3Df::dotProduct(nn, direction);
 
     // If triangle turned
@@ -99,32 +95,38 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
         return false;
     }
+
     Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
-
-    float surf_v1 = Vec3Df::getSurface(v3.getPos(), v2.getPos(), pos);
-    float surf_v2 = Vec3Df::getSurface(v3.getPos(), v1.getPos(), pos);
-    float surf_v3 = Vec3Df::getSurface(v1.getPos(), v2.getPos(), pos);
-
-    Vec3Df normal =
-        surf_v3*v3.getNormal() +
-        surf_v2*v2.getNormal() +
-        surf_v1*v1.getNormal();
-
-    normal.normalize();
-
     float distance = Vec3Df::squaredDistance (pos, origin);
 
     if (!hasIntersection || distance < intersectionDistance) {
         hasIntersection = true;
         intersectionDistance = distance;
-        intersection = {pos, normal};
+        intersection.setPos(pos);
+        a = &v1; b = &v2 ; c = &v3;
     }
 
     return true;
 }
 
-void Ray::draw(float r, float g, float b)
-{
+void Ray::computeNormal() {
+    if(!hasIntersection) return;
+
+    float surf_c = Vec3Df::getSurface(a->getPos(), b->getPos(), intersection.getPos());
+    float surf_b = Vec3Df::getSurface(a->getPos(), c->getPos(), intersection.getPos());
+    float surf_a = Vec3Df::getSurface(c->getPos(), b->getPos(), intersection.getPos());
+
+    Vec3Df normal =
+        surf_a*a->getNormal() +
+        surf_b*b->getNormal() +
+        surf_c*c->getNormal();
+
+    normal.normalize();
+
+    intersection.setNormal(normal);
+}
+
+void Ray::draw(float r, float g, float b) {
     glColor3f(r, g, b);
     glBegin(GL_LINES);
     glVertex3f(origin[0], origin[1], origin[2]);

@@ -76,16 +76,16 @@ bool KDtree::intersect(Ray &ray) const {
     const Mesh & mesh = o.getMesh();
 
     if(splitAxis ==  Axis::NONE) {
-        bool hasIntersection = false;
         for(unsigned idT : triangles) {
             const Triangle & t = mesh.getTriangles()[idT];
             const Vertex & v0 = mesh.getVertices() [t.getVertex(0)];
             const Vertex & v1 = mesh.getVertices() [t.getVertex(1)];
             const Vertex & v2 = mesh.getVertices() [t.getVertex(2)];
 
-            hasIntersection |= ray.intersect(v0, v1, v2);
+            ray.intersect(v0, v1, v2);
         }
-        return hasIntersection;
+        ray.computeNormal();
+        return ray.intersect();
     }
     else {
         Vec3Df lI, rI;
