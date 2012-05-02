@@ -87,16 +87,34 @@ typedef struct {
 } Ray;
 
 bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
-    /*Vert u = subVert(v1, v3);
+    Vert u = subVert(v1, v3);
     Vert v = subVert(v2, v3);
     Vert nn = crossProduct(u, v);
     Vert Otr = subVert(r.orig, v3);
 
-    float norm = dotProduct(nn, r.dir);*/
+    float norm = dotProduct(nn, r.dir);
+    if(norm > 0) {
+        return false;
+    }
 
 
+    if(dotProduct(nn, Otr) < 0)
+        return false;
+
+    float Iu = dotProduct(crossProduct(Otr, v), r.dir)/norm;
 
 
+    if ( (0>Iu) || (Iu >1) ) {
+        return false;
+    }
+
+    float Iv = dotProduct(crossProduct(u, Otr), r.dir)/norm;
+
+    if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
+        return false;
+    }
+
+    return true;
 
     /*Vec3Df u = v1.getPos() - v3.getPos();
     Vec3Df v = v2.getPos() - v3.getPos();
@@ -131,7 +149,6 @@ bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
         return false;
     }
     Vec3Df pos = v3.getPos() + Iu*u + Iv*v;*/
-   return true; 
     
 }
 
@@ -147,6 +164,7 @@ __kernel void squareArray(__constant Vert * vert,
     const int x = gid % *width;
     const int y = gid / *width;
 
+
     const float tang = tan(cam->FoV);
     Vert right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
     Vert up = mul(cam->upVector, tang / (*height));
@@ -158,15 +176,15 @@ __kernel void squareArray(__constant Vert * vert,
 
     normalize_(&stepX);
 
+    unsigned int color = 0;
+
     Ray r = {cam->pos, stepX};
-    //intersect(r, tri, vert);
+    for(unsigned int i = 0; i < *nb_tri; i++) {
+        if(intersect(r, vert[tri[i].t[0]], vert[tri[i].t[1]], vert[tri[i].t[2]])) {
+            color = 128;
+        }
+    }
 
 
-
-
-
-
-    pix[y*(*width) + x] = 0;
-    pix[y*(*width) + x] |= (0<<8);
-    pix[y*(*width) + x] |= (128<<16);
+    pix[y*(*width) + x] = color;
 };

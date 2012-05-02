@@ -126,7 +126,7 @@ void Scene::buildDefaultScene () {
 
     //---------- GROUND---------//
     Mesh groundMesh;
-    groundMesh.loadOFF ("models/ground.off");
+    groundMesh.loadOFF ("models/sphere.off");
     Object * ground = new Object(groundMesh, groundMat, "Ground");
     objects.push_back (ground);
 

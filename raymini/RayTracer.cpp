@@ -82,7 +82,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
     unsigned int pix[screenWidth*screenHeight];
     cl.getImage(camPos, direction, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight, pix);
 
-    const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    /*const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
@@ -112,7 +112,7 @@ QImage RayTracer::render (const Vec3Df & camPos,
             }
         }
         scene->move(nbPictures);
-    }
+    }*/
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
