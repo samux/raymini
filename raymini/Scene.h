@@ -63,6 +63,7 @@ private:
 
     void buildDefaultScene ();
     void buildRoom (Material *sphereMat=nullptr);
+    void buildMesh(const std::string & path, Material *mat);
     std::vector<Object *> objects;
     std::vector<Light *> lights;
     BoundingBox bbox;

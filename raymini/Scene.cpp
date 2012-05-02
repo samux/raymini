@@ -23,6 +23,7 @@ void printUsage() {
          << "rsm: room with mirror sphere" << endl
          << "rsglas: room with glass sphere" << endl
          << "rsglos: room with glossy sphere" << endl
+         << "mesh <mesh_path>" << endl
          << endl;
 }
 
@@ -46,12 +47,15 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     controller(c) {
 
     string id(argc>1?argv[1]:"");
+    string meshPath(argc>2?argv[2]:"");
 
     if(!id.compare("room")) buildRoom();
     else if(!id.compare("rs")) buildRoom(&red);
     else if(!id.compare("rsm")) buildRoom(&mirrorMat);
     else if(!id.compare("rsglas")) buildRoom(new Glass(c, 1.1f));
     else if(!id.compare("rsglos")) buildRoom(&glossyMat);
+    else if(!id.compare("mesh"))
+        buildMesh(meshPath, new Material(c, 1.f, 1.f, Vec3Df (1.f, .6f, .2f)));
     else buildDefaultScene();
 
     updateBoundingBox ();
@@ -107,8 +111,18 @@ void Scene::buildRoom(Material *sphereMat) {
         objects.push_back(sphere);
     }
 
-    lights.push_back(new Light(Vec3Df (0, 0, 3), 0.01, Vec3Df(0, 0, 1),
-                               Vec3Df (1.f, 1.f, 1.f), 1.0f));
+    lights.push_back(new Light({0.f, 0.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, 1.f));
+}
+
+void Scene::buildMesh(const std::string & path, Material *mat) {
+    Mesh mesh;
+    mesh.loadOFF(path);
+    mesh.scale(1.f/Object::computeBoundingBox(mesh).getRadius());
+    objects.push_back(new Object(mesh, mat));
+
+    lights.push_back(new Light({1.f, 1.f, 1.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, 1.f));
 }
 
 void Scene::buildDefaultScene () {
