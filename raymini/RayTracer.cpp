@@ -148,12 +148,10 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
         Vec3Df stepY = (float(j)+offset.second - screenHeight/2.f) * upVec;
         Vec3Df step = stepX + stepY;
         Vec3Df dir = direction + step;
-        cout << "i: " << i << " j: " << j << " dir: " << dir << endl;
-        if(i == 0 && j == 0)
-            while(1);
+        /*cout << "i: " << i << " j: " << j << " dir: " << dir << endl;
         cout << rightVec << endl;
         cout << upVec << endl;
-        cout << camPos << endl;
+        cout << camPos << endl;*/
         dir.normalize();
         if (typeFocus != Focus::NONE) {
             float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
