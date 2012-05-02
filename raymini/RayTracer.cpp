@@ -7,12 +7,10 @@
 
 #include <QImage>
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
-#include <omp.h>
-#include <chrono>
 
 #include "Controller.h"
+#include "ProgressBar.h"
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"
@@ -25,47 +23,6 @@ inline int clamp (float f) {
     int v = static_cast<int> (255*f);
     return min(max(v, 0), 255);
 }
-
-class ProgressBar {
-private:
-    unsigned max;
-    unsigned current;
-    omp_lock_t lck;
-    chrono::time_point<chrono::system_clock> start;
-
-    void lock() { omp_set_lock(&lck); }
-    void unlock() { omp_unset_lock(&lck); }
-
-public:
-    ProgressBar(unsigned nbIter) :
-        max(nbIter), current(0), start(chrono::system_clock::now()) {
-        omp_init_lock(&lck);
-        cerr << endl
-             << setw (5) << 0
-             << "% >";
-        for(unsigned i = 0 ; i < 100 ; i++)
-            cerr << ' ';
-        cerr << '<';
-    }
-
-    void operator()() {
-        lock();
-        float percent = 100.f*float(current)/float(max);
-        cerr << '\r'
-             << fixed << setprecision(2) << setw (5) << percent
-             << "% >";
-        for(unsigned i = 0 ; i < unsigned(percent)+1 ; i++)
-            cerr << '*';
-        current++;
-        if(current==max) {
-            auto now = chrono::system_clock::now();
-            chrono::microseconds u = now -start;
-            cerr << "< " << u.count()/1000 << "ms "
-                 << '\r' << setw (5) << 100.00;
-        }
-        unlock();
-    }
-};
 
 RayTracer::RayTracer(Controller *c):
     mode(Mode::RAY_TRACING_MODE),

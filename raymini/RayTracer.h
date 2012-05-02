@@ -12,7 +12,6 @@
 #include <vector>
 #include <QImage>
 #include <utility>
-#include <vector>
 
 #include "Vec3D.h"
 #include "Shadow.h"
