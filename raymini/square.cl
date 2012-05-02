@@ -1,155 +1,121 @@
 typedef struct {
-    float v[3];
+    float p[3];
+} Vec;
+
+typedef struct {
+    Vec p;
+    Vec n;
 } Vert;
 
 typedef struct {
-    unsigned int t[3];
+    unsigned int v[3];
 } Tri;
 
 typedef struct {
-    Vert pos;
-    Vert dir;
-    Vert upVector;
-    Vert rightVector;
+    Vec pos;
+    Vec dir;
+    Vec upVector;
+    Vec rightVector;
     float FoV;
     float aspectRatio;
 } Cam;
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-Vert addVert(Vert a, Vert b) {
-    Vert res;
+Vec addVert(Vec a, Vec b) {
+    Vec res;
     for(unsigned int i = 0; i < 3; i++)
-        res.v[i] = a.v[i] + b.v[i];
+        res.p[i] = a.p[i] + b.p[i];
     return res;
 }
 
-void subVert_(Vert * a, Vert b) {
+void subVert_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
-        a->v[i] = a->v[i] - b.v[i];
+        a->p[i] = a->p[i] - b.p[i];
 }
 
-Vert subVert(Vert a, Vert b) {
-    Vert res;
+Vec subVert(Vec a, Vec b) {
+    Vec res;
     for(unsigned int i = 0; i < 3; i++)
-        res.v[i] = a.v[i] - b.v[i];
+        res.p[i] = a.p[i] - b.p[i];
     return res;
 }
 
-void addVert_(Vert * a, Vert b) {
+void addVert_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
-        a->v[i] = a->v[i] + b.v[i];
+        a->p[i] = a->p[i] + b.p[i];
 }
 
-Vert mul(Vert a, float b) {
-    Vert res;
+Vec mul(Vec a, float b) {
+    Vec res;
     for(unsigned int i = 0; i < 3; i++)
-        res.v[i] = a.v[i] * b;
+        res.p[i] = a.p[i] * b;
     return res;
 }
 
-float dotProduct(Vert a, Vert b) {
+float dotProduct(Vec a, Vec b) {
     float res = 0;
     for(unsigned int i = 0; i < 3; i++)
-        res += a.v[i] * b.v[i];
+        res += a.p[i] * b.p[i];
     return res;
 }
 
-Vert crossProduct(Vert a, Vert b) {
-    Vert res;
-    res.v[0] = a.v[1]*b.v[2] - a.v[2]*b.v[1];
-    res.v[1] = a.v[2]*b.v[0] - a.v[0]*b.v[2];
-    res.v[2] = a.v[0]*b.v[1] - a.v[1]*b.v[0];
+Vec crossProduct(Vec a, Vec b) {
+    Vec res;
+    res.p[0] = a.p[1]*b.p[2] - a.p[2]*b.p[1];
+    res.p[1] = a.p[2]*b.p[0] - a.p[0]*b.p[2];
+    res.p[2] = a.p[0]*b.p[1] - a.p[1]*b.p[0];
     return res;
 }
 
-float getSquaredLength(Vert a) {
+float getSquaredLength(Vec a) {
     return dotProduct(a, a);
 }
 
-float getLength(Vert a) {
+float getLength(Vec a) {
     return  sqrt(getSquaredLength(a));
 }
 
-void normalize_(Vert * a) {
+void normalize_(Vec * a) {
     float norm = getLength(*a);
     if(norm == 0) {
         return;
     }
     float resLength = 1/norm;
     for(unsigned int i = 0; i < 3; i++)
-        a->v[i] = a->v[i] * resLength;
+        a->p[i] = a->p[i] * resLength;
 }
 
 typedef struct {
-    Vert orig;
-    Vert dir;
+    Vec orig;
+    Vec dir;
 } Ray;
 
 bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
-    Vert u = subVert(v1, v3);
-    Vert v = subVert(v2, v3);
-    Vert nn = crossProduct(u, v);
-    Vert Otr = subVert(r.orig, v3);
+    Vec u = subVert(v1.p, v3.p);
+    Vec v = subVert(v2.p, v3.p);
+    Vec nn = crossProduct(u, v);
+    Vec Otr = subVert(r.orig, v3.p);
 
     float norm = dotProduct(nn, r.dir);
     if(norm > 0) {
         return false;
     }
 
-
     if(dotProduct(nn, Otr) < 0)
         return false;
 
     float Iu = dotProduct(crossProduct(Otr, v), r.dir)/norm;
-
-
     if ( (0>Iu) || (Iu >1) ) {
         return false;
     }
 
     float Iv = dotProduct(crossProduct(u, Otr), r.dir)/norm;
-
     if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
         return false;
     }
 
     return true;
-
-    /*Vec3Df u = v1.getPos() - v3.getPos();
-    Vec3Df v = v2.getPos() - v3.getPos();
-    Vec3Df nn = Vec3Df::crossProduct(u, v);
-    if(Vec3Df::dotProduct(nn, v1.getNormal()) < 0) {
-        nn = -nn;
-    }
-    Vec3Df Otr = origin - v3.getPos();
-
-    float norm = Vec3Df::dotProduct(nn, direction);
-
-    // If triangle turned
-    if (norm > 0) {
-        return false;
-    }
-
-    // If starting ray behind triangle
-    if (Vec3Df::dotProduct(nn, Otr) < 0) {
-        return false;
-    }
-
-    // Coordinates into triangle
-    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/norm;
-
-    if ( (0>Iu) || (Iu >1) ) {
-        return false;
-    }
-
-    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/norm;
-
-    if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
-        return false;
-    }
-    Vec3Df pos = v3.getPos() + Iu*u + Iv*v;*/
-    
 }
 
 __kernel void squareArray(__constant Vert * vert,
@@ -166,11 +132,11 @@ __kernel void squareArray(__constant Vert * vert,
 
 
     const float tang = tan(cam->FoV);
-    Vert right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
-    Vert up = mul(cam->upVector, tang / (*height));
+    Vec right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
+    Vec up = mul(cam->upVector, tang / (*height));
 
-    Vert stepX = mul(right, (float)x - (*width)/(float)2);
-    Vert stepY = mul(up, (float)y - (*height)/(float)2);
+    Vec stepX = mul(right, (float)x - (*width)/(float)2);
+    Vec stepY = mul(up, (float)y - (*height)/(float)2);
     addVert_(&stepX, stepY);
     addVert_(&stepX, cam->dir);
 
@@ -180,11 +146,10 @@ __kernel void squareArray(__constant Vert * vert,
 
     Ray r = {cam->pos, stepX};
     for(unsigned int i = 0; i < *nb_tri; i++) {
-        if(intersect(r, vert[tri[i].t[0]], vert[tri[i].t[1]], vert[tri[i].t[2]])) {
+        if(intersect(r, vert[tri[i].v[0]], vert[tri[i].v[1]], vert[tri[i].v[2]])) {
             color = 128;
         }
     }
-
 
     pix[y*(*width) + x] = color;
 };

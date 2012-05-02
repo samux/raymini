@@ -20,6 +20,14 @@ OpenCL::OpenCL(Controller * c): c(c) {
 
         std::vector<Device> devices = context->getInfo<CL_CONTEXT_DEVICES>();
 
+        std::string deviceName;
+        devices[0].getInfo((cl_device_info)CL_DEVICE_NAME, &deviceName);
+        std::cout << "NAME: " << deviceName << std::endl;
+
+        cl_device_type deviceType;
+        devices[0].getInfo((cl_device_info)CL_DEVICE_TYPE, &deviceType);
+        std::cout << "TYPE: " << deviceType << std::endl;
+
         try {
             program->build(devices);
         }
@@ -39,19 +47,39 @@ OpenCL::OpenCL(Controller * c): c(c) {
         std::vector<Vertex> vs = c->getScene()->getObjects()[0]->getMesh().getVertices();
         vertices.resize(vs.size());
         for(unsigned int i = 0; i < vs.size(); i++) {
-            vertices[i].v1 = vs[i].getPos()[0];
-            vertices[i].v2 = vs[i].getPos()[1];
-            vertices[i].v3 = vs[i].getPos()[2];
-            std::cout << vertices[i].v2 << std::endl;
+            for(unsigned int j = 0; j < 3; j++) {
+                vertices[i].p.p[j] = vs[i].getPos()[j];
+                vertices[i].n.p[j] = vs[i].getNormal()[j];
+            }
         }
 
         std::vector<Triangle> ts = c->getScene()->getObjects()[0]->getMesh().getTriangles();
         triangles.resize(ts.size());
         for(unsigned int i = 0; i < ts.size(); i++) {
-            triangles[i].v1 = ts[i].getVertex(0);
-            triangles[i].v2 = ts[i].getVertex(1);
-            triangles[i].v3 = ts[i].getVertex(2);
+            for(unsigned int j = 0; j < 3; j++) {
+                triangles[i].v[j] = ts[i].getVertex(j);
+            }
         }
+
+        nb_vert = vertices.size();
+        nb_tri = triangles.size();
+
+        vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Vert) * vertices.size(), &vertices[0]);
+
+        nb_vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_vert);
+
+        triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Tri) * triangles.size(), &triangles[0]);
+
+        nb_triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_tri);
+
+        kernel->setArg(0, *vertBuffer);
+        kernel->setArg(1, *nb_vertBuffer);
+        kernel->setArg(2, *triBuffer);
+        kernel->setArg(3, *nb_triBuffer);
     }
     catch (Error& err)
     {
@@ -76,39 +104,16 @@ void OpenCL::getImage ( const Vec3Df & camPos,
 
     try {
         Cam cam;
-        cam.pos.v1 = camPos[0];
-        cam.pos.v2 = camPos[1];
-        cam.pos.v3 = camPos[2];
+        for(unsigned int i = 0; i < 3; i++) {
+            cam.pos.p[i] = camPos[i];
+            cam.dir.p[i] = viewDirection[i];
+            cam.upVector.p[i] = upVector[i];
+            cam.rightVector.p[i] = rightVector[i];
 
-        cam.dir.v1 = viewDirection[0];
-        cam.dir.v2 = viewDirection[1];
-        cam.dir.v3 = viewDirection[2];
-
-        cam.upVector.v1 = upVector[0];
-        cam.upVector.v2 = upVector[1];
-        cam.upVector.v3 = upVector[2];
-
-        cam.rightVector.v1 = rightVector[0];
-        cam.rightVector.v2 = rightVector[1];
-        cam.rightVector.v3 = rightVector[2];
+        }
 
         cam.FoV = fieldOfView;
         cam.aspectRatio = aspectRatio;
-
-        unsigned int nb_vert = vertices.size();
-        unsigned int nb_tri = triangles.size();
-
-        Buffer vertBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Vert) * vertices.size(), &vertices[0]);
-
-        Buffer nb_vertBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        sizeof(unsigned int), &nb_vert);
-
-        Buffer triBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Tri) * triangles.size(), &triangles[0]);
-
-        Buffer nb_triBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        sizeof(unsigned int), &nb_tri);
 
         Buffer pixBuffer(*context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, 
                         sizeof(unsigned int) * pixelCount, &pixBuf[0]);
@@ -122,18 +127,14 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         Buffer camBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(Cam), &cam);
 
-        kernel->setArg(0, vertBuffer);
-        kernel->setArg(1, nb_vertBuffer);
-        kernel->setArg(2, triBuffer);
-        kernel->setArg(3, nb_triBuffer);
         kernel->setArg(4, pixBuffer);
         kernel->setArg(5, widthBuffer);
         kernel->setArg(6, heightBuffer);
         kernel->setArg(7, camBuffer);
 
-        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(64));
+        std::cout << "GPU Started!\n";
+        cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(128));
         cmdQ->enqueueReadBuffer(pixBuffer, true, 0, sizeof(unsigned int)*pixelCount, &pixBuf[0]);
-
         std::cout << "Finished!\n";
     }
     catch (Error& err) {

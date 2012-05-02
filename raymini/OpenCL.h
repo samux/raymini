@@ -6,22 +6,23 @@
 #include "CL/cl.hpp"
 
 typedef struct {
-    float v1;
-    float v2;
-    float v3;
+    float p[3];
+} Vec;
+
+typedef struct {
+    Vec p;
+    Vec n;
 } Vert;
 
 typedef struct {
-    unsigned int v1;
-    unsigned int v2;
-    unsigned int v3;
+    unsigned int v[3];
 } Tri;
 
 typedef struct {
-    Vert pos;
-    Vert dir;
-    Vert upVector;
-    Vert rightVector;
+    Vec pos;
+    Vec dir;
+    Vec upVector;
+    Vec rightVector;
     float FoV;
     float aspectRatio;
 } Cam;
@@ -50,5 +51,13 @@ private:
 
     std::vector<Vert> vertices;
     std::vector<Tri> triangles;
+
+    cl::Buffer * vertBuffer;
+    cl::Buffer * nb_vertBuffer;
+    cl::Buffer * triBuffer;
+    cl::Buffer * nb_triBuffer;
+
+    unsigned int nb_vert;
+    unsigned int nb_tri;
 
 };
