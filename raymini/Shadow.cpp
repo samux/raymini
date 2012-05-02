@@ -12,7 +12,7 @@ bool Shadow::hard(const Vec3Df & pos, const Vec3Df& light) const {
     Vec3Df dir = light - pos;
     float dist = dir.normalize();
 
-    bool inter = rt->intersect(dir, pos, riShadow, ioShadow, true);
+    bool inter = rt->intersect(dir, pos, riShadow, ioShadow);
     return !inter || (inter && riShadow.getIntersectionDistance() > dist);
 }
 
