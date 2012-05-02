@@ -16,7 +16,7 @@ vector<Light> PBGI::getLights(const Ray & r) const {
             const Octree * o = octree->intersect(rayCube);
             if(o && rayCube.getIntersectionDistance() > 0.01) {
                 Surfel s = o->getMeanSurfel();
-                float intensity = 15.0/pow(1.0+rayCube.getIntersectionDistance(),3);
+                float intensity = c->getRayTracer()->intensityPathTracing/pow(1.0+rayCube.getIntersectionDistance(),3);
                 light.push_back(Light(s.getPos(), s.getColor(), intensity));
             }
         }

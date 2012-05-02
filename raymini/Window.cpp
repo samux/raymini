@@ -120,7 +120,6 @@ void Window::updateFromRayTracer() {
     bool isPT = rayTracer->depthPathTracing != 0;
     PTNbRaySpinBox->setVisible(isPT);
     PTMaxAngleSpinBox->setVisible(isPT);
-    PTIntensitySpinBox->setVisible(isPT);
     PTOnlyCheckBox->setVisible(isPT);
     PBGICheckBox->setVisible(!isPT);
 }
@@ -347,11 +346,10 @@ void Window::initControlWidget () {
     connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
 
-    PTIntensitySpinBox = new QSpinBox(PTGroupBox);
+    QSpinBox * PTIntensitySpinBox = new QSpinBox(PTGroupBox);
     PTIntensitySpinBox->setPrefix ("Intensity: ");
     PTIntensitySpinBox->setMinimum (1);
     PTIntensitySpinBox->setMaximum (1000);
-    PTIntensitySpinBox->setVisible(false);
     PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
     connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetIntensityPathTracing (int)));
     PTLayout->addWidget (PTIntensitySpinBox);

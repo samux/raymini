@@ -98,7 +98,6 @@ void Scene::buildRoom(Material *sphereMat) {
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &black, "Front Wall", {0, -2, 2}));
 
-
     if(sphereMat) {
         Mesh sphereMesh;
         sphereMesh.loadOFF("models/sphere.off");
@@ -110,7 +109,6 @@ void Scene::buildRoom(Material *sphereMat) {
 
     lights.push_back(new Light(Vec3Df (0, 0, 3), 0.01, Vec3Df(0, 0, 1),
                                Vec3Df (1.f, 1.f, 1.f), 1.0f));
-
 }
 
 void Scene::buildDefaultScene () {
