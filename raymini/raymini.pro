@@ -33,6 +33,7 @@ HEADERS = Window.h \
           PointCloud.h \
           Brdf.h \
           PBGI.h \
+          OpenCL.h \
           Octree.h
 
 SOURCES = Window.cpp \
@@ -64,6 +65,7 @@ SOURCES = Window.cpp \
           PointCloud.cpp \
           Octree.cpp \
           PBGI.cpp \
+          OpenCL.cpp \
           Main.cpp
 
     DESTDIR=.

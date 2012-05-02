@@ -20,6 +20,7 @@
 #include "AntiAliasing.h"
 #include "Focus.h"
 #include "Observable.h"
+#include "OpenCL.h"
 
 class Color;
 class Object;
@@ -102,7 +103,8 @@ public:
         nbPictures(1),
         controller(c),
         backgroundColor(Vec3Df(.1f, .1f, .3f)),
-        shadow(this) {}
+        shadow(this),
+        cl(c){}
     virtual ~RayTracer () {}
 
 private:
@@ -112,6 +114,7 @@ private:
     static constexpr float distanceOrthogonalCameraScreen = 1.0;
     Vec3Df backgroundColor;
     Shadow shadow;
+    OpenCL cl;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light> getLights(const Vertex & closestIntersection) const;
