@@ -92,18 +92,7 @@ public:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;
 
-    RayTracer(Controller *c):
-        mode(Mode::RAY_TRACING_MODE),
-        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
-        intensityPathTracing(25.f), onlyPathTracing(false),
-        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
-        intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
-        typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
-        typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
-        nbPictures(1),
-        controller(c),
-        backgroundColor(Vec3Df(.1f, .1f, .3f)),
-        shadow(this) {}
+    RayTracer(Controller *c);
     virtual ~RayTracer () {}
 
 private:
@@ -117,7 +106,6 @@ private:
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light> getLights(const Vertex & closestIntersection) const;
     std::vector<Light> getLightsPT(const Vertex & closestIntersection, unsigned depth = 0) const;
-    RenderThread renderThread;
 };
 
 

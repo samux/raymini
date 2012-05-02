@@ -31,6 +31,7 @@ public:
     inline RayTracer *getRayTracer() {return rayTracer;}
     inline PBGI *getPBGI() {return pbgi;}
     inline WindowModel *getWindowModel() {return windowModel;}
+    inline RenderThread *getRenderThread() {return renderThread;}
 
 public slots :
     void windowRenderRayImage();
@@ -78,7 +79,12 @@ public slots :
 
     void threadRenderRayImage();
 
+    void rayTracerProgressed(float);
+
 private:
+    /** Stop thread if running */
+    void ensureThreadStopped();
+
     // Views
     Window *window;
     GLViewer *viewer;
@@ -88,10 +94,8 @@ private:
     RayTracer *rayTracer;
     WindowModel *windowModel;
     PBGI * pbgi;
+    RenderThread *renderThread;
 
     // QApplication
     QApplication *raymini;
-
-    // Render thread
-    RenderThread *renderThread;
 };

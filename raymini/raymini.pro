@@ -64,6 +64,7 @@ SOURCES = Window.cpp \
           Surfel.cpp \
           PointCloud.cpp \
           Octree.cpp \
+          RenderThread.cpp \
           PBGI.cpp \
           Main.cpp
 

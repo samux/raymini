@@ -22,6 +22,7 @@ void Controller::initAll(int argc, char **argv) {
     scene = new Scene(this, argc, argv);
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);
+    renderThread = new RenderThread(this);
 
     // do this after Scene and RayTracer
     pbgi = new PBGI(this);
@@ -39,6 +40,8 @@ void Controller::initAll(int argc, char **argv) {
     rayTracer->addObserver(viewer);
     windowModel->addObserver(window);
     windowModel->addObserver(viewer);
+    renderThread->addObserver(window);
+    renderThread->addObserver(viewer);
 
     window->show();
 
@@ -46,10 +49,13 @@ void Controller::initAll(int argc, char **argv) {
     scene->notifyAll();
     rayTracer->notifyAll();
     windowModel->notifyAll();
+}
 
-    renderThread = new RenderThread();
-    renderThread->controller = this;
-    connect(renderThread, SIGNAL(finished()), this, SLOT(threadRenderRayImage()));
+void Controller::ensureThreadStopped() {
+    if (renderThread->isRendering()) {
+        renderThread->stopRendering();
+        cout << "Stopped render\n";
+    }
 }
 
 /******************************************
@@ -57,6 +63,7 @@ void Controller::initAll(int argc, char **argv) {
  ******************************************/
 
 void Controller::windowSetShadowMode(int i) {
+    ensureThreadStopped();
     switch(i) {
     case 0:
         rayTracer->setShadowMode(Shadow::NONE);
@@ -72,11 +79,13 @@ void Controller::windowSetShadowMode(int i) {
 }
 
 void Controller::windowSetShadowNbRays (int i) {
+    ensureThreadStopped();
     rayTracer->setShadowNbImpule(i);
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetRayTracerMode (bool b) {
+    ensureThreadStopped();
     rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::RAY_TRACING_MODE;
     rayTracer->notifyAll();
 }
@@ -93,15 +102,19 @@ void Controller::windowSetRayTracerMode (bool b) {
                              //QString (" screen resolution"));
 
 void Controller::threadRenderRayImage() {
-    viewerSetRayImage(renderThread->resultImage);
-    viewerSetDisplayMode(WindowModel::RayDisplayMode);
+    if (!renderThread->isEmergencyStop()) {
+        viewerSetRayImage(renderThread->getLastRendered());
+        viewerSetDisplayMode(WindowModel::RayDisplayMode);
+    }
+}
+
+void Controller::rayTracerProgressed(float percent) {
+    renderThread->setPercent(percent);
+    renderThread->notifyAll();
 }
 
 void Controller::windowRenderRayImage () {
-    if (renderThread->isRunning()) {
-        cout << "Already generating an image !\n";
-        return;
-    }
+    ensureThreadStopped();
     qglviewer::Camera * cam = viewer->camera ();
     qglviewer::Vec p = cam->position ();
     qglviewer::Vec d = cam->viewDirection ();
@@ -115,12 +128,12 @@ void Controller::windowRenderRayImage () {
     float aspectRatio = cam->aspectRatio ();
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
-    renderThread->prepare(camPos, viewDirection, upVector, rightVector,
+    renderThread->startRendering(camPos, viewDirection, upVector, rightVector,
             fieldOfView, aspectRatio, screenWidth, screenHeight);
-    renderThread->start();
 }
 
 void Controller::windowSetBGColor () {
+    ensureThreadStopped();
     Vec3Df bg = 255*rayTracer->getBackgroundColor();
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
@@ -160,6 +173,7 @@ void Controller::windowAbout () {
 }
 
 void Controller::windowChangeAntiAliasingType(int index) {
+    ensureThreadStopped();
     AntiAliasing::Type type;
 
     switch (index)
@@ -183,51 +197,61 @@ void Controller::windowChangeAntiAliasingType(int index) {
 }
 
 void Controller::windowSetNbRayAntiAliasing(int i) {
+    ensureThreadStopped();
     rayTracer->nbRayAntiAliasing = i;
     rayTracer->notifyAll();
 }
 
 void Controller::windowChangeAmbientOcclusionNbRays(int index) {
+    ensureThreadStopped();
     rayTracer->nbRayAmbientOcclusion = index;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionMaxAngle(int i) {
+    ensureThreadStopped();
     rayTracer->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionRadius(double f) {
+    ensureThreadStopped();
     rayTracer->radiusAmbientOcclusion = f;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionIntensity(int i) {
+    ensureThreadStopped();
     rayTracer->intensityAmbientOcclusion = float(i)/100;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyAO(bool b) {
+    ensureThreadStopped();
     rayTracer->onlyAmbientOcclusion = b;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusType(int type) {
+    ensureThreadStopped();
     rayTracer->typeFocus = static_cast<Focus::Type>(type);
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusNbRays(int n) {
+    ensureThreadStopped();
     rayTracer->nbRayFocus = n;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusAperture(double a) {
+    ensureThreadStopped();
     rayTracer->apertureFocus = a;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
+    ensureThreadStopped();
     if (rayTracer->typeFocus == Focus::NONE) {
         cerr <<__FUNCTION__<< ": There is no point to change WindowModel focus mode !"<<endl;
         return;
@@ -237,6 +261,7 @@ void Controller::windowSetFocalFixing(bool isFocusMode) {
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {
+    ensureThreadStopped();
     if (rayTracer->typeFocus == Focus::NONE || !windowModel->isFocusMode()) {
         cerr <<__FUNCTION__<< ": There is no point to define a focal !"<<endl;
         return;
@@ -246,30 +271,36 @@ void Controller::viewerSetFocusPoint(Vertex point) {
 }
 
 void Controller::windowSetDepthPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->depthPathTracing = i;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbRayPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->nbRayPathTracing = i;
     rayTracer->notifyAll();
 }
 void Controller::windowSetMaxAnglePathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetIntensityPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->intensityPathTracing = float(i);
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbImagesSpinBox(int i) {
+    ensureThreadStopped();
     rayTracer->nbPictures = i;
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyPT(bool b) {
+    ensureThreadStopped();
     rayTracer->onlyPathTracing = b;
     rayTracer->notifyAll();
 }
@@ -280,6 +311,7 @@ void Controller::windowSelectObject(int o) {
 }
 
 void Controller::windowEnableObject(bool enabled) {
+    ensureThreadStopped();
     int o = windowModel->getSelectedObjectIndex();
     if (o == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -297,6 +329,7 @@ void Controller::windowSelectLight(int l) {
 }
 
 void Controller::windowEnableLight(bool enabled) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -308,6 +341,7 @@ void Controller::windowEnableLight(bool enabled) {
 }
 
 void Controller::windowSetLightRadius(double r) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -319,6 +353,7 @@ void Controller::windowSetLightRadius(double r) {
 }
 
 void Controller::windowSetLightIntensity(double i) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -330,6 +365,7 @@ void Controller::windowSetLightIntensity(double i) {
 }
 
 void Controller::windowSetLightPos() {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -340,6 +376,7 @@ void Controller::windowSetLightPos() {
 }
 
 void Controller::windowSetLightColor() {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
