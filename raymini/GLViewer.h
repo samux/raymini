@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include <GL/glew.h>
-#include <QGLViewer/qglviewer.h>
 #include <vector>
 #include <string>
 
@@ -18,9 +16,11 @@
 #include "Object.h"
 #include "Observer.h"
 #include "Vec3D.h"
+#include <QGLViewer/qglviewer.h>
 
 class Controller;
 class Octree;
+class QGLViewer;
 
 class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT

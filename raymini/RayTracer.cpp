@@ -79,6 +79,9 @@ QImage RayTracer::render (const Vec3Df & camPos,
     vector<Color> buffer;
     buffer.resize(screenHeight*screenWidth);
 
+    unsigned int pix[screenWidth*screenHeight];
+    cl.getImage(camPos, direction, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight, pix);
+
     const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 

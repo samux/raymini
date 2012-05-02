@@ -5,40 +5,40 @@
 #include <string>
 #include <utility>
 #include <algorithm>
-//The OpenCL C++ bindings, with exceptions
-#define __CL_ENABLE_EXCEPTIONS
-#include <CL/cl.hpp>
+
+
+using namespace cl;
 
 
 OpenCL::OpenCL(Controller * c): c(c) {
     try {
-        cl::Context context(CL_DEVICE_TYPE_GPU);
+        context = new Context(CL_DEVICE_TYPE_GPU);
 
         std::ifstream sourceFile("square.cl");
         std::string sourceCode(std::istreambuf_iterator<char>(sourceFile), (std::istreambuf_iterator<char>()));
-        cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length()+1));
+        Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length()+1));
 
-        cl::Program program(context, source);
+        program = new Program(*context, source);
 
-        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+        std::vector<Device> devices = context->getInfo<CL_CONTEXT_DEVICES>();
 
         try {
-            program.build(devices);
+            program->build(devices);
         }
-        catch (cl::Error& err)
+        catch (Error& err)
         {
             std::cerr << "Building failed, " << err.what() << "(" << err.err() << ")" 
                 << "\nRetrieving build log\n"	
-                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
+                << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
                 << "\n";
             return;
         }
 
-        cl::Kernel kernel(program, "squareArray");
+        kernel = new Kernel(*program, "squareArray");
 
-        /*cl::CommandQueue cmdQ(context, devices[0]);
+        cmdQ = new CommandQueue(context, devices[0]);
 
-        std::vector<Vect> v = mesh.getV();
+        /*std::vector<Vect> v = mesh.getV();
         std::vector<Tri> t = mesh.getT();
 
         pixels = (unsigned int *)malloc(sizeof(unsigned int) * pixelCount);
@@ -63,12 +63,25 @@ OpenCL::OpenCL(Controller * c): c(c) {
         std::cout << "Finished!\n";
         return;*/
     }
-    catch (cl::Error& err)
+    catch (Error& err)
     {
         std::cerr << "An OpenCL error occured, " << err.what()
             << "\nError num of " << err.err() << "\n";
         return;
     }
+
+}
+
+void OpenCL::getImage ( const Vec3Df & camPos,
+                        const Vec3Df & viewDirection,
+                        const Vec3Df & upVector,
+                        const Vec3Df & rightVector,
+                        float fieldOfView,
+                        float aspectRatio,
+                        unsigned int screenWidth,
+                        unsigned int screenHeight,
+                        unsigned int * pixBuffer) {
+
 
 }
 
