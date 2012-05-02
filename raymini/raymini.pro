@@ -68,20 +68,9 @@ SOURCES = Window.cpp \
 
     DESTDIR=.
 
-    #SKYBOX_TEXTURE_TARGET_BASENAME = "textures/skybox"
-    #SKYBOX_TEXTURE_TARGET = $${SKYBOX_TEXTURE_TARGET_BASENAME}.ppm
-    #SKYBOX_TEXTURE_SOURCE = $${SKYBOX_TEXTURE_TARGET_BASENAME}.jpg
-
-    #!exists($${SKYBOX_TEXTURE_TARGET}) {
-        #!exists($${SKYBOX_TEXTURE_SOURCE}) {
-            #error("Cannot find "$${SKYBOX_TEXTURE_SOURCE})
-        #}
-        #system(convert $${SKYBOX_TEXTURE_SOURCE} $${SKYBOX_TEXTURE_TARGET})
-    #}
-
 win32 {
-    INCLUDEPATH += 'C:\Users\boubek\projects\cg\extern\libQGLViewer-2.3.4'
-    LIBS += -L"c:\Users\boubek\projects\cg\extern\libQGLViewer-2.3.4\QGLViewer\release" \
+    INCLUDEPATH += '%HOMEPATH%\libQGLViewer-2.3.4'
+    LIBS += -L"%HOMEPATH%\libQGLViewer-2.3.4\QGLViewer\release" \
             -lQGLViewer2 \
             -lglew32
 }
