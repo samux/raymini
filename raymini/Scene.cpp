@@ -115,7 +115,10 @@ void Scene::buildRoom(Material *sphereMat) {
         sphereMesh.loadOFF("models/sphere.off");
         auto sphere = new Object(sphereMesh, sphereMat, "Sphere", {0, 0, 1});
         auto glass = dynamic_cast<Glass*>(sphereMat);
-        if(glass) glass->setObject(sphere);
+        if(glass) {
+            sphere->setTrans({0,0,1.5});
+            glass->setObject(sphere);
+        }
         if(dynamic_cast<Mirror*>(sphereMat))sphere->setTrans({0,0,0});
         objects.push_back(sphere);
     }
