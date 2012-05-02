@@ -40,6 +40,8 @@
 #include "AntiAliasing.h"
 #include "Controller.h"
 
+const char * ICON = "textures/icon.png";
+
 using namespace std;
 
 Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
@@ -52,8 +54,8 @@ Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     addDockWidget (Qt::RightDockWidgetArea, controlDockWidget);
     controlDockWidget->setFeatures (QDockWidget::AllDockWidgetFeatures);
     statusBar()->showMessage("");
-    setWindowIcon(QIcon("textures/rayIcon.jpg"));
-    controlDockWidget->setWindowIcon(QIcon("textures/rayIcon.jpg"));
+    setWindowIcon(QIcon(ICON));
+    controlDockWidget->setWindowIcon(QIcon(ICON));
 }
 
 Window::~Window () {
