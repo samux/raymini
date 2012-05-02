@@ -59,7 +59,7 @@ Vec3Df Glass::genColor (const Vec3Df & camPos, const Vertex & closestIntersectio
     dir.normalize();
 
     //Works only for convex object
-    Ray ray(pos-o->getTrans()+2*size*dir, -dir);
+    Ray ray(pos-o->getTrans()+3*size*dir, -dir);
     if (!o->getKDtree().intersect(ray)) {
         return controller->getRayTracer()->getColor(pos+size*dir, pos-camPos);
     }
