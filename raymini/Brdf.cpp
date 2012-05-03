@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "Brdf.h"
 
 using namespace std;

@@ -14,7 +14,6 @@
 #include "GLViewer.h"
 #include "PBGI.h"
 
-/*class Controller: public QApplication {*/
 class Controller : public QObject {
     Q_OBJECT
 public:

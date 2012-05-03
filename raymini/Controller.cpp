@@ -1,6 +1,5 @@
 #include "Controller.h"
 
-#include <QStatusBar>
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>

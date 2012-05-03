@@ -10,13 +10,10 @@
 
 #include <GL/glew.h>
 #include <QGLViewer/qglviewer.h>
-#include <vector>
 #include <string>
 
-#include "Scene.h"
-#include "Material.h"
-#include "Object.h"
 #include "Observer.h"
+#include "Vertex.h"
 #include "Vec3D.h"
 
 class Controller;

@@ -9,14 +9,9 @@
 #include "GLViewer.h"
 
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
-#include <string>
 
 #include "RayTracer.h"
 #include "Controller.h"
-#include "PBGI.h"
 #include "Light.h"
 
 using namespace std;
