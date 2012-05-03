@@ -26,6 +26,11 @@ typedef struct {
     Vec dir;
 } Ray;
 
+typedef struct {
+    Vec color;
+    float Ks; 
+} Mat;
+
 
 inline Vec addVec(Vec a, Vec b) {
     Vec res;

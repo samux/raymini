@@ -128,7 +128,7 @@ void Scene::buildDefaultScene () {
     Mesh groundMesh;
     groundMesh.loadOFF ("models/ground.off");
     Object * ground = new Object(groundMesh, groundMat, "Ground");
-    objects.push_back (ground);
+    //objects.push_back (ground);
 
     //-------- CEILING---------//
     Mesh ceilingMesh;
@@ -188,8 +188,8 @@ void Scene::buildDefaultScene () {
     //objects.push_back(skyBox);
 
 
-    Light * l = new Light(Vec3Df (0, 0, 3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
+    Light * l = new Light(Vec3Df (3.0, 3.0, -3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);
     lights.push_back (l);
     Light * l1 = new Light(Vec3Df (.5f, 3.f, 2.5f), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.0f, 0.0f, 0.0f), 1.0f);
-    lights.push_back (l1);
+    //lights.push_back (l1);
 }

@@ -4,15 +4,16 @@
 
 Vec lambert(Vec r, Vec i, Vec n) {
     float res = max(dotProduct(i, n), 0.0f);
-    Vec c = {128,128,128};
+    Vec c = {200,200,100};
     return mul(c, res);
 }
 
 Vec phong(Vec r, Vec i, Vec n) {
-    Vec ref = mul(n, 2*dotProduct(n, i));
+    Vec ref = mul(n, 2.f*dotProduct(n, i));
     ref = subVec(ref, i);
-    Vec c = {255,255,255};
-    return mul(c, 0.2*pow(max(dotProduct(ref, r), 0.f), 1.f));
+    normalize_(&ref);
+    Vec c = {100,100,100};
+    return mul(c, 0.2*pow(max(dotProduct(ref, r), 0.f), 0.5f));
 }
 
 Vec brdf(Vert pos, Vec posLight, Vec posCam) {
@@ -22,15 +23,12 @@ Vec brdf(Vert pos, Vec posLight, Vec posCam) {
     Vec ir = subVec(pos.p, posLight);
     normalize_(&ir);
 
-    Vec c = {128,0,0};
+    Vec c = {0,0,0};
     Vec amb = addVec(c, lambert(ra, ir, pos.n));
     return addVec(amb, phong(ra, ir, pos.n));
 }
 
-/*GLfloat max(GLfloat a, GLfloat b) {
-  return (a<b) ? b : a;
-}
-
+/*
 Vec3Df lambert(Vec3Df r, Vec3Df i, Vec3Df n){        
   return Color_Diff * Kd * max(Vec3Df::dotProduct(i, n), 0);
 }
@@ -78,7 +76,7 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
 
     normalize_(&stepX);
 
-    float color = (128 << 16);
+    float color = 0;
 
     unsigned int c[6] = {100, 100 << 8, 100 << 16, 200, 200 << 8, 200 << 16};
 
@@ -89,7 +87,7 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
     Vert closestInter;
     float small_dist = 100000.0f;
     bool intersected = false;
-    for(unsigned int idx_obj = 0; idx_obj < 2; idx_obj++) {
+    for(unsigned int idx_obj = 0; idx_obj < 1; idx_obj++) {
         for(unsigned int i = 0; i < nb_tri[idx_obj]; i++) {
             if(intersect(r, vert[index_vert + tri[index_tri + i].v[0]], 
                             vert[index_vert + tri[index_tri + i].v[1]], 
