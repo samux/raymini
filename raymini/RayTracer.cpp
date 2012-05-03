@@ -269,7 +269,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 }
 
 float RayTracer::getAmbientOcclusion(Vertex intersection) const {
-    if (!nbRayAmbientOcclusion) return intensityAmbientOcclusion;
+    if ((!nbRayAmbientOcclusion)||(quality!=OPTIMAL)) return intensityAmbientOcclusion;
 
     int occlusion = 0;
     vector<Vec3Df> directions = intersection.getNormal().randRotate(maxAngleAmbientOcclusion,
