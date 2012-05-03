@@ -1,10 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <array>
-#include "Vec3D.h"
-#include "BoundingBox.h"
 
+#include "BoundingBox.h"
 #include "Ray.h"
 
 class Object;

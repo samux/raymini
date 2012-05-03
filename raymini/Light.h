@@ -8,9 +8,6 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include <iostream>
-#include <vector>
-
 #include "Vec3D.h"
 
 class Light {
