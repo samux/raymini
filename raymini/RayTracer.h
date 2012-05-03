@@ -32,7 +32,7 @@ class RayTracer: public Observable {
 public:
 
     enum Mode {RAY_TRACING_MODE = 0, PBGI_MODE};
-    enum Quality {OPTIMAL, BASIC, ONE_OVER_4, ONE_OVER_9, ONE_OVER_16};
+    enum Quality {OPTIMAL, BASIC, ONE_OVER_4, ONE_OVER_9, ONE_OVER_16, ONE_OVER_25};
 
     /*          Config           */
     Mode mode;
@@ -58,6 +58,7 @@ public:
     unsigned nbPictures;
 
     Quality quality;
+    Quality durtiesQuality;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     Shadow::Mode getShadowMode() { return shadow.mode; }

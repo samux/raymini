@@ -112,24 +112,7 @@ void Controller::threadSetElapsed(int e)  {
 
 void Controller::threadSetsRenderQuality(int renderedCount) {
     // How we re render images when camera doesn't move
-    switch (renderedCount) {
-        case 0:
-            rayTracer->quality = RayTracer::Quality::ONE_OVER_16;
-            break;
-        case 1:
-            rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
-            break;
-        case 2:
-            rayTracer->quality = RayTracer::Quality::ONE_OVER_4;
-            break;
-        case 3:
-            rayTracer->quality = RayTracer::Quality::BASIC;
-            break;
-        case 4:
-        default:
-            rayTracer->quality = RayTracer::Quality::OPTIMAL;
-            break;
-    }
+    rayTracer->quality = static_cast<RayTracer::Quality>(max(0, rayTracer->durtiesQuality - renderedCount));
 }
 
 void Controller::windowStopRendering() {
@@ -447,6 +430,11 @@ void Controller::windowSetRealTime(bool r) {
         windowRenderRayImage();
     }
     windowModel->notifyAll();
+}
+
+void Controller::windowSetDurtiestQuality(int quality) {
+    rayTracer->durtiesQuality = static_cast<RayTracer::Quality>(quality);
+    rayTracer->notifyAll();
 }
 
 void Controller::viewerSetWireframe(bool b) {

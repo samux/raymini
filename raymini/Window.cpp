@@ -129,6 +129,9 @@ void Window::updateFromRayTracer() {
     PTMaxAngleSpinBox->setVisible(isPT);
     PTOnlyCheckBox->setVisible(isPT);
     PBGICheckBox->setVisible(!isPT);
+
+    // Real time
+    updateRealTime();
 }
 
 void Window::updateFromWindowModel() {
@@ -231,6 +234,13 @@ void Window::updateRealTime() {
     WindowModel *windowModel = controller->getWindowModel();
     bool isRealTime = windowModel->isRealTime();
     realTimeCheckBox->setChecked(isRealTime);
+    durtiestQualityComboBox->setVisible(isRealTime);
+    durtiestQualityLabel->setVisible(isRealTime);
+    if (isRealTime) {
+        RayTracer *rayTracer = controller->getRayTracer();
+        int quality = rayTracer->durtiesQuality;
+        durtiestQualityComboBox->setCurrentIndex(quality);
+    }
 }
 
 void Window::updateStatus() {
@@ -582,19 +592,37 @@ void Window::initControlWidget () {
     actionLayout->addWidget(stopRenderButton);
     stopRenderButton->setVisible(false);
     connect(stopRenderButton, SIGNAL(clicked()), controller, SLOT(windowStopRendering()));
+
     renderButton = new QPushButton ("Render", sceneGroupBox);
     actionLayout->addWidget (renderButton);
     connect (renderButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+
     renderProgressBar = new QProgressBar(sceneGroupBox);
     renderProgressBar->setMinimum(0);
     renderProgressBar->setMaximum(100);
     actionLayout->addWidget(renderProgressBar);
+
     realTimeCheckBox = new QCheckBox("Real time", sceneGroupBox);
     connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
     actionLayout->addWidget(realTimeCheckBox);
+
+    durtiestQualityLabel = new QLabel("Durtiest quality:", sceneGroupBox);
+    actionLayout->addWidget(durtiestQualityLabel);
+
+    durtiestQualityComboBox = new QComboBox(sceneGroupBox);
+    durtiestQualityComboBox->addItem("Optimal");
+    durtiestQualityComboBox->addItem("Basic");
+    durtiestQualityComboBox->addItem("One over 4 pixel");
+    durtiestQualityComboBox->addItem("One over 9 pixel");
+    durtiestQualityComboBox->addItem("One over 16 pixel");
+    durtiestQualityComboBox->addItem("One over 25 pixel");
+    connect(durtiestQualityComboBox, SIGNAL(activated(int)), controller, SLOT(windowSetDurtiestQuality(int)));
+    actionLayout->addWidget(durtiestQualityComboBox);
+
     QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
     actionLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
+
     QPushButton * saveButton  = new QPushButton ("Save", sceneGroupBox);
     connect (saveButton, SIGNAL (clicked ()) , controller, SLOT (windowExportRayImage ()));
     actionLayout->addWidget (saveButton);

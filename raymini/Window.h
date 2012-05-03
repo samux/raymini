@@ -52,12 +52,12 @@ private :
     void updateLights();
     // Updated by both WindowModel and RayTracer
     void updateFocus();
+    void updateRealTime();
     // Updated by both WindowModel and Scene
     void updateObjects();
     // Updated by RenderThread
     void updateProgressBar();
     // Updated by WindowModel
-    void updateRealTime();
     void updateStatus();
 
     QActionGroup * actionGroup;
@@ -65,10 +65,13 @@ private :
     QString currentDirectory;
 
     // Needed for further actions
+
     QPushButton *stopRenderButton;
     QPushButton *renderButton;
     QProgressBar *renderProgressBar;
     QCheckBox *realTimeCheckBox;
+    QLabel *durtiestQualityLabel;
+    QComboBox *durtiestQualityComboBox;
 
     QComboBox *shadowTypeList;
     QSpinBox *shadowSpinBox;

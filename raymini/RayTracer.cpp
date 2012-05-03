@@ -34,6 +34,7 @@ RayTracer::RayTracer(Controller *c):
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
     nbPictures(1),
     quality(OPTIMAL),
+    durtiesQuality(ONE_OVER_16),
     controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
     shadow(this)
@@ -58,6 +59,8 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
         qualityDivider = 3;
     } else if (quality == ONE_OVER_16) {
         qualityDivider = 4;
+    } else if (quality == ONE_OVER_25) {
+        qualityDivider = 5;
     }
     computedScreenWidth /= qualityDivider;
     computedScreenHeight /= qualityDivider;
@@ -299,6 +302,8 @@ QString RayTracer::qualityToString(Quality quality) {
             return QString("one over nine pixels");
         case ONE_OVER_16:
             return QString("one over sixteen pixels");
+        case ONE_OVER_25:
+            return QString("one over twenty-five pixels");
     }
     return QString();
 }

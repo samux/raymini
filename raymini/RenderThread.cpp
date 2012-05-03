@@ -10,7 +10,7 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 
 void RenderThread::run() {
     hasToRedrawMutex.lock();
-    if (haveToRedraw || drawingIterations < 5) {
+    if (haveToRedraw || drawingIterations < controller->getRayTracer()->durtiesQuality+1) {
         reallyWorkingMutex.lock();
         reallyWorking = true;
         reallyWorkingMutex.unlock();
