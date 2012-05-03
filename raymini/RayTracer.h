@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <QImage>
+#include <QString>
 #include <utility>
 #include <vector>
 
@@ -31,7 +32,7 @@ class RayTracer: public Observable {
 public:
 
     enum Mode {RAY_TRACING_MODE = 0, PBGI_MODE};
-    enum Quality {OPTIMAL, BASIC, ONE_OVER_4, ONE_OVER_9};
+    enum Quality {OPTIMAL, BASIC, ONE_OVER_4, ONE_OVER_9, ONE_OVER_16};
 
     /*          Config           */
     Mode mode;
@@ -96,6 +97,8 @@ public:
 
     RayTracer(Controller *c);
     virtual ~RayTracer () {}
+
+    static QString qualityToString(Quality quality);
 
 private:
     Controller *controller;

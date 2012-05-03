@@ -115,15 +115,18 @@ void Controller::threadSetsRenderQuality(int renderedCount) {
     // How we re render images when camera doesn't move
     switch (renderedCount) {
         case 0:
-            rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_16;
             break;
         case 1:
-            rayTracer->quality = RayTracer::Quality::ONE_OVER_4;
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
             break;
         case 2:
-            rayTracer->quality = RayTracer::Quality::BASIC;
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_4;
             break;
         case 3:
+            rayTracer->quality = RayTracer::Quality::BASIC;
+            break;
+        case 4:
         default:
             rayTracer->quality = RayTracer::Quality::OPTIMAL;
             break;

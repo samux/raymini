@@ -10,10 +10,13 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 
 void RenderThread::run() {
     hasToRedrawMutex.lock();
-    if (haveToRedraw || drawingIterations < 4) {
+    if (haveToRedraw || drawingIterations < 5) {
         time.restart();
         time.start();
         controller->threadSetsRenderQuality(drawingIterations++);
+        reallyWorkingMutex.lock();
+        isReallyWorking = true;
+        reallyWorkingMutex.unlock();
         resultImage = controller->getRayTracer()->render(
                 camPos,
                 viewDirection,
@@ -26,6 +29,9 @@ void RenderThread::run() {
         controller->threadSetElapsed(time.elapsed());
     }
     haveToRedraw = false;
+    reallyWorkingMutex.lock();
+    isReallyWorking = false;
+    reallyWorkingMutex.unlock();
     hasToRedrawMutex.unlock();
 }
 
@@ -44,7 +50,7 @@ void RenderThread::startRendering(const Vec3Df & camPos,
         if (controller->getWindowModel()->isRealTime()) {
             drawingIterations = 0;
         } else {
-            drawingIterations = 4;
+            drawingIterations = 5;
         }
     }
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
@@ -53,7 +59,13 @@ void RenderThread::startRendering(const Vec3Df & camPos,
 }
 
 bool RenderThread::isRendering() {
-    return isRunning();
+    bool result = isRunning();
+    if (result) {
+        reallyWorkingMutex.lock();
+        result = isReallyWorking;
+        reallyWorkingMutex.unlock();
+    }
+    return result;
 }
 
 bool RenderThread::hasRendered() {

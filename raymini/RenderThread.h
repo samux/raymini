@@ -59,6 +59,8 @@ private:
     bool haveToRedraw;
     QMutex hasToRedrawMutex;
     int drawingIterations;
+    QMutex reallyWorkingMutex;
+    bool isReallyWorking;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,

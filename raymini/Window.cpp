@@ -90,6 +90,7 @@ void Window::update(Observable *observable) {
     }
     else if (observable == controller->getRenderThread()) {
         updateProgressBar();
+        updateStatus();
     }
     else {
         cerr << "Window::update(Observable*) has been called from an unknown source!" << endl;
@@ -233,20 +234,30 @@ void Window::updateRealTime() {
 
 void Window::updateStatus() {
     WindowModel *windowModel = controller->getWindowModel();
+    RayTracer *rayTracer = controller->getRayTracer();
+    RenderThread *renderThread = controller->getRenderThread();
     int elapsed = windowModel->getElapsedTime();
     qglviewer::Camera * cam = controller->getViewer()->camera ();
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
+    RayTracer::Quality quality = rayTracer->quality;
     if (elapsed != 0) {
         int FPS = 1000/elapsed;
-        statusBar()->showMessage(
+        QString message = 
                 QString("[")+
                 QString::number(screenWidth) + QString ("x") + QString::number (screenHeight) +
                 QString("] ")+
                 QString::number(elapsed) +
                 QString ("ms (") +
                 QString::number(FPS)+
-                QString(" fps)"));
+                QString(" fps)");
+        if (renderThread->isRendering()) {
+            message +=
+                QString(" Rendering in ")+
+                QString(RayTracer::qualityToString(quality))+
+                QString(" quality...");
+        }
+        statusBar()->showMessage(message);
     }
 }
 

@@ -54,9 +54,10 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     int qualityDivider = 1;
     if (quality == ONE_OVER_4) {
         qualityDivider = 2;
-    }
-    else if (quality == ONE_OVER_9) {
+    } else if (quality == ONE_OVER_9) {
         qualityDivider = 3;
+    } else if (quality == ONE_OVER_16) {
+        qualityDivider = 4;
     }
     computedScreenWidth /= qualityDivider;
     computedScreenHeight /= qualityDivider;
@@ -284,4 +285,20 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     }
 
     return intensityAmbientOcclusion * (1.f-float(occlusion)/float(nbRayAmbientOcclusion));
+}
+
+QString RayTracer::qualityToString(Quality quality) {
+    switch (quality) {
+        case OPTIMAL:
+            return QString("optimal");
+        case BASIC:
+            return QString("basic");
+        case ONE_OVER_4:
+            return QString("one over four pixels");
+        case ONE_OVER_9:
+            return QString("one over nine pixels");
+        case ONE_OVER_16:
+            return QString("one over sixteen pixels");
+    }
+    return QString();
 }
