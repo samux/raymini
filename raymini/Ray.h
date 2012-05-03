@@ -20,14 +20,21 @@ public:
     inline Ray () : hasIntersection(false) , intersectionDistance(1000000.f){}
     inline Ray (const Vec3Df & origin, const Vec3Df & direction)
         : origin (origin), direction (direction),
-          hasIntersection(false) , intersectionDistance(1000000.f){}
+          hasIntersection(false) , intersectionDistance(1000000.f),
+          isComputed(false) {}
     inline virtual ~Ray () {}
 
     inline const Vec3Df & getOrigin () const { return origin; }
     inline Vec3Df & getOrigin () { return origin; }
     inline const Vec3Df & getDirection () const { return direction; }
     inline Vec3Df & getDirection () { return direction; }
-    inline Vertex getIntersection() const { return {intersection+trans, computeNormal()}; }
+    inline Vertex getIntersection() {
+        if(!isComputed) {
+            computedIntersection = {intersection+trans, computeNormal()};
+            isComputed = true;
+        }
+        return computedIntersection;
+    }
     inline float getIntersectionDistance() const { return intersectionDistance; }
     inline bool intersect() const { return hasIntersection; }
 
@@ -51,6 +58,8 @@ private:
     Vec3Df intersection;
     float intersectionDistance;
 
+    bool isComputed;
+    Vertex computedIntersection;
     Vec3Df trans;
     const Vertex *a, *b, *c;
     Vec3Df computeNormal() const;

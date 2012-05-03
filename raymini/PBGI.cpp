@@ -5,11 +5,11 @@
 
 using namespace std;
 
-vector<Light> PBGI::getLights(const Ray & r) const {
+vector<Light> PBGI::getLights(Ray & r) const {
     Vec3Df color;
     vector<Light> light;
     vector<Vec3Df> directions = r.getIntersection().getDirectionsOnCube(res);
-    for(Vec3Df & dir: directions) {
+    for(const Vec3Df & dir: directions) {
         // we look at the half hemisphere
         if(Vec3Df::dotProduct(dir, r.getIntersection().getNormal()) > 0.0) {
             Ray rayCube(r.getIntersection().getPos() + 0.01*dir, dir);
