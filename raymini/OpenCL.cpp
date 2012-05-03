@@ -44,42 +44,69 @@ OpenCL::OpenCL(Controller * c): c(c) {
 
         cmdQ = new CommandQueue(*context, devices[0]);
 
-        std::vector<Vertex> vs = c->getScene()->getObjects()[0]->getMesh().getVertices();
-        vertices.resize(vs.size());
-        for(unsigned int i = 0; i < vs.size(); i++) {
-            for(unsigned int j = 0; j < 3; j++) {
-                vertices[i].p.p[j] = vs[i].getPos()[j];
-                vertices[i].n.p[j] = vs[i].getNormal()[j];
+        nb_obj = c->getScene()->getObjects().size();
+        vertices.resize(nb_obj);
+        triangles.resize(nb_obj);
+        nb_vert.resize(nb_obj);
+        nb_tri.resize(nb_obj);
+        nb_vert_total = 0;
+        nb_tri_total = 0;
+
+        unsigned int index_vert = 0;
+        unsigned int index_tri = 0;
+
+        for(unsigned int idx_obj = 0; idx_obj < nb_obj; idx_obj++) {
+            std::vector<Vertex> vs = c->getScene()->getObjects()[idx_obj]->getMesh().getVertices();
+            vertices.resize(vertices.size() + vs.size());
+            for(unsigned int i = 0; i < vs.size(); i++) {
+                for(unsigned int j = 0; j < 3; j++) {
+                    vertices[index_vert + i].p.p[j] = vs[i].getPos()[j];
+                    vertices[index_vert + i].n.p[j] = vs[i].getNormal()[j];
+                }
             }
+
+            std::vector<Triangle> ts = c->getScene()->getObjects()[idx_obj]->getMesh().getTriangles();
+            triangles.resize(triangles.size() + ts.size());
+            for(unsigned int i = 0; i < ts.size(); i++) {
+                for(unsigned int j = 0; j < 3; j++) {
+                    triangles[index_tri + i].v[j] = ts[i].getVertex(j);
+                }
+            }
+
+            nb_vert[idx_obj] = vs.size();
+            nb_tri[idx_obj] = ts.size();
+
+            index_vert += nb_vert[idx_obj];
+            index_tri += nb_tri[idx_obj];
+
+            nb_vert_total += nb_vert[idx_obj];
+            nb_tri_total += nb_tri[idx_obj];
+            std::cout << "OBJ: "  << idx_obj << " NB_TRI: " << nb_tri[idx_obj] << std::endl;
+            std::cout << "OBJ: "  << idx_obj << " NB_VERT: " << nb_vert[idx_obj] << std::endl;
         }
 
-        std::vector<Triangle> ts = c->getScene()->getObjects()[0]->getMesh().getTriangles();
-        triangles.resize(ts.size());
-        for(unsigned int i = 0; i < ts.size(); i++) {
-            for(unsigned int j = 0; j < 3; j++) {
-                triangles[i].v[j] = ts[i].getVertex(j);
-            }
-        }
-
-        nb_vert = vertices.size();
-        nb_tri = triangles.size();
+        nb_objBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_obj);
 
         vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Vert) * vertices.size(), &vertices[0]);
+                                sizeof(Vert) * nb_vert_total, &vertices[0]);
+
+        std::cout << "nb vert total: " << nb_vert_total << std::endl;
 
         nb_vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        sizeof(unsigned int), &nb_vert);
+                        sizeof(int)*nb_obj, &nb_vert[0]);
 
         triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                                sizeof(Tri) * triangles.size(), &triangles[0]);
+                                sizeof(Tri) * nb_tri_total, &triangles[0]);
 
         nb_triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                        sizeof(unsigned int), &nb_tri);
+                        sizeof(unsigned int)*nb_obj, &nb_tri[0]);
 
-        kernel->setArg(0, *vertBuffer);
-        kernel->setArg(1, *nb_vertBuffer);
-        kernel->setArg(2, *triBuffer);
-        kernel->setArg(3, *nb_triBuffer);
+        kernel->setArg(0, *nb_objBuffer);
+        kernel->setArg(1, *vertBuffer);
+        kernel->setArg(2, *nb_vertBuffer);
+        kernel->setArg(3, *triBuffer);
+        kernel->setArg(4, *nb_triBuffer);
     }
     catch (Error& err)
     {
@@ -87,7 +114,6 @@ OpenCL::OpenCL(Controller * c): c(c) {
             << "\nError num of " << err.err() << "\n";
         return;
     }
-
 }
 
 void OpenCL::getImage ( const Vec3Df & camPos,
@@ -127,10 +153,10 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         Buffer camBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(Cam), &cam);
 
-        kernel->setArg(4, pixBuffer);
-        kernel->setArg(5, widthBuffer);
-        kernel->setArg(6, heightBuffer);
-        kernel->setArg(7, camBuffer);
+        kernel->setArg(5, pixBuffer);
+        kernel->setArg(6, widthBuffer);
+        kernel->setArg(7, heightBuffer);
+        kernel->setArg(8, camBuffer);
 
         std::cout << "GPU Started!\n";
         cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(128));

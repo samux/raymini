@@ -126,7 +126,7 @@ void Scene::buildDefaultScene () {
 
     //---------- GROUND---------//
     Mesh groundMesh;
-    groundMesh.loadOFF ("models/sphere.off");
+    groundMesh.loadOFF ("models/ground.off");
     Object * ground = new Object(groundMesh, groundMat, "Ground");
     objects.push_back (ground);
 
@@ -137,7 +137,7 @@ void Scene::buildDefaultScene () {
 
     Object * ceiling = new Object(ceilingMesh, &blue, "Ceiling");
     ceiling->setTrans(Vec3Df(0, 0, 3.0));
-    objects.push_back (ceiling);
+    //objects.push_back (ceiling);
 
     //---------- WALLS----------//
     Mesh wallMesh;
@@ -145,41 +145,47 @@ void Scene::buildDefaultScene () {
 
     Object * leftWall = new Object(wallMesh, mirrorMat, "Left wall");
     leftWall->setTrans(Vec3Df(-1.95251, 0, 1.5));
-    objects.push_back (leftWall);
+    //objects.push_back (leftWall);
 
     Mesh backWallMesh(wallMesh);
     backWallMesh.rotate(Vec3Df(0, 0, 1), 3*M_PI/2);
     Object * backWall = new Object(backWallMesh, &red, "Back wall");
     backWall->setTrans(Vec3Df(0, 1.95251, 1.5));
-    objects.push_back (backWall);
+    //objects.push_back (backWall);
+
+    //---------- SPHERE-----------//
+    Mesh sphereMesh;
+    sphereMesh.loadOFF ("models/sphere.off");
+    Object * sphere = new Object(sphereMesh, ramMat, "Sphere");
+    objects.push_back (sphere);
 
     //---------- RAM-----------//
     Mesh ramMesh;
     ramMesh.loadOFF ("models/ram.off");
     Object * ram = new Object(ramMesh, ramMat, "Ram");
     ram->setTrans (Vec3Df (-1.f, -1.0f, 0.f));
-    objects.push_back (ram);
+    //objects.push_back (ram);
 
     //---------- RHINO----------//
     Mesh rhinoMesh;
     rhinoMesh.loadOFF ("models/rhino.off");
     Object * rhino = new Object(rhinoMesh, rhinoMat, "Rhino");
     rhino->setTrans (Vec3Df (1.f, 0.f, 0.4f));
-    objects.push_back (rhino);
+    //objects.push_back (rhino);
 
     //---------- GARGOYLE-------//
     Mesh gargMesh;
     gargMesh.loadOFF ("models/gargoyle.off");
     Object * garg = new Object(gargMesh, gargMat, "Gargoyle");
     garg->setTrans (Vec3Df (-1.f, 1.0f, 0.f));
-    objects.push_back (garg);
+    //objects.push_back (garg);
 
     //---------- SKY BOX--------//
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
     Object * skyBox = new Object(skyBoxMesh, skyBoxMaterial, "Skybox");
     skyBox->setEnabled(false);
-    objects.push_back(skyBox);
+    //objects.push_back(skyBox);
 
 
     Light * l = new Light(Vec3Df (0, 0, 3), 0.5, Vec3Df(0, 0, 1), Vec3Df (1.f, 1.f, 1.f), 1.0f);

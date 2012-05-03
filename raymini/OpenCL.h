@@ -52,12 +52,16 @@ private:
     std::vector<Vert> vertices;
     std::vector<Tri> triangles;
 
+    cl::Buffer * nb_objBuffer;
     cl::Buffer * vertBuffer;
     cl::Buffer * nb_vertBuffer;
     cl::Buffer * triBuffer;
     cl::Buffer * nb_triBuffer;
 
-    unsigned int nb_vert;
-    unsigned int nb_tri;
+    std::vector<unsigned int> nb_vert;
+    std::vector<unsigned int> nb_tri;
+    unsigned int nb_vert_total;
+    unsigned int nb_tri_total;
+    unsigned int nb_obj;
 
 };

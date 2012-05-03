@@ -22,45 +22,45 @@ typedef struct {
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-Vec addVert(Vec a, Vec b) {
+inline Vec addVert(Vec a, Vec b) {
     Vec res;
     for(unsigned int i = 0; i < 3; i++)
         res.p[i] = a.p[i] + b.p[i];
     return res;
 }
 
-void subVert_(Vec * a, Vec b) {
+inline void subVert_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
         a->p[i] = a->p[i] - b.p[i];
 }
 
-Vec subVert(Vec a, Vec b) {
+inline Vec subVert(Vec a, Vec b) {
     Vec res;
     for(unsigned int i = 0; i < 3; i++)
         res.p[i] = a.p[i] - b.p[i];
     return res;
 }
 
-void addVert_(Vec * a, Vec b) {
+inline void addVert_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
         a->p[i] = a->p[i] + b.p[i];
 }
 
-Vec mul(Vec a, float b) {
+inline Vec mul(Vec a, float b) {
     Vec res;
     for(unsigned int i = 0; i < 3; i++)
         res.p[i] = a.p[i] * b;
     return res;
 }
 
-float dotProduct(Vec a, Vec b) {
+inline float dotProduct(Vec a, Vec b) {
     float res = 0;
     for(unsigned int i = 0; i < 3; i++)
         res += a.p[i] * b.p[i];
     return res;
 }
 
-Vec crossProduct(Vec a, Vec b) {
+inline Vec crossProduct(Vec a, Vec b) {
     Vec res;
     res.p[0] = a.p[1]*b.p[2] - a.p[2]*b.p[1];
     res.p[1] = a.p[2]*b.p[0] - a.p[0]*b.p[2];
@@ -68,15 +68,15 @@ Vec crossProduct(Vec a, Vec b) {
     return res;
 }
 
-float getSquaredLength(Vec a) {
+inline float getSquaredLength(Vec a) {
     return dotProduct(a, a);
 }
 
-float getLength(Vec a) {
+inline float getLength(Vec a) {
     return  sqrt(getSquaredLength(a));
 }
 
-void normalize_(Vec * a) {
+inline void normalize_(Vec * a) {
     float norm = getLength(*a);
     if(norm == 0) {
         return;
@@ -118,7 +118,8 @@ bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
     return true;
 }
 
-__kernel void squareArray(__constant Vert * vert,
+__kernel void squareArray(__constant unsigned int * nb_obj,
+                          __constant Vert * vert,
                           __constant unsigned int * nb_vert,
                           __constant Tri * tri,
                           __constant unsigned int * nb_tri,
@@ -129,7 +130,6 @@ __kernel void squareArray(__constant Vert * vert,
     const int gid = get_global_id(0);
     const int x = gid % *width;
     const int y = gid / *width;
-
 
     const float tang = tan(cam->FoV);
     Vec right = mul(cam->rightVector, cam->aspectRatio * tang / (*width));
@@ -142,14 +142,25 @@ __kernel void squareArray(__constant Vert * vert,
 
     normalize_(&stepX);
 
-    unsigned int color = 0;
+    float color = (128 << 16);
+
+    unsigned int c[6] = {100, 100 << 8, 100 << 16, 200, 200 << 8, 200 << 16};
 
     Ray r = {cam->pos, stepX};
-    for(unsigned int i = 0; i < *nb_tri; i++) {
-        if(intersect(r, vert[tri[i].v[0]], vert[tri[i].v[1]], vert[tri[i].v[2]])) {
-            color = 128;
+    unsigned int index_tri = 0;
+    unsigned int index_vert = 0;
+    for(unsigned int idx_obj = 0; idx_obj < *nb_obj; idx_obj++) {
+        for(unsigned int i = 0; i < nb_tri[idx_obj]; i++) {
+            if(intersect(r, vert[index_vert + tri[index_tri + i].v[0]], 
+                            vert[index_vert + tri[index_tri + i].v[1]], 
+                            vert[index_vert + tri[index_tri + i].v[2]])) {
+                color = c[idx_obj];
+            }
         }
+        index_tri += nb_tri[idx_obj];
+        index_vert += nb_vert[idx_obj];
+        //printf("index_tri: %d\n", tri[index_tri].v[0]);
     }
 
-    pix[y*(*width) + x] = color;
+    pix[y*(*width) + x] = (int)color;
 };
