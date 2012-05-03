@@ -9,18 +9,20 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 }
 
 void RenderThread::run() {
-    time.restart();
-    time.start();
-    resultImage = controller->getRayTracer()->render(
-            camPos,
-            viewDirection,
-            upVector,
-            rightVector,
-            fieldOfView,
-            aspectRatio,
-            screenWidth,
-            screenHeight);
-    controller->threadSetElapsed(time.elapsed());
+    if (hasToRedraw) {
+        time.restart();
+        time.start();
+        resultImage = controller->getRayTracer()->render(
+                camPos,
+                viewDirection,
+                upVector,
+                rightVector,
+                fieldOfView,
+                aspectRatio,
+                screenWidth,
+                screenHeight);
+        controller->threadSetElapsed(time.elapsed());
+    }
 }
 
 void RenderThread::startRendering(const Vec3Df & camPos,
@@ -32,6 +34,7 @@ void RenderThread::startRendering(const Vec3Df & camPos,
                                   unsigned int screenWidth,
                                   unsigned int screenHeight) {
     emergencyStop = false;
+    hasToRedraw = this->camPos != camPos;
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
     start();
 }

@@ -388,6 +388,9 @@ void Controller::windowSetLightColor() {
 
 void Controller::windowSetRealTime(bool r) {
     windowModel->setRealTime(r);
+    if (r) {
+        windowRenderRayImage();
+    }
     windowModel->notifyAll();
 }
 

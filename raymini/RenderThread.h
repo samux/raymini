@@ -52,6 +52,7 @@ private:
     // Thread attributes
     bool emergencyStop;
     QTime time;
+    bool hasToRedraw;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,
