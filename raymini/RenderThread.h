@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QImage>
 #include <QTime>
+#include <QMutex>
 
 #include "Vec3D.h"
 #include "Observable.h"
@@ -53,6 +54,7 @@ private:
     bool emergencyStop;
     QTime time;
     bool hasToRedraw;
+    QMutex hasToRedrawMutex;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,

@@ -9,6 +9,7 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 }
 
 void RenderThread::run() {
+    hasToRedrawMutex.lock();
     if (hasToRedraw) {
         time.restart();
         time.start();
@@ -23,6 +24,8 @@ void RenderThread::run() {
                 screenHeight);
         controller->threadSetElapsed(time.elapsed());
     }
+    hasToRedraw = false;
+    hasToRedrawMutex.unlock();
 }
 
 void RenderThread::startRendering(const Vec3Df & camPos,
@@ -34,8 +37,10 @@ void RenderThread::startRendering(const Vec3Df & camPos,
                                   unsigned int screenWidth,
                                   unsigned int screenHeight) {
     emergencyStop = false;
-    hasToRedraw = this->camPos != camPos;
+    hasToRedrawMutex.lock();
+    hasToRedraw |= this->camPos != camPos;
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
+    hasToRedrawMutex.unlock();
     start();
 }
 bool RenderThread::isRendering() {
