@@ -25,12 +25,13 @@ public:
     inline Material(Controller *c) : controller(c),
                                      diffuse (1.f), specular (1.f), color (0.7f, 0.7f, 1.f),
                                      noise([](const Vertex &){ return 1.f; }), glossyRatio(0) {}
-    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color, float glossyRatio=0)
-        : controller(c), diffuse (diffuse), specular (specular), color (color),
+    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color, float glossyRatio=0, float alpha = 1.5f)
+        : controller(c), diffuse (diffuse), specular (specular), alpha(alpha), color (color),
           noise([](const Vertex &){ return 1.f; }), glossyRatio(glossyRatio) {}
     inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color,
-                    float (*noise)(const Vertex &), float glossyRatio=0)
-        : controller(c), diffuse (diffuse), specular (specular), color (color), noise(noise), glossyRatio(glossyRatio) {}
+                    float (*noise)(const Vertex &), float glossyRatio=0, float alpha = 1.5f)
+        : controller(c), diffuse (diffuse), specular (specular), alpha(alpha), color (color),
+          noise(noise), glossyRatio(glossyRatio) {}
 
     virtual ~Material () {}
 
@@ -53,6 +54,7 @@ protected:
 
     float diffuse;
     float specular;
+    float alpha; //for specular computation
     Vec3Df color;
     float (*noise)(const Vertex &);
     float glossyRatio;
@@ -60,7 +62,7 @@ protected:
 
 class Mirror : public Material {
 public:
-    Mirror(Controller *c) : Material(c, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f){}
+    Mirror(Controller *c) : Material(c, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f, 30){}
 };
 
 class Glass : public Material {

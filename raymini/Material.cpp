@@ -28,7 +28,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos, const Vertex & closestIntersec
                     diffuse,
                     specular,
                     ambientOcclusionContribution,
-                    1.5);
+                    alpha);
 
     if(glossyRatio == 0)
         return brdf(closestIntersection.getPos(), closestIntersection.getNormal(), camPos, type);
