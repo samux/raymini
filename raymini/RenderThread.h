@@ -58,6 +58,7 @@ private:
     QTime time;
     bool haveToRedraw;
     QMutex hasToRedrawMutex;
+    int drawingIterations;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,

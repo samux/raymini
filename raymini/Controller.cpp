@@ -75,7 +75,6 @@ void Controller::windowSetShadowMode(int i) {
     }
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
-    renderThread->hasToRedraw();
 }
 
 void Controller::windowSetShadowNbRays (int i) {
@@ -106,9 +105,28 @@ void Controller::threadSetElapsed(int e)  {
     windowModel->setElapsedTime(e);
 }
 
+void Controller::threadSetsRenderQuality(int renderedCount) {
+    // How we re render images when camera doesn't move
+    switch (renderedCount) {
+        case 0:
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
+            break;
+        case 1:
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_4;
+            break;
+        case 2:
+            rayTracer->quality = RayTracer::Quality::BASIC;
+            break;
+        case 3:
+            rayTracer->quality = RayTracer::Quality::OPTIMAL;
+            break;
+    }
+}
+
 void Controller::windowStopRendering() {
     ensureThreadStopped();
     windowSetRealTime(false);
+    renderThread->hasToRedraw();
     renderThread->notifyAll();
 }
 

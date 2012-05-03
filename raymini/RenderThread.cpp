@@ -10,9 +10,10 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 
 void RenderThread::run() {
     hasToRedrawMutex.lock();
-    if (haveToRedraw) {
+    if (haveToRedraw || drawingIterations < 4) {
         time.restart();
         time.start();
+        controller->threadSetsRenderQuality(drawingIterations++);
         resultImage = controller->getRayTracer()->render(
                 camPos,
                 viewDirection,
@@ -39,6 +40,9 @@ void RenderThread::startRendering(const Vec3Df & camPos,
     emergencyStop = false;
     hasToRedrawMutex.lock();
     haveToRedraw |= this->camPos != camPos;
+    if (haveToRedraw) {
+        drawingIterations = 0;
+    }
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
     hasToRedrawMutex.unlock();
     start();

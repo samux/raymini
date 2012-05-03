@@ -81,6 +81,8 @@ public slots :
 
     void threadRenderRayImage();
     void threadSetElapsed(int);
+    // Doesn't notify
+    void threadSetsRenderQuality(int renderedCount);
 
     void renderProgressed(float);
 
