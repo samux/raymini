@@ -35,6 +35,8 @@ public:
     /** Notify thread that it has to render again */
     void hasToRedraw();
 
+    inline bool isReallyWorking() const {return reallyWorking;}
+
     void run();
 private:
     Controller *controller;
@@ -60,7 +62,7 @@ private:
     QMutex hasToRedrawMutex;
     int drawingIterations;
     QMutex reallyWorkingMutex;
-    bool isReallyWorking;
+    bool reallyWorking;
 
     inline void prepare(const Vec3Df & camPos,
             const Vec3Df & viewDirection,

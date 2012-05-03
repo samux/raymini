@@ -35,8 +35,9 @@ public:
 
     /** To use with caution */
     inline void forceThreadUpdate() {
-        ensureThreadStopped();
-        renderThread->hasToRedraw();
+        if (renderThread->isReallyWorking()) {
+            ensureThreadStopped();
+        }
     }
 
 public slots :

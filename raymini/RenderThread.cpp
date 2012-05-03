@@ -12,7 +12,7 @@ void RenderThread::run() {
     hasToRedrawMutex.lock();
     if (haveToRedraw || drawingIterations < 5) {
         reallyWorkingMutex.lock();
-        isReallyWorking = true;
+        reallyWorking = true;
         reallyWorkingMutex.unlock();
         time.restart();
         time.start();
@@ -30,7 +30,7 @@ void RenderThread::run() {
     }
     haveToRedraw = false;
     reallyWorkingMutex.lock();
-    isReallyWorking = false;
+    reallyWorking = false;
     reallyWorkingMutex.unlock();
     hasToRedrawMutex.unlock();
 }
@@ -62,7 +62,7 @@ bool RenderThread::isRendering() {
     bool result = isRunning();
     if (result) {
         reallyWorkingMutex.lock();
-        result = isReallyWorking;
+        result = reallyWorking;
         reallyWorkingMutex.unlock();
     }
     return result;
@@ -74,6 +74,8 @@ bool RenderThread::hasRendered() {
 
 void RenderThread::stopRendering() {
     emergencyStop = true;
+    haveToRedraw = true;
+    drawingIterations = 0;
     quit();
 }
 
