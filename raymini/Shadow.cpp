@@ -13,6 +13,9 @@ bool Shadow::hard(const Vec3Df & pos, const Vec3Df& light) const {
     float dist = dir.normalize();
 
     bool inter = rt->intersect(dir, pos, riShadow, ioShadow);
+    if(inter && dynamic_cast<const Glass *>(&ioShadow->getMaterial()))
+        return true;
+
     return !inter || (inter && riShadow.getIntersectionDistance() > dist);
 }
 
