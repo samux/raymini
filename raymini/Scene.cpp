@@ -28,6 +28,7 @@ void printUsage(char * name) {
          << "\tmeshs: severals meshs and a light (moving ram)" << endl
          << "\toutdoor" << endl
          << "\tpool : pool table" << endl
+         << "\tmg : mirror and glass" << endl
          << "\tmesh <mesh_path>" << endl
          << endl;
     exit(1);
@@ -64,6 +65,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     else if(!id.compare("meshs")) buildMultiMeshs();
     else if(!id.compare("outdoor")) buildOutdor();
     else if(!id.compare("pool")) buildPool();
+    else if(!id.compare("mg")) buildMirrorGlass();
     else if(!id.compare("mesh"))
         buildMesh(meshPath, new Material(c, 1.f, 1.f, Vec3Df (1.f, .6f, .2f)));
     else printUsage(argv[0]);
@@ -243,5 +245,53 @@ void Scene::buildPool() {
         }
 
     lights.push_back(new Light({5.f, 5.f, 20.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, .7f));
+}
+
+void Scene::buildMirrorGlass() {
+    auto groundMat = new Material(controller, 1.f, 1.f, {1.f, 1.f, 1.f}, .1f, 30);
+    auto ramMat = new Material(controller, 1.f, 0.3f, Vec3Df (1.f, .6f, .2f));
+    auto glassMat = new Glass(controller, 1.4f);
+
+    Mesh groundMesh;
+    groundMesh.loadOFF("models/ground.off");
+
+    objects.push_back(new Object(groundMesh, groundMat, "Ground"));
+
+    groundMesh.rotate({0,1,0}, M_PI);
+    objects.push_back(new Object(groundMesh, &white, "Ceiling", {0, 0, 4}));
+
+    groundMesh.rotate({0,1,0}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &red, "Right Wall", {2, 0, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &green, "Back Wall", {0, 2, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &blue, "Left Wall", {-2, 0, 2}));
+
+    groundMesh.rotate({0,0,1}, M_PI/2);
+    objects.push_back(new Object(groundMesh, &mirrorMat, "Mirror Wall", {0, -2, 2}));
+
+    Mesh sphereMesh;
+    sphereMesh.loadOFF("models/sphere.off");
+
+    objects.push_back(new Object(sphereMesh, groundMat, "Pedestal"));
+
+    Mesh ramMesh;
+    ramMesh.loadOFF("models/ram.off");
+    objects.push_back(new Object(ramMesh, ramMat, "Ram", {0.f, 0.f, .85f}));
+
+    sphereMesh.scale(0.5);
+    objects.push_back(new Object(sphereMesh, &mirrorMat, "Mirror1", {-1 , 2, 1}));
+    objects.push_back(new Object(sphereMesh, &mirrorMat, "Mirror2", {1 , 2, 1}));
+    objects.push_back(new Object(sphereMesh, &mirrorMat, "Mirror2", {0 , 2, 1.f+sqrt(3.f)}));
+
+
+    auto glass = new Object(sphereMesh, glassMat, "glass", {1 , 1, 3});
+    glassMat->setObject(glass);
+    objects.push_back(glass);
+
+    lights.push_back(new Light({-1.3f, -2.9f, 3.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, .7f));
 }
