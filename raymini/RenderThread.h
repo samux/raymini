@@ -70,7 +70,6 @@ private:
             float aspectRatio,
             unsigned int screenWidth,
             unsigned int screenHeight) {
-        this->resultImage = resultImage;
         this->camPos = camPos;
         this->viewDirection = viewDirection;
         this->upVector = upVector;
