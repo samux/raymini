@@ -64,6 +64,7 @@ private:
     void buildRoom(Material *sphereMat=nullptr);
     void buildMultiLights();
     void buildMultiMeshs();
+    void buildPool();
     void buildOutdor();
     void buildMesh(const std::string & path, Material *mat);
     std::vector<Object *> objects;
