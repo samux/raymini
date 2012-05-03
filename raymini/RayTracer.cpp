@@ -62,7 +62,9 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     computedScreenHeight /= qualityDivider;
     buffer.resize(computedScreenHeight*computedScreenWidth);
 
-    const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    vector<pair<float, float>> singleNulOffset;
+    singleNulOffset.push_back(pair<float, float>(0, 0));
+    const vector<pair<float, float>> offsets = quality==Quality::OPTIMAL?AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing):singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
@@ -72,7 +74,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
-    const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
+    const unsigned nbIterations = scene->hasMobile()&&quality==Quality::OPTIMAL?nbPictures:1;
     ProgressBar progressBar(controller, nbIterations*computedScreenWidth);
 
     // For each picture
