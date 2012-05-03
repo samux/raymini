@@ -22,26 +22,26 @@ typedef struct {
 
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 
-inline Vec addVert(Vec a, Vec b) {
+inline Vec addVec(Vec a, Vec b) {
     Vec res;
     for(unsigned int i = 0; i < 3; i++)
         res.p[i] = a.p[i] + b.p[i];
     return res;
 }
 
-inline void subVert_(Vec * a, Vec b) {
+inline void subVec_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
         a->p[i] = a->p[i] - b.p[i];
 }
 
-inline Vec subVert(Vec a, Vec b) {
+inline Vec subVec(Vec a, Vec b) {
     Vec res;
     for(unsigned int i = 0; i < 3; i++)
         res.p[i] = a.p[i] - b.p[i];
     return res;
 }
 
-inline void addVert_(Vec * a, Vec b) {
+inline void addVec_(Vec * a, Vec b) {
     for(unsigned int i = 0; i < 3; i++)
         a->p[i] = a->p[i] + b.p[i];
 }
@@ -91,11 +91,11 @@ typedef struct {
     Vec dir;
 } Ray;
 
-bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
-    Vec u = subVert(v1.p, v3.p);
-    Vec v = subVert(v2.p, v3.p);
+bool intersect(Ray r, Vert v1, Vert v2, Vert v3, Vert * res) {
+    Vec u = subVec(v1.p, v3.p);
+    Vec v = subVec(v2.p, v3.p);
     Vec nn = crossProduct(u, v);
-    Vec Otr = subVert(r.orig, v3.p);
+    Vec Otr = subVec(r.orig, v3.p);
 
     float norm = dotProduct(nn, r.dir);
     if(norm > 0) {
@@ -114,6 +114,8 @@ bool intersect(Ray r, Vert v1, Vert v2, Vert v3) {
     if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
         return false;
     }
+
+    res->p = addVec(v3.p,addVec(mul(u, Iu), mul(v, Iv)));
 
     return true;
 }
@@ -137,8 +139,8 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
 
     Vec stepX = mul(right, (float)x - (*width)/(float)2);
     Vec stepY = mul(up, (float)y - (*height)/(float)2);
-    addVert_(&stepX, stepY);
-    addVert_(&stepX, cam->dir);
+    addVec_(&stepX, stepY);
+    addVec_(&stepX, cam->dir);
 
     normalize_(&stepX);
 
@@ -149,12 +151,19 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
     Ray r = {cam->pos, stepX};
     unsigned int index_tri = 0;
     unsigned int index_vert = 0;
+    Vert inter;
+    float small_dist = 100000.0;
     for(unsigned int idx_obj = 0; idx_obj < *nb_obj; idx_obj++) {
         for(unsigned int i = 0; i < nb_tri[idx_obj]; i++) {
             if(intersect(r, vert[index_vert + tri[index_tri + i].v[0]], 
                             vert[index_vert + tri[index_tri + i].v[1]], 
-                            vert[index_vert + tri[index_tri + i].v[2]])) {
-                color = c[idx_obj];
+                            vert[index_vert + tri[index_tri + i].v[2]], &inter)) {
+                Vec dist = subVec(inter.p, cam->pos);
+                float l = getLength(dist);
+                if(l < small_dist) {
+                    small_dist = l;
+                    color = c[idx_obj];
+                }
             }
         }
         index_tri += nb_tri[idx_obj];
