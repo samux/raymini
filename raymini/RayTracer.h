@@ -91,7 +91,7 @@ public:
                    const Object* & intersectedObject,
                    bool stopAtFirst = false) const;
 
-    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;
 
     RayTracer(Controller *c);

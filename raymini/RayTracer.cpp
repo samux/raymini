@@ -184,10 +184,11 @@ bool RayTracer::intersect(const Vec3Df & dir,
     return bestRay.intersect();
 }
 
-Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing) const {
+Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing) const {
     Ray bestRay;
     Brdf::Type type = onlyAmbientOcclusion?Brdf::Ambient:Brdf::All;
-    return getColor(dir, camPos, bestRay, rayTracing?0:depthPathTracing, type);
+    bool useRayTracing = (quality==Quality::OPTIMAL) && pathTracing;
+    return getColor(dir, camPos, bestRay, useRayTracing?0:depthPathTracing, type);
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
