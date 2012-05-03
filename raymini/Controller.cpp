@@ -29,7 +29,7 @@ void Controller::initAll(int argc, char **argv) {
 
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
-    connect(raymini, SIGNAL(lastWindowClosed()), raymini, SLOT(quit()));
+    connect(raymini, SIGNAL(lastWindowClosed()), this, SLOT(quitProgram()));
 
     viewer = new GLViewer(this);
     window->setCentralWidget(viewer);
@@ -59,6 +59,12 @@ void Controller::ensureThreadStopped() {
 /******************************************
  ***************** SLOTS ******************
  ******************************************/
+
+void Controller::quitProgram() {
+    ensureThreadStopped();
+    renderThread->wait();
+    raymini->quit();
+}
 
 void Controller::windowSetShadowMode(int i) {
     ensureThreadStopped();
@@ -118,6 +124,7 @@ void Controller::threadSetsRenderQuality(int renderedCount) {
             rayTracer->quality = RayTracer::Quality::BASIC;
             break;
         case 3:
+        default:
             rayTracer->quality = RayTracer::Quality::OPTIMAL;
             break;
     }

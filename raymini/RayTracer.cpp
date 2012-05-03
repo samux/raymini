@@ -51,14 +51,15 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     vector<Color> buffer;
     unsigned int computedScreenWidth = screenWidth;
     unsigned int computedScreenHeight = screenHeight;
+    int qualityDivider = 1;
     if (quality == Quality::ONE_OVER_4) {
-        computedScreenWidth /= 2;
-        computedScreenHeight /= 2;
+        qualityDivider = 2;
     }
     else if (quality == Quality::ONE_OVER_9) {
-        computedScreenWidth /= 3;
-        computedScreenHeight /= 3;
+        qualityDivider = 3;
     }
+    computedScreenWidth /= qualityDivider;
+    computedScreenHeight /= qualityDivider;
     buffer.resize(computedScreenHeight*computedScreenWidth);
 
     const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
@@ -99,13 +100,8 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
         for (unsigned int j = 0; j < screenHeight; j++) {
             unsigned int computedI = i;
             unsigned int computedJ = j;
-            if (quality == Quality::ONE_OVER_4) {
-                computedI /= 2;
-                computedJ /= 2;
-            } else if (quality == Quality::ONE_OVER_9) {
-                computedI /= 3;
-                computedJ /= 3;
-            }
+            computedI /= qualityDivider;
+            computedJ /= qualityDivider;
             Color c = buffer[computedJ*computedScreenWidth+computedI];
             image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
@@ -135,7 +131,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
         Vec3Df step = stepX + stepY;
         Vec3Df dir = direction + step;
         dir.normalize();
-        if (typeFocus != Focus::NONE) {
+        if (typeFocus != Focus::NONE && quality == Quality::OPTIMAL) {
             float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
                                               distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
             dir.normalize ();

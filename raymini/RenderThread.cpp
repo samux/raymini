@@ -41,7 +41,11 @@ void RenderThread::startRendering(const Vec3Df & camPos,
     hasToRedrawMutex.lock();
     haveToRedraw |= this->camPos != camPos;
     if (haveToRedraw) {
-        drawingIterations = 0;
+        if (controller->getWindowModel()->isRealTime()) {
+            drawingIterations = 0;
+        } else {
+            drawingIterations = 4;
+        }
     }
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
     hasToRedrawMutex.unlock();

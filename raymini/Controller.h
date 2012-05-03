@@ -86,6 +86,8 @@ public slots :
 
     void renderProgressed(float);
 
+    void quitProgram();
+
 private:
     /** Stop thread if running */
     void ensureThreadStopped();
