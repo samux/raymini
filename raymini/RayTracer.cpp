@@ -33,7 +33,7 @@ RayTracer::RayTracer(Controller *c):
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
     nbPictures(1),
-    quality(Quality::OPTIMAL),
+    quality(OPTIMAL),
     controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
     shadow(this)
@@ -52,10 +52,10 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     unsigned int computedScreenWidth = screenWidth;
     unsigned int computedScreenHeight = screenHeight;
     int qualityDivider = 1;
-    if (quality == Quality::ONE_OVER_4) {
+    if (quality == ONE_OVER_4) {
         qualityDivider = 2;
     }
-    else if (quality == Quality::ONE_OVER_9) {
+    else if (quality == ONE_OVER_9) {
         qualityDivider = 3;
     }
     computedScreenWidth /= qualityDivider;
@@ -64,7 +64,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
 
     vector<pair<float, float>> singleNulOffset;
     singleNulOffset.push_back(pair<float, float>(0, 0));
-    const vector<pair<float, float>> offsets = quality==Quality::OPTIMAL?AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing):singleNulOffset;
+    const vector<pair<float, float>> offsets = quality==OPTIMAL?AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing):singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
@@ -74,7 +74,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
-    const unsigned nbIterations = scene->hasMobile()&&quality==Quality::OPTIMAL?nbPictures:1;
+    const unsigned nbIterations = scene->hasMobile()&&quality==OPTIMAL?nbPictures:1;
     ProgressBar progressBar(controller, nbIterations*computedScreenWidth);
 
     // For each picture
@@ -133,7 +133,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
         Vec3Df step = stepX + stepY;
         Vec3Df dir = direction + step;
         dir.normalize();
-        if (typeFocus != Focus::NONE && quality == Quality::OPTIMAL) {
+        if (typeFocus != Focus::NONE && quality == OPTIMAL) {
             float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
                                               distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
             dir.normalize ();
@@ -187,7 +187,7 @@ bool RayTracer::intersect(const Vec3Df & dir,
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing) const {
     Ray bestRay;
     Brdf::Type type = onlyAmbientOcclusion?Brdf::Ambient:Brdf::All;
-    bool useRayTracing = (quality==Quality::OPTIMAL) && pathTracing;
+    bool useRayTracing = (quality==OPTIMAL) && pathTracing;
     return getColor(dir, camPos, bestRay, useRayTracing?0:depthPathTracing, type);
 }
 
@@ -202,7 +202,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
                                    light,
                                    type);
 
-        if((depth < depthPathTracing) || (mode == PBGI_MODE)) {
+        if((depth < depthPathTracing) || (mode == PBGI_MODE && quality == OPTIMAL)) {
 
             vector<Light> lights;
             switch(mode) {
