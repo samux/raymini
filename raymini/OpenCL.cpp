@@ -12,7 +12,7 @@ OpenCL::OpenCL(Controller * c): c(c) {
     try {
         context = new Context(CL_DEVICE_TYPE_GPU);
 
-        std::ifstream sourceFile("square.cl");
+        std::ifstream sourceFile("kernel.cl");
         std::string sourceCode(std::istreambuf_iterator<char>(sourceFile), (std::istreambuf_iterator<char>()));
         Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length()+1));
 
