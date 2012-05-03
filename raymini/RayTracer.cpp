@@ -236,9 +236,9 @@ vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
         if (!light->isEnabled()) {
             continue;
         }
-        float visibilite = shadow(closestIntersection.getPos(), *light);
+        float visibility = shadow(closestIntersection.getPos(), *light);
         Light l = *light;
-        l.setIntensity(light->getIntensity()*visibilite);
+        l.setIntensity(light->getIntensity()*visibility);
         enabledLights.push_back(l);
     }
 
