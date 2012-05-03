@@ -27,14 +27,12 @@ public:
     inline Vec3Df & getOrigin () { return origin; }
     inline const Vec3Df & getDirection () const { return direction; }
     inline Vec3Df & getDirection () { return direction; }
-    inline const Vertex& getIntersection() const { return intersection; }
+    inline Vertex getIntersection() const { return {intersection+trans, computeNormal()}; }
     inline float getIntersectionDistance() const { return intersectionDistance; }
     inline bool intersect() const { return hasIntersection; }
 
-    void computeNormal();
-
     void translate(const Vec3Df & trans) {
-        intersection.setPos(intersection.getPos() + trans);
+        this->trans = trans;
     }
 
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
@@ -50,10 +48,12 @@ private:
     Vec3Df direction;
 
     bool hasIntersection;
-    Vertex intersection;
+    Vec3Df intersection;
     float intersectionDistance;
 
+    Vec3Df trans;
     const Vertex *a, *b, *c;
+    Vec3Df computeNormal() const;
 };
 
 

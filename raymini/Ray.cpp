@@ -102,19 +102,19 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     if (!hasIntersection || distance < intersectionDistance) {
         hasIntersection = true;
         intersectionDistance = distance;
-        intersection.setPos(pos);
+        intersection = pos;
         a = &v1; b = &v2 ; c = &v3;
     }
 
     return true;
 }
 
-void Ray::computeNormal() {
-    if(!hasIntersection) return;
+Vec3Df Ray::computeNormal() const {
+    if(!hasIntersection) return Vec3Df();
 
-    float surf_c = Vec3Df::getSurface(a->getPos(), b->getPos(), intersection.getPos());
-    float surf_b = Vec3Df::getSurface(a->getPos(), c->getPos(), intersection.getPos());
-    float surf_a = Vec3Df::getSurface(c->getPos(), b->getPos(), intersection.getPos());
+    float surf_c = Vec3Df::getSurface(a->getPos(), b->getPos(), intersection);
+    float surf_b = Vec3Df::getSurface(a->getPos(), c->getPos(), intersection);
+    float surf_a = Vec3Df::getSurface(c->getPos(), b->getPos(), intersection);
 
     Vec3Df normal =
         surf_a*a->getNormal() +
@@ -123,7 +123,7 @@ void Ray::computeNormal() {
 
     normal.normalize();
 
-    intersection.setNormal(normal);
+    return normal;
 }
 
 void Ray::draw(float r, float g, float b) {
@@ -143,7 +143,7 @@ bool Ray::intersectDisc(const Vec3Df & center, const Vec3Df & normal, float radi
     if((t > 0.0) && (center - posIntersection).getSquaredLength() < radius*radius) {
         hasIntersection = true;
         intersectionDistance = (posIntersection - origin).getLength();
-        intersection = {posIntersection, Vec3Df()};
+        intersection = posIntersection;
         return true;
     }
     return false;

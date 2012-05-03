@@ -84,7 +84,6 @@ bool KDtree::intersect(Ray &ray) const {
 
             ray.intersect(v0, v1, v2);
         }
-        ray.computeNormal();
         return ray.intersect();
     }
     else {
