@@ -1,3 +1,5 @@
+#pragma OPENCL EXTENSION cl_amd_printf : enable
+
 typedef struct {
     float p[3];
 } Vec;
@@ -20,7 +22,11 @@ typedef struct {
     float aspectRatio;
 } Cam;
 
-#pragma OPENCL EXTENSION cl_amd_printf : enable
+typedef struct {
+    Vec orig;
+    Vec dir;
+} Ray;
+
 
 inline Vec addVec(Vec a, Vec b) {
     Vec res;
@@ -86,10 +92,11 @@ inline void normalize_(Vec * a) {
         a->p[i] = a->p[i] * resLength;
 }
 
-typedef struct {
-    Vec orig;
-    Vec dir;
-} Ray;
+inline float getSurface(Vec a, Vec b, Vec c) {
+    float s = getLength(crossProduct(subVec(b, a), subVec(c, a)));
+    return s;
+}
+
 
 bool intersect(Ray r, Vert v1, Vert v2, Vert v3, Vert * res) {
     Vec u = subVec(v1.p, v3.p);
@@ -117,8 +124,68 @@ bool intersect(Ray r, Vert v1, Vert v2, Vert v3, Vert * res) {
 
     res->p = addVec(v3.p,addVec(mul(u, Iu), mul(v, Iv)));
 
+    float surf_v1 = getSurface(v3.p, v2.p, res->p);
+    float surf_v2 = getSurface(v3.p, v1.p, res->p);
+    float surf_v3 = getSurface(v1.p, v2.p, res->p);
+
+    Vec normal = addVec(mul(v3.n, surf_v3), mul(v2.n, surf_v2));
+    normal = addVec(normal, mul(v1.n, surf_v1));
+    normalize_(&normal);
+
+    res->n = normal;
+
     return true;
 }
+
+Vec lambert(Vec r, Vec i, Vec n) {
+    float res = max(dotProduct(i, n), 0.0f);
+    Vec c = {128,128,128};
+    return mul(c, res);
+}
+
+Vec phong(Vec r, Vec i, Vec n) {
+    Vec ref = mul(n, 2*dotProduct(n, i));
+    ref = subVec(ref, i);
+    Vec c = {255,255,255};
+    return mul(c, 0.2*pow(max(dotProduct(ref, r), 0.f), 1.f));
+}
+
+Vec brdf(Vert pos, Vec posLight, Vec posCam) {
+    Vec ra = subVec(posCam, pos.p);
+    normalize_(&ra);
+
+    Vec ir = subVec(pos.p, posLight);
+    normalize_(&ir);
+
+    Vec c = {128,0,0};
+    Vec amb = addVec(c, lambert(ra, ir, pos.n));
+    return addVec(amb, phong(ra, ir, pos.n));
+}
+
+/*GLfloat max(GLfloat a, GLfloat b) {
+  return (a<b) ? b : a;
+}
+
+Vec3Df lambert(Vec3Df r, Vec3Df i, Vec3Df n){        
+  return Color_Diff * Kd * max(Vec3Df::dotProduct(i, n), 0);
+}
+
+Vec3Df phong(Vec3Df r, Vec3Df i, Vec3Df n)
+{
+  Vec3Df ref = 2 * Vec3Df::dotProduct(n, i) * n - i;
+
+  return Ks * Color_Spec * pow(max(Vec3Df::dotProduct(ref, r), 0), Alpha);
+}
+
+Vec3Df brdf(const Vertex &pos, const Vec3Df & posLight, const Vec3Df  posCam) {
+  Vec3Df ra=(posCam - pos.p);
+  ra.normalize();
+
+  Vec3Df ir=(pos.p - posLight);
+  ir.normalize();
+
+  return Ka * Color_Amb + lambert(ra, ir, pos.n) + phong(ra, ir, pos.n);
+}*/
 
 __kernel void squareArray(__constant unsigned int * nb_obj,
                           __constant Vert * vert,
@@ -128,7 +195,9 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
                           __global unsigned int * pix,
                           __constant unsigned int * width,
                           __constant unsigned int * height,
-                          __constant Cam * cam) {
+                          __constant Cam * cam,
+                          __constant Vec * lights
+                          /*__constant unsigned int * nb_light*/) {
     const int gid = get_global_id(0);
     const int x = gid % *width;
     const int y = gid / *width;
@@ -152,8 +221,10 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
     unsigned int index_tri = 0;
     unsigned int index_vert = 0;
     Vert inter;
-    float small_dist = 100000.0;
-    for(unsigned int idx_obj = 0; idx_obj < *nb_obj; idx_obj++) {
+    Vert closestInter;
+    float small_dist = 100000.0f;
+    bool intersected = false;
+    for(unsigned int idx_obj = 0; idx_obj < 2; idx_obj++) {
         for(unsigned int i = 0; i < nb_tri[idx_obj]; i++) {
             if(intersect(r, vert[index_vert + tri[index_tri + i].v[0]], 
                             vert[index_vert + tri[index_tri + i].v[1]], 
@@ -163,13 +234,22 @@ __kernel void squareArray(__constant unsigned int * nb_obj,
                 if(l < small_dist) {
                     small_dist = l;
                     color = c[idx_obj];
+                    closestInter = inter;
+                    intersected = true;
                 }
             }
         }
         index_tri += nb_tri[idx_obj];
         index_vert += nb_vert[idx_obj];
-        //printf("index_tri: %d\n", tri[index_tri].v[0]);
     }
 
-    pix[y*(*width) + x] = (int)color;
+
+    if(intersected) {
+        Vec c_brdf = brdf(closestInter, lights[0], cam->pos);
+        pix[y*(*width) + x] =   (int)c_brdf.p[0] << 16 |
+                                (int)c_brdf.p[1] << 8 |
+                                (int)c_brdf.p[2];
+    } else {
+        pix[y*(*width) + x] = (int)color;
+    }
 };

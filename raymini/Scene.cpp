@@ -155,7 +155,7 @@ void Scene::buildDefaultScene () {
 
     //---------- SPHERE-----------//
     Mesh sphereMesh;
-    sphereMesh.loadOFF ("models/sphere.off");
+    sphereMesh.loadOFF ("models/sphere1.off");
     Object * sphere = new Object(sphereMesh, ramMat, "Sphere");
     objects.push_back (sphere);
 

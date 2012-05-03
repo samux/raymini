@@ -91,8 +91,6 @@ OpenCL::OpenCL(Controller * c): c(c) {
         vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
                                 sizeof(Vert) * nb_vert_total, &vertices[0]);
 
-        std::cout << "nb vert total: " << nb_vert_total << std::endl;
-
         nb_vertBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(int)*nb_obj, &nb_vert[0]);
 
@@ -102,11 +100,23 @@ OpenCL::OpenCL(Controller * c): c(c) {
         nb_triBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(unsigned int)*nb_obj, &nb_tri[0]);
 
-        kernel->setArg(0, *nb_objBuffer);
-        kernel->setArg(1, *vertBuffer);
-        kernel->setArg(2, *nb_vertBuffer);
-        kernel->setArg(3, *triBuffer);
-        kernel->setArg(4, *nb_triBuffer);
+        // Light
+        nb_light = c->getScene()->getLights().size();
+        lights.resize(nb_light);
+        for(unsigned int i = 0; i < nb_light; i++) {
+            for(unsigned int j = 0; j < 3; j++) {
+                lights[i].p[j] = c->getScene()->getLights()[i]->getPos()[j];
+            }
+        }
+        std::cout << "NB LIGHT: " << nb_light << std::endl;
+
+        lightBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                sizeof(Vec) * nb_light, &lights[0]);
+
+        nb_lightBuffer = new Buffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                        sizeof(unsigned int), &nb_light);
+        
+
     }
     catch (Error& err)
     {
@@ -153,10 +163,17 @@ void OpenCL::getImage ( const Vec3Df & camPos,
         Buffer camBuffer(*context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                         sizeof(Cam), &cam);
 
+        kernel->setArg(0, *nb_objBuffer);
+        kernel->setArg(1, *vertBuffer);
+        kernel->setArg(2, *nb_vertBuffer);
+        kernel->setArg(3, *triBuffer);
+        kernel->setArg(4, *nb_triBuffer);
         kernel->setArg(5, pixBuffer);
         kernel->setArg(6, widthBuffer);
         kernel->setArg(7, heightBuffer);
         kernel->setArg(8, camBuffer);
+        kernel->setArg(9, *lightBuffer);
+        //kernel->setArg(9, *nb_lightBuffer);
 
         std::cout << "GPU Started!\n";
         cmdQ->enqueueNDRangeKernel(*kernel, NullRange, NDRange(pixelCount), NDRange(128));
