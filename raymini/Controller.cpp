@@ -73,18 +73,22 @@ void Controller::windowSetShadowMode(int i) {
         rayTracer->setShadowMode(Shadow::SOFT);
         break;
     }
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
+    renderThread->hasToRedraw();
 }
 
 void Controller::windowSetShadowNbRays (int i) {
     ensureThreadStopped();
     rayTracer->setShadowNbImpule(i);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetRayTracerMode (bool b) {
     ensureThreadStopped();
     rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::RAY_TRACING_MODE;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
@@ -138,6 +142,7 @@ void Controller::windowSetBGColor () {
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
         rayTracer->setBackgroundColor(Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
+        renderThread->hasToRedraw();
         rayTracer->notifyAll();
     }
 }
@@ -193,60 +198,70 @@ void Controller::windowChangeAntiAliasingType(int index) {
             break;
         }
     rayTracer->typeAntiAliasing = type;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbRayAntiAliasing(int i) {
     ensureThreadStopped();
     rayTracer->nbRayAntiAliasing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowChangeAmbientOcclusionNbRays(int index) {
     ensureThreadStopped();
     rayTracer->nbRayAmbientOcclusion = index;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionMaxAngle(int i) {
     ensureThreadStopped();
     rayTracer->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionRadius(double f) {
     ensureThreadStopped();
     rayTracer->radiusAmbientOcclusion = f;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionIntensity(int i) {
     ensureThreadStopped();
     rayTracer->intensityAmbientOcclusion = float(i)/100;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyAO(bool b) {
     ensureThreadStopped();
     rayTracer->onlyAmbientOcclusion = b;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusType(int type) {
     ensureThreadStopped();
     rayTracer->typeFocus = static_cast<Focus::Type>(type);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusNbRays(int n) {
     ensureThreadStopped();
     rayTracer->nbRayFocus = n;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusAperture(double a) {
     ensureThreadStopped();
     rayTracer->apertureFocus = a;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
@@ -273,35 +288,41 @@ void Controller::viewerSetFocusPoint(Vertex point) {
 void Controller::windowSetDepthPathTracing(int i) {
     ensureThreadStopped();
     rayTracer->depthPathTracing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbRayPathTracing(int i) {
     ensureThreadStopped();
     rayTracer->nbRayPathTracing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 void Controller::windowSetMaxAnglePathTracing(int i) {
     ensureThreadStopped();
     rayTracer->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetIntensityPathTracing(int i) {
     ensureThreadStopped();
     rayTracer->intensityPathTracing = float(i);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbImagesSpinBox(int i) {
     ensureThreadStopped();
     rayTracer->nbPictures = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyPT(bool b) {
     ensureThreadStopped();
     rayTracer->onlyPathTracing = b;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
@@ -320,6 +341,7 @@ void Controller::windowEnableObject(bool enabled) {
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getObjects()[o]->setEnabled(enabled);
     scene->updateBoundingBox();
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -337,6 +359,7 @@ void Controller::windowEnableLight(bool enabled) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setEnabled(enabled);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -349,6 +372,7 @@ void Controller::windowSetLightRadius(double r) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setRadius(r);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -361,6 +385,7 @@ void Controller::windowSetLightIntensity(double i) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setIntensity(i);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -372,6 +397,7 @@ void Controller::windowSetLightPos() {
         return;
     }
     scene->getLights()[l]->setPos(window->getLightPos());
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -383,12 +409,14 @@ void Controller::windowSetLightColor() {
         return;
     }
     scene->getLights()[l]->setColor(window->getLightColor());
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
 void Controller::windowSetRealTime(bool r) {
     windowModel->setRealTime(r);
     if (r) {
+        renderThread->hasToRedraw();
         windowRenderRayImage();
     }
     windowModel->notifyAll();

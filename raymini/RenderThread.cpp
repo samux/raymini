@@ -10,7 +10,7 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 
 void RenderThread::run() {
     hasToRedrawMutex.lock();
-    if (hasToRedraw) {
+    if (haveToRedraw) {
         time.restart();
         time.start();
         resultImage = controller->getRayTracer()->render(
@@ -24,7 +24,7 @@ void RenderThread::run() {
                 screenHeight);
         controller->threadSetElapsed(time.elapsed());
     }
-    hasToRedraw = false;
+    haveToRedraw = false;
     hasToRedrawMutex.unlock();
 }
 
@@ -38,21 +38,31 @@ void RenderThread::startRendering(const Vec3Df & camPos,
                                   unsigned int screenHeight) {
     emergencyStop = false;
     hasToRedrawMutex.lock();
-    hasToRedraw |= this->camPos != camPos;
+    haveToRedraw |= this->camPos != camPos;
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
     hasToRedrawMutex.unlock();
     start();
 }
+
 bool RenderThread::isRendering() {
     return isRunning();
 }
+
 bool RenderThread::hasRendered() {
     return isFinished();
 }
+
 void RenderThread::stopRendering() {
     emergencyStop = true;
     quit();
 }
+
 const QImage &RenderThread::getLastRendered() {
     return resultImage;
+}
+
+void RenderThread::hasToRedraw() {
+    hasToRedrawMutex.lock();
+    haveToRedraw = true;
+    hasToRedrawMutex.unlock();
 }

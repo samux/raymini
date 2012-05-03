@@ -32,6 +32,9 @@ public:
 
     inline bool isEmergencyStop() const {return emergencyStop;}
 
+    /** Notify thread that it has to render again */
+    void hasToRedraw();
+
     void run();
 private:
     Controller *controller;
@@ -53,7 +56,7 @@ private:
     // Thread attributes
     bool emergencyStop;
     QTime time;
-    bool hasToRedraw;
+    bool haveToRedraw;
     QMutex hasToRedrawMutex;
 
     inline void prepare(const Vec3Df & camPos,
