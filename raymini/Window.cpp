@@ -109,6 +109,7 @@ void Window::updateFromRayTracer() {
     RayTracer *rayTracer = controller->getRayTracer();
 
     // Shadows
+    shadowTypeList->setCurrentIndex(rayTracer->getShadowMode());
     shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
 
     // Anti aliasing
@@ -361,7 +362,7 @@ void Window::initControlWidget () {
     QGroupBox * shadowsGroupBox = new QGroupBox ("Shadows", rayGroupBox);
     QVBoxLayout * shadowsLayout = new QVBoxLayout (shadowsGroupBox);
 
-    QComboBox *shadowTypeList = new QComboBox(shadowsGroupBox);
+    shadowTypeList = new QComboBox(shadowsGroupBox);
     shadowTypeList->addItem("None");
     shadowTypeList->addItem("Hard shadow");
     shadowTypeList->addItem("Soft shadow");

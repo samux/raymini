@@ -70,6 +70,7 @@ private :
     QProgressBar *renderProgressBar;
     QCheckBox *realTimeCheckBox;
 
+    QComboBox *shadowTypeList;
     QSpinBox *shadowSpinBox;
 
     QSpinBox *PTNbRaySpinBox;

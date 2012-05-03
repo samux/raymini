@@ -88,6 +88,7 @@ void GLViewer::wheelEvent (QWheelEvent * e) {
     if (!controller->getWindowModel()->isRealTime()) {
         controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     }
+    controller->forceThreadUpdate();
     QGLViewer::wheelEvent (e);
 }
 
