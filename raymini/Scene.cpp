@@ -240,7 +240,7 @@ void Scene::buildPool() {
 
     for(int i = 0 ; i < 5 ; i++)
         for(int j = 0 ; j <= i ; j++) {
-            auto ball = new Material(controller, 1.f, 1.f, color[(i*(i+1))/2+j], .05f, 50);
+            auto ball = new Material(controller, 1.f, 1.f, color[(i*(i+1))/2+j], .1f, 50);
             objects.push_back(new Object(sphereMesh, ball, "Ball", {-i*delta, (2*j-i)*height, height}));
         }
 
@@ -250,7 +250,18 @@ void Scene::buildPool() {
 
 void Scene::buildMirrorGlass() {
     auto groundMat = new Material(controller, 1.f, 1.f, {1.f, 1.f, 1.f}, .1f, 30);
-    auto ramMat = new Material(controller, 1.f, 0.3f, Vec3Df (1.f, .6f, .2f));
+    auto wallMat = new Material(controller, 1.f, .5f, {.3f, .6f, .6f},
+                                [](const Vertex & v) -> float {
+                                    float perturbation = 0.05; // <1
+                                    float f0 = 4;
+                                    float lines = 30;
+                                    double valeur = (1 - cos(lines * 2 * M_PI * ((v.getPos()[0]+v.getPos()[1]) / f0 + perturbation * Perlin(0.5f, 7, f0)(v.getPos())))) / 2;
+                                    return valeur;
+                                });
+    auto ramMat = new Material(controller, 1.f, 0.3f, Vec3Df (.7f, .4f, .2f),
+                               [](const Vertex & v) -> float {
+                                   return min(1.f, .3f+Perlin(0.5f, 4, 15)(v.getPos()));
+                               });
     auto glassMat = new Glass(controller, 1.4f);
 
     Mesh groundMesh;
@@ -262,13 +273,13 @@ void Scene::buildMirrorGlass() {
     objects.push_back(new Object(groundMesh, &white, "Ceiling", {0, 0, 4}));
 
     groundMesh.rotate({0,1,0}, M_PI/2);
-    objects.push_back(new Object(groundMesh, &red, "Right Wall", {2, 0, 2}));
+    objects.push_back(new Object(groundMesh, wallMat, "Right Wall", {2, 0, 2}));
 
     groundMesh.rotate({0,0,1}, M_PI/2);
-    objects.push_back(new Object(groundMesh, &green, "Back Wall", {0, 2, 2}));
+    objects.push_back(new Object(groundMesh, wallMat, "Back Wall", {0, 2, 2}));
 
     groundMesh.rotate({0,0,1}, M_PI/2);
-    objects.push_back(new Object(groundMesh, &blue, "Left Wall", {-2, 0, 2}));
+    objects.push_back(new Object(groundMesh, wallMat, "Left Wall", {-2, 0, 2}));
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &mirrorMat, "Mirror Wall", {0, -2, 2}));
