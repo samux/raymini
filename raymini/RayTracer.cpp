@@ -26,9 +26,9 @@ inline int clamp (float f) {
 
 RayTracer::RayTracer(Controller *c):
     mode(Mode::RAY_TRACING_MODE),
-    depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
-    intensityPathTracing(25.f), onlyPathTracing(false),
-    radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
+    depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2.f),
+    intensityPathTracing(3.f), onlyPathTracing(false),
+    radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/3),
     intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
@@ -41,13 +41,13 @@ RayTracer::RayTracer(Controller *c):
 {}
 
 QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
-                          const Vec3Df & direction,
-                          const Vec3Df & upVector,
-                          const Vec3Df & rightVector,
-                          float fieldOfView,
-                          float aspectRatio,
-                          unsigned int screenWidth,
-                          unsigned int screenHeight) {
+                                     const Vec3Df & direction,
+                                     const Vec3Df & upVector,
+                                     const Vec3Df & rightVector,
+                                     float fieldOfView,
+                                     float aspectRatio,
+                                     unsigned int screenWidth,
+                                     unsigned int screenHeight) {
     Scene *scene = controller->getScene();
     vector<Color> buffer;
     unsigned int computedScreenWidth = screenWidth;
@@ -90,12 +90,12 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
             progressBar();
             for (unsigned int j = 0; j < computedScreenHeight && !controller->getRenderThread()->isEmergencyStop(); j++) {
                 buffer[j*computedScreenWidth+i] += computePixel(camPos,
-                                                        direction,
-                                                        upVec, rightVec,
-                                                        computedScreenWidth, computedScreenHeight,
-                                                        offsets, offsets_focus,
-                                                        focalDistance,
-                                                        i, j);
+                                                                direction,
+                                                                upVec, rightVec,
+                                                                computedScreenWidth, computedScreenHeight,
+                                                                offsets, offsets_focus,
+                                                                focalDistance,
+                                                                i, j);
             }
         }
         scene->move(nbPictures);
@@ -292,18 +292,18 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
 
 QString RayTracer::qualityToString(Quality quality) {
     switch (quality) {
-        case OPTIMAL:
-            return QString("optimal");
-        case BASIC:
-            return QString("basic");
-        case ONE_OVER_4:
-            return QString("one over four pixels");
-        case ONE_OVER_9:
-            return QString("one over nine pixels");
-        case ONE_OVER_16:
-            return QString("one over sixteen pixels");
-        case ONE_OVER_25:
-            return QString("one over twenty-five pixels");
+    case OPTIMAL:
+        return QString("optimal");
+    case BASIC:
+        return QString("basic");
+    case ONE_OVER_4:
+        return QString("one over four pixels");
+    case ONE_OVER_9:
+        return QString("one over nine pixels");
+    case ONE_OVER_16:
+        return QString("one over sixteen pixels");
+    case ONE_OVER_25:
+        return QString("one over twenty-five pixels");
     }
     return QString();
 }
