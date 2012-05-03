@@ -165,10 +165,10 @@ void Controller::windowRenderRayImage () {
 }
 
 void Controller::windowSetBGColor () {
-    ensureThreadStopped();
     Vec3Df bg = 255*rayTracer->getBackgroundColor();
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
+        ensureThreadStopped();
         rayTracer->setBackgroundColor(Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
         renderThread->hasToRedraw();
         rayTracer->notifyAll();
@@ -294,7 +294,6 @@ void Controller::windowSetFocusAperture(double a) {
 }
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
-    ensureThreadStopped();
     if (rayTracer->typeFocus == Focus::NONE) {
         cerr <<__FUNCTION__<< ": There is no point to change WindowModel focus mode !"<<endl;
         return;
@@ -310,6 +309,7 @@ void Controller::viewerSetFocusPoint(Vertex point) {
         return;
     }
     windowModel->setFocusPoint(point);
+    renderThread->hasToRedraw();
     windowModel->notifyAll();
 }
 

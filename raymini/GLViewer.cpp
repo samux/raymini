@@ -66,6 +66,7 @@ void GLViewer::mousePressEvent (QMouseEvent * event) {
     if (!controller->getWindowModel()->isRealTime()) {
         controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     }
+    controller->forceThreadUpdate();
     QGLViewer::mousePressEvent(event);
 }
 

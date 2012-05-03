@@ -33,6 +33,12 @@ public:
     inline WindowModel *getWindowModel() {return windowModel;}
     inline RenderThread *getRenderThread() {return renderThread;}
 
+    /** To use with caution */
+    inline void forceThreadUpdate() {
+        ensureThreadStopped();
+        renderThread->hasToRedraw();
+    }
+
 public slots :
     void windowRenderRayImage();
     void windowStopRendering();
