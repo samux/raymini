@@ -34,7 +34,6 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
-#include <vector>
 #include <array>
 #include <algorithm>
 
