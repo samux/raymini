@@ -20,6 +20,7 @@
 #include "AntiAliasing.h"
 #include "Focus.h"
 #include "Observable.h"
+#include "RenderThread.h"
 
 class Color;
 class Object;
@@ -30,6 +31,7 @@ class RayTracer: public Observable {
 public:
 
     enum Mode {RAY_TRACING_MODE = 0, PBGI_MODE};
+    enum Quality {OPTIMAL, BASIC, ONE_OVER_4, ONE_OVER_9};
 
     /*          Config           */
     Mode mode;
@@ -53,6 +55,8 @@ public:
     float apertureFocus;
 
     unsigned nbPictures;
+
+    Quality quality;
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     Shadow::Mode getShadowMode() { return shadow.mode; }
@@ -87,21 +91,10 @@ public:
                    Ray & bestRay,
                    const Object* & intersectedObject) const;
 
-    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing = true) const;
+    Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;
 
-    RayTracer(Controller *c):
-        mode(Mode::RAY_TRACING_MODE),
-        depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2),
-        intensityPathTracing(10.f), onlyPathTracing(false),
-        radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/3),
-        intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
-        typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
-        typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
-        nbPictures(1),
-        controller(c),
-        backgroundColor(Vec3Df(.1f, .1f, .3f)),
-        shadow(this) {}
+    RayTracer(Controller *c);
     virtual ~RayTracer () {}
 
 private:

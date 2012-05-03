@@ -31,9 +31,11 @@ public:
     inline RayTracer *getRayTracer() {return rayTracer;}
     inline PBGI *getPBGI() {return pbgi;}
     inline WindowModel *getWindowModel() {return windowModel;}
+    inline RenderThread *getRenderThread() {return renderThread;}
 
 public slots :
     void windowRenderRayImage();
+    void windowStopRendering();
     void windowSetRayTracerMode(bool);
     void windowSetShadowMode(int);
     void windowSetShadowNbRays(int);
@@ -67,6 +69,7 @@ public slots :
     void windowSetLightColor();
     void windowSelectObject(int);
     void windowEnableObject(bool);
+    void windowSetRealTime(bool);
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
@@ -76,7 +79,19 @@ public slots :
     void viewerSetRayImage(const QImage & image);
     void viewerSetFocusPoint(Vertex point);
 
+    void threadRenderRayImage();
+    void threadSetElapsed(int);
+    // Doesn't notify
+    void threadSetsRenderQuality(int renderedCount);
+
+    void renderProgressed(float);
+
+    void quitProgram();
+
 private:
+    /** Stop thread if running */
+    void ensureThreadStopped();
+
     // Views
     Window *window;
     GLViewer *viewer;
@@ -86,6 +101,7 @@ private:
     RayTracer *rayTracer;
     WindowModel *windowModel;
     PBGI * pbgi;
+    RenderThread *renderThread;
 
     // QApplication
     QApplication *raymini;

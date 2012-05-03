@@ -7,12 +7,10 @@
 
 #include <QImage>
 #include <iostream>
-#include <iomanip>
 #include <algorithm>
-#include <omp.h>
-#include <chrono>
 
 #include "Controller.h"
+#include "ProgressBar.h"
 #include "RayTracer.h"
 #include "Ray.h"
 #include "Scene.h"
@@ -26,48 +24,22 @@ inline int clamp (float f) {
     return min(max(v, 0), 255);
 }
 
-class ProgressBar {
-private:
-    unsigned max;
-    unsigned current;
-    omp_lock_t lck;
-    chrono::time_point<chrono::system_clock> start;
+RayTracer::RayTracer(Controller *c):
+    mode(Mode::RAY_TRACING_MODE),
+    depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI),
+    intensityPathTracing(25.f), onlyPathTracing(false),
+    radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(2*M_PI/3),
+    intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
+    typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
+    typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
+    nbPictures(1),
+    quality(OPTIMAL),
+    controller(c),
+    backgroundColor(Vec3Df(.1f, .1f, .3f)),
+    shadow(this)
+{}
 
-    void lock() { omp_set_lock(&lck); }
-    void unlock() { omp_unset_lock(&lck); }
-
-public:
-    ProgressBar(unsigned nbIter) :
-        max(nbIter), current(0), start(chrono::system_clock::now()) {
-        omp_init_lock(&lck);
-        cerr << endl
-             << setw (5) << 0
-             << "% >";
-        for(unsigned i = 0 ; i < 100 ; i++)
-            cerr << ' ';
-        cerr << '<';
-    }
-
-    void operator()() {
-        lock();
-        float percent = 100.f*float(current)/float(max);
-        cerr << '\r'
-             << fixed << setprecision(2) << setw (5) << percent
-             << "% >";
-        for(unsigned i = 0 ; i < unsigned(percent)+1 ; i++)
-            cerr << '*';
-        current++;
-        if(current==max) {
-            auto now = chrono::system_clock::now();
-            chrono::microseconds u = now -start;
-            cerr << "< " << u.count()/1000 << "ms "
-                 << '\r' << setw (5) << 100.00;
-        }
-        unlock();
-    }
-};
-
-QImage RayTracer::render (const Vec3Df & camPos,
+QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                           const Vec3Df & direction,
                           const Vec3Df & upVector,
                           const Vec3Df & rightVector,
@@ -77,33 +49,46 @@ QImage RayTracer::render (const Vec3Df & camPos,
                           unsigned int screenHeight) {
     Scene *scene = controller->getScene();
     vector<Color> buffer;
-    buffer.resize(screenHeight*screenWidth);
+    unsigned int computedScreenWidth = screenWidth;
+    unsigned int computedScreenHeight = screenHeight;
+    int qualityDivider = 1;
+    if (quality == ONE_OVER_4) {
+        qualityDivider = 2;
+    }
+    else if (quality == ONE_OVER_9) {
+        qualityDivider = 3;
+    }
+    computedScreenWidth /= qualityDivider;
+    computedScreenHeight /= qualityDivider;
+    buffer.resize(computedScreenHeight*computedScreenWidth);
 
-    const vector<pair<float, float>> offsets = AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing);
+    vector<pair<float, float>> singleNulOffset;
+    singleNulOffset.push_back(pair<float, float>(0, 0));
+    const vector<pair<float, float>> offsets = quality==OPTIMAL?AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing):singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
-    const Vec3Df rightVec = tang * aspectRatio * rightVector / screenWidth;
-    const Vec3Df upVec = tang * upVector / screenHeight;
+    const Vec3Df rightVec = tang * aspectRatio * rightVector / computedScreenWidth;
+    const Vec3Df upVec = tang * upVector / computedScreenHeight;
 
     const Vec3Df camToObject = controller->getWindowModel()->getFocusPoint().getPos() - camPos;
     const float focalDistance = Vec3Df::dotProduct(camToObject, direction) - distanceOrthogonalCameraScreen;
 
-    const unsigned nbIterations = scene->hasMobile()?nbPictures:1;
-    ProgressBar progressBar(nbIterations*screenWidth);
+    const unsigned nbIterations = scene->hasMobile()&&quality==OPTIMAL?nbPictures:1;
+    ProgressBar progressBar(controller, nbIterations*computedScreenWidth);
 
     // For each picture
-    for (unsigned picNumber = 0 ; picNumber < nbIterations ; picNumber++) {
+    for (unsigned picNumber = 0 ; picNumber < nbIterations; picNumber++) {
 
         // For each pixel
         #pragma omp parallel for
-        for (unsigned int i = 0; i < screenWidth; i++) {
+        for (unsigned int i = 0; i < computedScreenWidth; i++) {
             progressBar();
-            for (unsigned int j = 0; j < screenHeight; j++) {
-                buffer[j*screenWidth+i] += computePixel(camPos,
+            for (unsigned int j = 0; j < computedScreenHeight && !controller->getRenderThread()->isEmergencyStop(); j++) {
+                buffer[j*computedScreenWidth+i] += computePixel(camPos,
                                                         direction,
                                                         upVec, rightVec,
-                                                        screenWidth, screenHeight,
+                                                        computedScreenWidth, computedScreenHeight,
                                                         offsets, offsets_focus,
                                                         focalDistance,
                                                         i, j);
@@ -115,7 +100,11 @@ QImage RayTracer::render (const Vec3Df & camPos,
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
         for (unsigned int j = 0; j < screenHeight; j++) {
-            Color c = buffer[j*screenWidth+i];
+            unsigned int computedI = i;
+            unsigned int computedJ = j;
+            computedI /= qualityDivider;
+            computedJ /= qualityDivider;
+            Color c = buffer[computedJ*computedScreenWidth+computedI];
             image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
         }
     }
@@ -144,7 +133,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
         Vec3Df step = stepX + stepY;
         Vec3Df dir = direction + step;
         dir.normalize();
-        if (typeFocus != Focus::NONE) {
+        if (typeFocus != Focus::NONE && quality == OPTIMAL) {
             float distanceCameraScreen = sqrt(step.getLength()*step.getLength() +
                                               distanceOrthogonalCameraScreen*distanceOrthogonalCameraScreen);
             dir.normalize ();
@@ -192,10 +181,11 @@ bool RayTracer::intersect(const Vec3Df & dir,
     return bestRay.intersect();
 }
 
-Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool rayTracing) const {
+Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing) const {
     Ray bestRay;
     Brdf::Type type = onlyAmbientOcclusion?Brdf::Ambient:Brdf::All;
-    return getColor(dir, camPos, bestRay, rayTracing?0:depthPathTracing, type);
+    bool useRayTracing = (quality==OPTIMAL) && pathTracing;
+    return getColor(dir, camPos, bestRay, useRayTracing?0:depthPathTracing, type);
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
@@ -209,7 +199,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
                                    light,
                                    type);
 
-        if((depth < depthPathTracing) || (mode == PBGI_MODE)) {
+        if((depth < depthPathTracing) || (mode == PBGI_MODE && quality == OPTIMAL)) {
 
             vector<Light> lights;
             switch(mode) {
@@ -244,9 +234,9 @@ vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
         if (!light->isEnabled()) {
             continue;
         }
-        float visibilite = shadow(closestIntersection.getPos(), *light);
+        float visibility = shadow(closestIntersection.getPos(), *light);
         Light l = *light;
-        l.setIntensity(light->getIntensity()*visibilite);
+        l.setIntensity(light->getIntensity()*visibility);
         enabledLights.push_back(l);
     }
 
@@ -276,7 +266,7 @@ vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigne
 }
 
 float RayTracer::getAmbientOcclusion(Vertex intersection) const {
-    if (!nbRayAmbientOcclusion) return intensityAmbientOcclusion;
+    if ((!nbRayAmbientOcclusion)||(quality!=OPTIMAL)) return intensityAmbientOcclusion;
 
     int occlusion = 0;
     vector<Vec3Df> directions = intersection.getNormal().randRotate(maxAngleAmbientOcclusion,

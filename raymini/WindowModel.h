@@ -37,6 +37,14 @@ public:
 
     void setFocusMode(bool f);
 
+    inline void setRealTime(bool r) {realTime = r;}
+    inline bool isRealTime() const {return realTime;}
+
+    void handleRealTime();
+
+    inline void setElapsedTime(int e) {elapsedTime = e;}
+    inline int getElapsedTime() const {return elapsedTime;}
+
 private:
     Controller *controller;
 
@@ -48,4 +56,6 @@ private:
     DisplayMode displayMode;
     QImage rayImage;
     Vertex focusPoint;
+    bool realTime;
+    int elapsedTime;
 };

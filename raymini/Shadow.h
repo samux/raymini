@@ -16,13 +16,7 @@ public:
 
     Shadow(RayTracer *rt) : mode(NONE), nbImpulse(10), rt(rt) {}
 
-    inline float operator()(const Vec3Df & pos, const Light & light) const {
-        if(mode == HARD)
-            return float(hard(pos, light.getPos()));
-        else if(mode == SOFT)
-            return soft(pos, light);
-        return 1.0;
-    }
+    float operator()(const Vec3Df & pos, const Light & light) const;
 
 private:
     class RayTracer *rt;

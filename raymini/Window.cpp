@@ -88,6 +88,9 @@ void Window::update(Observable *observable) {
     else if (observable == controller->getWindowModel()) {
         updateFromWindowModel();
     }
+    else if (observable == controller->getRenderThread()) {
+        updateProgressBar();
+    }
     else {
         cerr << "Window::update(Observable*) has been called from an unknown source!" << endl;
     }
@@ -135,6 +138,12 @@ void Window::updateFromWindowModel() {
 
     // Objects
     updateObjects();
+
+    // Real time
+    updateRealTime();
+
+    // Status
+    updateStatus();
 }
 
 void Window::updateLights() {
@@ -196,6 +205,48 @@ void Window::updateObjects() {
     if (isSelected) {
         bool isEnabled = scene->getObjects()[index]->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
+    }
+}
+
+void Window::updateProgressBar() {
+    RenderThread *renderThread = controller->getRenderThread();
+    WindowModel *windowModel = controller->getWindowModel();
+    bool isRendering = renderThread->isRendering();
+    bool isRealTime = windowModel->isRealTime();
+    stopRenderButton->setVisible(isRendering||isRealTime);
+    renderButton->setVisible(!isRendering && !isRealTime);
+    renderProgressBar->setVisible(isRendering || isRealTime);
+    if (isRendering) {
+        float percent = renderThread->getPercent();
+        renderProgressBar->setValue(percent);
+    }
+    else {
+        renderProgressBar->setValue(100);
+    }
+}
+
+void Window::updateRealTime() {
+    WindowModel *windowModel = controller->getWindowModel();
+    bool isRealTime = windowModel->isRealTime();
+    realTimeCheckBox->setChecked(isRealTime);
+}
+
+void Window::updateStatus() {
+    WindowModel *windowModel = controller->getWindowModel();
+    int elapsed = windowModel->getElapsedTime();
+    qglviewer::Camera * cam = controller->getViewer()->camera ();
+    unsigned int screenWidth = cam->screenWidth ();
+    unsigned int screenHeight = cam->screenHeight ();
+    if (elapsed != 0) {
+        int FPS = 1000/elapsed;
+        statusBar()->showMessage(
+                QString("[")+
+                QString::number(screenWidth) + QString ("x") + QString::number (screenHeight) +
+                QString("] ")+
+                QString::number(elapsed) +
+                QString ("ms (") +
+                QString::number(FPS)+
+                QString(" fps)"));
     }
 }
 
@@ -515,9 +566,20 @@ void Window::initControlWidget () {
     QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneGroupBox);
     QVBoxLayout * actionLayout = new QVBoxLayout (ActionGroupBox);
 
-    QPushButton * rayButton = new QPushButton ("Render", sceneGroupBox);
-    actionLayout->addWidget (rayButton);
-    connect (rayButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+    stopRenderButton = new QPushButton("Stop", sceneGroupBox);
+    actionLayout->addWidget(stopRenderButton);
+    stopRenderButton->setVisible(false);
+    connect(stopRenderButton, SIGNAL(clicked()), controller, SLOT(windowStopRendering()));
+    renderButton = new QPushButton ("Render", sceneGroupBox);
+    actionLayout->addWidget (renderButton);
+    connect (renderButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
+    renderProgressBar = new QProgressBar(sceneGroupBox);
+    renderProgressBar->setMinimum(0);
+    renderProgressBar->setMaximum(100);
+    actionLayout->addWidget(renderProgressBar);
+    realTimeCheckBox = new QCheckBox("Real time", sceneGroupBox);
+    connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
+    actionLayout->addWidget(realTimeCheckBox);
     QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
     actionLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));

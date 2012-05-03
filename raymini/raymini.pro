@@ -31,6 +31,8 @@ HEADERS = Window.h \
           Focus.h \
           Surfel.h \
           PointCloud.h \
+          RenderThread.h \
+          ProgressBar.h \
           Brdf.h \
           PBGI.h \
           Octree.h
@@ -63,6 +65,8 @@ SOURCES = Window.cpp \
           Surfel.cpp \
           PointCloud.cpp \
           Octree.cpp \
+          RenderThread.cpp \
+          ProgressBar.cpp \
           PBGI.cpp \
           Main.cpp
 

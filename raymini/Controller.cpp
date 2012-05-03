@@ -12,19 +12,24 @@ Controller::Controller(QApplication *r):
 {}
 
 Controller::~Controller()
-{}
+{
+    delete scene;
+    delete rayTracer;
+    delete windowModel;
+}
 
 void Controller::initAll(int argc, char **argv) {
     scene = new Scene(this, argc, argv);
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);
+    renderThread = new RenderThread(this);
 
     // do this after Scene and RayTracer
     pbgi = new PBGI(this);
 
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
-    connect(raymini, SIGNAL(lastWindowClosed()), raymini, SLOT(quit()));
+    connect(raymini, SIGNAL(lastWindowClosed()), this, SLOT(quitProgram()));
 
     viewer = new GLViewer(this);
     window->setCentralWidget(viewer);
@@ -35,6 +40,7 @@ void Controller::initAll(int argc, char **argv) {
     rayTracer->addObserver(viewer);
     windowModel->addObserver(window);
     windowModel->addObserver(viewer);
+    renderThread->addObserver(window);
 
     window->show();
 
@@ -44,11 +50,24 @@ void Controller::initAll(int argc, char **argv) {
     windowModel->notifyAll();
 }
 
+void Controller::ensureThreadStopped() {
+    if (renderThread->isRendering()) {
+        renderThread->stopRendering();
+    }
+}
+
 /******************************************
  ***************** SLOTS ******************
  ******************************************/
 
+void Controller::quitProgram() {
+    ensureThreadStopped();
+    renderThread->wait();
+    raymini->quit();
+}
+
 void Controller::windowSetShadowMode(int i) {
+    ensureThreadStopped();
     switch(i) {
     case 0:
         rayTracer->setShadowMode(Shadow::NONE);
@@ -60,20 +79,71 @@ void Controller::windowSetShadowMode(int i) {
         rayTracer->setShadowMode(Shadow::SOFT);
         break;
     }
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetShadowNbRays (int i) {
+    ensureThreadStopped();
     rayTracer->setShadowNbImpule(i);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetRayTracerMode (bool b) {
+    ensureThreadStopped();
     rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::RAY_TRACING_MODE;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
+void Controller::threadRenderRayImage() {
+    // To avoid dark bands
+    if (!renderThread->isEmergencyStop()) {
+        viewerSetRayImage(renderThread->getLastRendered());
+        viewerSetDisplayMode(WindowModel::RayDisplayMode);
+    }
+    windowModel->handleRealTime();
+    renderThread->notifyAll();
+}
+
+void Controller::threadSetElapsed(int e)  {
+    windowModel->setElapsedTime(e);
+}
+
+void Controller::threadSetsRenderQuality(int renderedCount) {
+    // How we re render images when camera doesn't move
+    switch (renderedCount) {
+        case 0:
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
+            break;
+        case 1:
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_4;
+            break;
+        case 2:
+            rayTracer->quality = RayTracer::Quality::BASIC;
+            break;
+        case 3:
+        default:
+            rayTracer->quality = RayTracer::Quality::OPTIMAL;
+            break;
+    }
+}
+
+void Controller::windowStopRendering() {
+    ensureThreadStopped();
+    windowSetRealTime(false);
+    renderThread->hasToRedraw();
+    renderThread->notifyAll();
+}
+
+void Controller::renderProgressed(float percent) {
+    renderThread->setPercent(percent);
+    renderThread->notifyAll();
+}
+
 void Controller::windowRenderRayImage () {
+    ensureThreadStopped();
     qglviewer::Camera * cam = viewer->camera ();
     qglviewer::Vec p = cam->position ();
     qglviewer::Vec d = cam->viewDirection ();
@@ -87,32 +157,17 @@ void Controller::windowRenderRayImage () {
     float aspectRatio = cam->aspectRatio ();
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
-    // TODO move to view
-    QTime timer;
-    timer.start ();
-
-    // Will notify
-    viewerSetRayImage(rayTracer->render (camPos, viewDirection, upVector, rightVector,
-                                           fieldOfView, aspectRatio, screenWidth, screenHeight));
-
-    window->statusBar()->showMessage(QString ("Raytracing performed in ") +
-                             QString::number (timer.elapsed ()) +
-                             QString ("ms at ") +
-                             QString::number (screenWidth) + QString ("x") + QString::number (screenHeight) +
-                             QString (" screen resolution"));
-
-    // Will notify
-    viewerSetDisplayMode(WindowModel::RayDisplayMode);
-
-    windowModel->notifyAll();
-    rayTracer->notifyAll();
+    renderThread->startRendering(camPos, viewDirection, upVector, rightVector,
+            fieldOfView, aspectRatio, screenWidth, screenHeight);
 }
 
 void Controller::windowSetBGColor () {
+    ensureThreadStopped();
     Vec3Df bg = 255*rayTracer->getBackgroundColor();
     QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
     if (c.isValid () == true) {
         rayTracer->setBackgroundColor(Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
+        renderThread->hasToRedraw();
         rayTracer->notifyAll();
     }
 }
@@ -148,6 +203,7 @@ void Controller::windowAbout () {
 }
 
 void Controller::windowChangeAntiAliasingType(int index) {
+    ensureThreadStopped();
     AntiAliasing::Type type;
 
     switch (index)
@@ -167,55 +223,75 @@ void Controller::windowChangeAntiAliasingType(int index) {
             break;
         }
     rayTracer->typeAntiAliasing = type;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbRayAntiAliasing(int i) {
+    ensureThreadStopped();
     rayTracer->nbRayAntiAliasing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowChangeAmbientOcclusionNbRays(int index) {
+    ensureThreadStopped();
     rayTracer->nbRayAmbientOcclusion = index;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionMaxAngle(int i) {
+    ensureThreadStopped();
     rayTracer->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionRadius(double f) {
+    ensureThreadStopped();
     rayTracer->radiusAmbientOcclusion = f;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionIntensity(int i) {
+    ensureThreadStopped();
     rayTracer->intensityAmbientOcclusion = float(i)/100;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyAO(bool b) {
+    ensureThreadStopped();
     rayTracer->onlyAmbientOcclusion = b;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusType(int type) {
+    ensureThreadStopped();
     rayTracer->typeFocus = static_cast<Focus::Type>(type);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusNbRays(int n) {
+    ensureThreadStopped();
     rayTracer->nbRayFocus = n;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocusAperture(double a) {
+    ensureThreadStopped();
     rayTracer->apertureFocus = a;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
+    ensureThreadStopped();
     if (rayTracer->typeFocus == Focus::NONE) {
         cerr <<__FUNCTION__<< ": There is no point to change WindowModel focus mode !"<<endl;
         return;
@@ -225,6 +301,7 @@ void Controller::windowSetFocalFixing(bool isFocusMode) {
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {
+    ensureThreadStopped();
     if (rayTracer->typeFocus == Focus::NONE || !windowModel->isFocusMode()) {
         cerr <<__FUNCTION__<< ": There is no point to define a focal !"<<endl;
         return;
@@ -234,31 +311,43 @@ void Controller::viewerSetFocusPoint(Vertex point) {
 }
 
 void Controller::windowSetDepthPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->depthPathTracing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbRayPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->nbRayPathTracing = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 void Controller::windowSetMaxAnglePathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetIntensityPathTracing(int i) {
+    ensureThreadStopped();
     rayTracer->intensityPathTracing = float(i);
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetNbImagesSpinBox(int i) {
+    ensureThreadStopped();
     rayTracer->nbPictures = i;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
 void Controller::windowSetOnlyPT(bool b) {
+    ensureThreadStopped();
     rayTracer->onlyPathTracing = b;
+    renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
 
@@ -268,6 +357,7 @@ void Controller::windowSelectObject(int o) {
 }
 
 void Controller::windowEnableObject(bool enabled) {
+    ensureThreadStopped();
     int o = windowModel->getSelectedObjectIndex();
     if (o == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -276,6 +366,7 @@ void Controller::windowEnableObject(bool enabled) {
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getObjects()[o]->setEnabled(enabled);
     scene->updateBoundingBox();
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
@@ -285,6 +376,7 @@ void Controller::windowSelectLight(int l) {
 }
 
 void Controller::windowEnableLight(bool enabled) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -292,10 +384,12 @@ void Controller::windowEnableLight(bool enabled) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setEnabled(enabled);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
 void Controller::windowSetLightRadius(double r) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -303,10 +397,12 @@ void Controller::windowSetLightRadius(double r) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setRadius(r);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
 void Controller::windowSetLightIntensity(double i) {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
@@ -314,27 +410,41 @@ void Controller::windowSetLightIntensity(double i) {
     }
     viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     scene->getLights()[l]->setIntensity(i);
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
 void Controller::windowSetLightPos() {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
     scene->getLights()[l]->setPos(window->getLightPos());
+    renderThread->hasToRedraw();
     scene->notifyAll();
 }
 
 void Controller::windowSetLightColor() {
+    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
     scene->getLights()[l]->setColor(window->getLightColor());
+    renderThread->hasToRedraw();
     scene->notifyAll();
+}
+
+void Controller::windowSetRealTime(bool r) {
+    windowModel->setRealTime(r);
+    if (r) {
+        renderThread->hasToRedraw();
+        windowRenderRayImage();
+    }
+    windowModel->notifyAll();
 }
 
 void Controller::viewerSetWireframe(bool b) {
