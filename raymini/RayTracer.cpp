@@ -33,7 +33,7 @@ RayTracer::RayTracer(Controller *c):
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
     nbPictures(1),
-    qualityDivider(4),
+    qualityDivider(1),
     quality(OPTIMAL),
     durtiestQualityDivider(5),
     durtiestQuality(ONE_OVER_X),
