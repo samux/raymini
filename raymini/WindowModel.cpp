@@ -26,7 +26,6 @@ void WindowModel::handleRealTime() {
     RayTracer *rayTracer = controller->getRayTracer();
     bool isRendering = renderThread->isRendering();
     if (realTime && !isRendering) {
-        rayTracer->quality = RayTracer::Quality::ONE_OVER_9;
         controller->windowRenderRayImage();
     }
     if (!realTime) {
