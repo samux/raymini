@@ -77,6 +77,7 @@ public slots :
     void windowEnableObject(bool);
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
+    void windowSetQualityDivider(int);
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);

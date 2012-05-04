@@ -72,6 +72,7 @@ private :
     QCheckBox *realTimeCheckBox;
     QLabel *durtiestQualityLabel;
     QComboBox *durtiestQualityComboBox;
+    QSpinBox *qualityDividerSpinBox;
 
     QComboBox *shadowTypeList;
     QSpinBox *shadowSpinBox;

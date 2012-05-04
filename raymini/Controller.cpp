@@ -112,7 +112,19 @@ void Controller::threadSetElapsed(int e)  {
 
 void Controller::threadSetsRenderQuality(int renderedCount) {
     // How we re render images when camera doesn't move
-    rayTracer->quality = static_cast<RayTracer::Quality>(max(0, rayTracer->durtiesQuality - renderedCount));
+    int diff = rayTracer->durtiestQualityDivider-renderedCount;
+    switch (diff) {
+        case 0:
+            rayTracer->quality = RayTracer::Quality::OPTIMAL;
+            break;
+        case 1:
+            rayTracer->quality = RayTracer::Quality::BASIC;
+            break;
+        default:
+            rayTracer->quality = RayTracer::Quality::ONE_OVER_X;
+            break;
+    }
+    rayTracer->qualityDivider = diff;
 }
 
 void Controller::windowStopRendering() {
@@ -441,7 +453,15 @@ void Controller::windowSetRealTime(bool r) {
 }
 
 void Controller::windowSetDurtiestQuality(int quality) {
-    rayTracer->durtiesQuality = static_cast<RayTracer::Quality>(quality);
+    rayTracer->durtiestQuality = static_cast<RayTracer::Quality>(quality);
+    if (quality < 2) {
+        rayTracer->durtiestQualityDivider = 1;
+    }
+    rayTracer->notifyAll();
+}
+
+void Controller::windowSetQualityDivider(int divider) {
+    rayTracer->durtiestQualityDivider = divider;
     rayTracer->notifyAll();
 }
 

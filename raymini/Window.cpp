@@ -238,8 +238,13 @@ void Window::updateRealTime() {
     durtiestQualityLabel->setVisible(isRealTime);
     if (isRealTime) {
         RayTracer *rayTracer = controller->getRayTracer();
-        int quality = rayTracer->durtiesQuality;
+        int quality = rayTracer->durtiestQuality;
         durtiestQualityComboBox->setCurrentIndex(quality);
+        qualityDividerSpinBox->setVisible(quality == RayTracer::Quality::ONE_OVER_X);
+        qualityDividerSpinBox->setValue(rayTracer->durtiestQualityDivider);
+    }
+    else {
+        qualityDividerSpinBox->setVisible(false);
     }
 }
 
@@ -252,6 +257,7 @@ void Window::updateStatus() {
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
     RayTracer::Quality quality = rayTracer->quality;
+    int divider = rayTracer->qualityDivider;
     if (elapsed != 0) {
         int FPS = 1000/elapsed;
         QString message = 
@@ -265,7 +271,7 @@ void Window::updateStatus() {
         if (renderThread->isRendering()) {
             message +=
                 QString(" Rendering in ")+
-                QString(RayTracer::qualityToString(quality))+
+                QString(RayTracer::qualityToString(quality, divider))+
                 QString(" quality...");
         }
         statusBar()->showMessage(message);
@@ -609,15 +615,22 @@ void Window::initControlWidget () {
     durtiestQualityLabel = new QLabel("Durtiest quality:", sceneGroupBox);
     actionLayout->addWidget(durtiestQualityLabel);
 
+    QHBoxLayout *durtiestLayout = new QHBoxLayout;
+
     durtiestQualityComboBox = new QComboBox(sceneGroupBox);
     durtiestQualityComboBox->addItem("Optimal");
     durtiestQualityComboBox->addItem("Basic");
-    durtiestQualityComboBox->addItem("One over 4 pixel");
-    durtiestQualityComboBox->addItem("One over 9 pixel");
-    durtiestQualityComboBox->addItem("One over 16 pixel");
-    durtiestQualityComboBox->addItem("One over 25 pixel");
+    durtiestQualityComboBox->addItem("One over");
     connect(durtiestQualityComboBox, SIGNAL(activated(int)), controller, SLOT(windowSetDurtiestQuality(int)));
-    actionLayout->addWidget(durtiestQualityComboBox);
+    durtiestLayout->addWidget(durtiestQualityComboBox);
+
+    qualityDividerSpinBox = new QSpinBox(sceneGroupBox);
+    qualityDividerSpinBox->setSuffix("^2 pixels");
+    qualityDividerSpinBox->setMinimum(2);
+    connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
+    durtiestLayout->addWidget(qualityDividerSpinBox);
+
+    actionLayout->addLayout(durtiestLayout);
 
     QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
     actionLayout->addWidget (showButton);

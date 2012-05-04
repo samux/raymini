@@ -33,8 +33,10 @@ RayTracer::RayTracer(Controller *c):
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
     typeFocus(Focus::NONE), nbRayFocus(9), apertureFocus(0.1),
     nbPictures(1),
+    qualityDivider(4),
     quality(OPTIMAL),
-    durtiesQuality(ONE_OVER_25),
+    durtiestQualityDivider(5),
+    durtiestQuality(ONE_OVER_X),
     controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
     shadow(this)
@@ -50,16 +52,8 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                                      unsigned int screenHeight) {
     Scene *scene = controller->getScene();
     vector<Color> buffer;
-    int qualityDivider = 1;
-    if (quality == ONE_OVER_4) {
-        qualityDivider = 2;
-    } else if (quality == ONE_OVER_9) {
-        qualityDivider = 3;
-    } else if (quality == ONE_OVER_16) {
-        qualityDivider = 4;
-    } else if (quality == ONE_OVER_25) {
-        qualityDivider = 5;
-    }
+    qualityDivider = quality==ONE_OVER_X?qualityDivider:1;
+    cout<<quality<<" "<<qualityDivider<<endl;
     // To avoid black pixels on the top of the screen
     unsigned int computedScreenWidth = ceil((float)screenWidth/(float)qualityDivider);
     unsigned int computedScreenHeight = ceil((float)screenHeight/(float)qualityDivider);
@@ -287,20 +281,16 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     return intensityAmbientOcclusion * (1.f-float(occlusion)/float(nbRayAmbientOcclusion));
 }
 
-QString RayTracer::qualityToString(Quality quality) {
+QString RayTracer::qualityToString(Quality quality, int qualityDivider) {
     switch (quality) {
     case OPTIMAL:
         return QString("optimal");
     case BASIC:
         return QString("basic");
-    case ONE_OVER_4:
-        return QString("one over four pixels");
-    case ONE_OVER_9:
-        return QString("one over nine pixels");
-    case ONE_OVER_16:
-        return QString("one over sixteen pixels");
-    case ONE_OVER_25:
-        return QString("one over twenty-five pixels");
+    case ONE_OVER_X:
+        QString number;
+        number = QString("%1").arg(qualityDivider*qualityDivider);
+        return QString("one over ")+number+QString(" pixels");
     }
     return QString();
 }
