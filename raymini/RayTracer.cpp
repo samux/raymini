@@ -50,8 +50,6 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                                      unsigned int screenHeight) {
     Scene *scene = controller->getScene();
     vector<Color> buffer;
-    unsigned int computedScreenWidth = screenWidth;
-    unsigned int computedScreenHeight = screenHeight;
     int qualityDivider = 1;
     if (quality == ONE_OVER_4) {
         qualityDivider = 2;
@@ -62,8 +60,9 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     } else if (quality == ONE_OVER_25) {
         qualityDivider = 5;
     }
-    computedScreenWidth /= qualityDivider;
-    computedScreenHeight /= qualityDivider;
+    // To avoid black pixels on the top of the screen
+    unsigned int computedScreenWidth = ceil((float)screenWidth/(float)qualityDivider);
+    unsigned int computedScreenHeight = ceil((float)screenHeight/(float)qualityDivider);
     buffer.resize(computedScreenHeight*computedScreenWidth);
 
     vector<pair<float, float>> singleNulOffset;
@@ -103,13 +102,11 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
     for (unsigned int i = 0; i < screenWidth; i++) {
+        unsigned int computedI = i/qualityDivider;
         for (unsigned int j = 0; j < screenHeight; j++) {
-            unsigned int computedI = i;
-            unsigned int computedJ = j;
-            computedI /= qualityDivider;
-            computedJ /= qualityDivider;
+            unsigned int computedJ = j/qualityDivider;
             Color c = buffer[computedJ*computedScreenWidth+computedI];
-            image.setPixel (i, j, qRgb (clamp (c[0]), clamp (c[1]), clamp (c[2])));
+            image.setPixel(i, j, qRgb(clamp(c[0]), clamp(c[1]), clamp(c[2])));
         }
     }
 
