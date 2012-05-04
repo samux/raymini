@@ -348,7 +348,9 @@ void Controller::windowEnableObject(bool enabled) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    if (!windowModel->isRealTime()) {
+        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    }
     scene->getObjects()[o]->setEnabled(enabled);
     scene->updateBoundingBox();
     renderThread->hasToRedraw();
@@ -367,7 +369,9 @@ void Controller::windowEnableLight(bool enabled) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    if (!windowModel->isRealTime()) {
+        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    }
     scene->getLights()[l]->setEnabled(enabled);
     renderThread->hasToRedraw();
     scene->notifyAll();
@@ -380,7 +384,9 @@ void Controller::windowSetLightRadius(double r) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    if (!windowModel->isRealTime()) {
+        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    }
     scene->getLights()[l]->setRadius(r);
     renderThread->hasToRedraw();
     scene->notifyAll();
@@ -393,7 +399,9 @@ void Controller::windowSetLightIntensity(double i) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    if (!windowModel->isRealTime()) {
+        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+    }
     scene->getLights()[l]->setIntensity(i);
     renderThread->hasToRedraw();
     scene->notifyAll();
