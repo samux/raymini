@@ -470,7 +470,6 @@ void Controller::windowSetRealTime(bool r) {
 
 void Controller::windowSetDurtiestQuality(int quality) {
     rayTracer->durtiestQuality = static_cast<RayTracer::Quality>(quality);
-    rayTracer->durtiestQualityDivider = quality<2?1:5;
     rayTracer->notifyAll();
 }
 
