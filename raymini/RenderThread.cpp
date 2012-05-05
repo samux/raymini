@@ -10,13 +10,15 @@ RenderThread::RenderThread(Controller *c): controller(c), emergencyStop(false) {
 
 void RenderThread::run() {
     hasToRedrawMutex.lock();
-    if (haveToRedraw || drawingIterations < controller->getRayTracer()->durtiestQualityDivider+1) {
+    if (haveToRedraw || !optimalDone) {
         reallyWorkingMutex.lock();
         reallyWorking = true;
         reallyWorkingMutex.unlock();
+        emergencyStopMutex.lock();
+        emergencyStop = false;
+        emergencyStopMutex.unlock();
         time.restart();
         time.start();
-        controller->threadSetsRenderQuality(drawingIterations++);
         resultImage = controller->getRayTracer()->render(
                 camPos,
                 viewDirection,
@@ -27,6 +29,7 @@ void RenderThread::run() {
                 screenWidth,
                 screenHeight);
         controller->threadSetElapsed(time.elapsed());
+        optimalDone = controller->threadImproveRenderingQuality();
     }
     haveToRedraw = false;
     reallyWorkingMutex.lock();
@@ -43,14 +46,18 @@ void RenderThread::startRendering(const Vec3Df & camPos,
                                   float aspectRatio,
                                   unsigned int screenWidth,
                                   unsigned int screenHeight) {
-    emergencyStop = false;
     hasToRedrawMutex.lock();
     haveToRedraw |= this->camPos != camPos;
+    if (!haveToRedraw) {
+        emergencyStopMutex.lock();
+        haveToRedraw = emergencyStop;
+        emergencyStopMutex.unlock();
+    }
     if (haveToRedraw) {
         if (controller->getWindowModel()->isRealTime()) {
-            drawingIterations = 0;
+            controller->threadSetDurtiestRenderingQuality();
         } else {
-            drawingIterations = controller->getRayTracer()->durtiestQualityDivider+5; // more than qualities
+            controller->threadSetBestRenderingQuality();
         }
     }
     prepare(camPos, viewDirection, upVector, rightVector, fieldOfView, aspectRatio, screenWidth, screenHeight);
@@ -73,14 +80,23 @@ bool RenderThread::hasRendered() {
 }
 
 void RenderThread::stopRendering() {
+    // Don't use mutexes to be immediate
     emergencyStop = true;
     haveToRedraw = true;
-    drawingIterations = 0;
     quit();
 }
 
 const QImage &RenderThread::getLastRendered() {
     return resultImage;
+}
+
+bool RenderThread::isEmergencyStop() {
+    bool result;
+    emergencyStopMutex.lock();
+    result = emergencyStop;
+    emergencyStopMutex.unlock();
+
+    return result;
 }
 
 void RenderThread::hasToRedraw() {

@@ -110,21 +110,33 @@ void Controller::threadSetElapsed(int e)  {
     windowModel->setElapsedTime(e);
 }
 
-void Controller::threadSetsRenderQuality(int renderedCount) {
-    // How we re render images when camera doesn't move
-    int diff = rayTracer->durtiestQualityDivider-renderedCount;
-    if (diff <= 0) {
+void Controller::threadSetBestRenderingQuality() {
+    rayTracer->quality = RayTracer::Quality::OPTIMAL;
+    rayTracer->qualityDivider = 1;
+}
+
+void Controller::threadSetDurtiestRenderingQuality() {
+    rayTracer->quality = rayTracer->durtiestQuality;
+    rayTracer->qualityDivider = rayTracer->durtiestQualityDivider;
+}
+
+bool Controller::threadImproveRenderingQuality() {
+    if (rayTracer->quality == RayTracer::Quality::OPTIMAL) {
+        return true;
+    }
+    if (rayTracer->quality == RayTracer::Quality::BASIC) {
         rayTracer->quality = RayTracer::Quality::OPTIMAL;
         rayTracer->qualityDivider = 1;
     }
-    else if (diff == 1) {
-        rayTracer->quality = RayTracer::Quality::BASIC;
-        rayTracer->qualityDivider = 1;
+    // Logarithmic progression
+    else if (rayTracer->quality == RayTracer::Quality::ONE_OVER_X) {
+        rayTracer->qualityDivider /= 2;
+        if (rayTracer->qualityDivider <= 1) {
+            rayTracer->qualityDivider = 1;
+            rayTracer->quality = RayTracer::Quality::BASIC;
+        }
     }
-    else {
-        rayTracer->quality = RayTracer::Quality::ONE_OVER_X;
-        rayTracer->qualityDivider = diff;
-    }
+    return false;
 }
 
 void Controller::windowStopRendering() {
@@ -449,14 +461,16 @@ void Controller::windowSetRealTime(bool r) {
         renderThread->hasToRedraw();
         windowRenderRayImage();
     }
+    else {
+        ensureThreadStopped();
+    }
+
     windowModel->notifyAll();
 }
 
 void Controller::windowSetDurtiestQuality(int quality) {
     rayTracer->durtiestQuality = static_cast<RayTracer::Quality>(quality);
-    if (quality < 2) {
-        rayTracer->durtiestQualityDivider = 1;
-    }
+    rayTracer->durtiestQualityDivider = quality<2?1:5;
     rayTracer->notifyAll();
 }
 

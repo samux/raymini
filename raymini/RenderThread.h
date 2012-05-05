@@ -30,7 +30,7 @@ public:
     inline float getPercent() const {return percent;}
     inline void setPercent(float p) {percent = p;}
 
-    inline bool isEmergencyStop() const {return emergencyStop;}
+    bool isEmergencyStop();
 
     /** Notify thread that it has to render again */
     void hasToRedraw();
@@ -57,10 +57,11 @@ private:
 
     // Thread attributes
     bool emergencyStop;
+    QMutex emergencyStopMutex;
     QTime time;
     bool haveToRedraw;
+    bool optimalDone;
     QMutex hasToRedrawMutex;
-    int drawingIterations;
     QMutex reallyWorkingMutex;
     bool reallyWorking;
 

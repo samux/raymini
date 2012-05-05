@@ -89,12 +89,16 @@ public slots :
 
     void threadRenderRayImage();
     void threadSetElapsed(int);
-    // Doesn't notify
-    void threadSetsRenderQuality(int renderedCount);
 
     void renderProgressed(float);
 
     void quitProgram();
+
+public:
+    void threadSetBestRenderingQuality();
+    void threadSetDurtiestRenderingQuality();
+    // Return true iff quality was already optimal
+    bool threadImproveRenderingQuality();
 
 private:
     /** Stop thread if running */
