@@ -62,6 +62,22 @@ Window::~Window () {
 
 }
 
+Vec3Df Window::getObjectPos() const {
+    Vec3Df newPos;
+    for (int i=0; i<3; i++) {
+        newPos[i] = objectPosSpinBoxes[i]->value();
+    }
+    return newPos;
+}
+
+Vec3Df Window::getObjectMobile() const {
+    Vec3Df newMobile;
+    for (int i=0; i<3; i++) {
+        newMobile[i] = objectMobileSpinBoxes[i]->value();
+    }
+    return newMobile;
+}
+
 Vec3Df Window::getLightPos() const {
     Vec3Df newPos;
     for (int i=0; i<3; i++) {
@@ -103,6 +119,9 @@ void Window::updateFromScene() {
 
     // Objects
     updateObjects();
+
+    // Motion blur
+    updateMotionBlur();
 }
 
 void Window::updateFromRayTracer() {
@@ -111,27 +130,56 @@ void Window::updateFromRayTracer() {
     // Shadows
     shadowTypeList->setCurrentIndex(rayTracer->getShadowMode());
     shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
+    shadowSpinBox->disconnect();
+    shadowSpinBox->setValue(rayTracer->getShadowMode());
+    connect(shadowSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetShadowNbRays(int)));
 
     // Anti aliasing
     AANbRaySpinBox->setVisible(rayTracer->typeAntiAliasing != AntiAliasing::NONE);
+    AANbRaySpinBox->disconnect();
+    AANbRaySpinBox->setValue(rayTracer->nbRayAmbientOcclusion);
+    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
 
     // Ambient occlusion
     bool isAO = rayTracer->nbRayAmbientOcclusion != 0;
     AORadiusSpinBox->setVisible(isAO);
     AOMaxAngleSpinBox->setVisible(isAO);
+    AORadiusSpinBox->disconnect();
+    AORadiusSpinBox->setValue(rayTracer->radiusAmbientOcclusion);
+    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
+    AOMaxAngleSpinBox->disconnect();
+    AOMaxAngleSpinBox->setValue(rayTracer->maxAngleAmbientOcclusion);
+    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
 
     // Focus
     updateFocus();
 
     // Path tracing
     bool isPT = rayTracer->depthPathTracing != 0;
+    PTDepthSpinBox->disconnect();
+    PTDepthSpinBox->setValue(rayTracer->depthPathTracing);
+    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
     PTNbRaySpinBox->setVisible(isPT);
     PTMaxAngleSpinBox->setVisible(isPT);
     PTOnlyCheckBox->setVisible(isPT);
     PBGICheckBox->setVisible(!isPT);
+    if (isPT) {
+        PTNbRaySpinBox->disconnect();
+        PTNbRaySpinBox->setValue(rayTracer->nbRayPathTracing);
+        connect(PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
+        PTMaxAngleSpinBox->disconnect();
+        PTMaxAngleSpinBox->setValue(rayTracer->maxAnglePathTracing*360.0/(2.0*M_PI));
+        connect(PTMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetMaxAnglePathTracing(int)));
+        PTIntensitySpinBox->disconnect();
+        PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
+        connect(PTIntensitySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetIntensityPathTracing(int)));
+    }
 
     // Real time
     updateRealTime();
+
+    // Motion blur
+    updateMotionBlur();
 }
 
 void Window::updateFromWindowModel() {
@@ -176,11 +224,19 @@ void Window::updateLights() {
         float intensity = l->getIntensity();
         float radius = l->getRadius();
         for (int i=0; i<3; i++) {
+            lightPosSpinBoxes[i]->disconnect();
             lightPosSpinBoxes[i]->setValue(pos[i]);
+            connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
+            lightColorSpinBoxes[i]->disconnect();
             lightColorSpinBoxes[i]->setValue(color[i]);
+            connect(lightColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightColor()));
         }
+        lightIntensitySpinBox->disconnect();
         lightIntensitySpinBox->setValue(intensity);
+        connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
+        lightRadiusSpinBox->disconnect();
         lightRadiusSpinBox->setValue(radius);
+        connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
     }
 }
 
@@ -195,8 +251,12 @@ void Window::updateFocus() {
     focusApertureSpinBox->setVisible(isFocus);
     bool isFocusMode = windowModel->isFocusMode();
     changeFocusFixingCheckBox->setChecked(!isFocusMode);
+    focusNbRaysSpinBox->disconnect();
     focusNbRaysSpinBox->setValue(rayTracer->nbRayFocus);
+    connect(focusNbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetFocusNbRays(int)));
+    focusApertureSpinBox->disconnect();
     focusApertureSpinBox->setValue(rayTracer->apertureFocus);
+    connect(focusApertureSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetFocusAperture(double)));
 }
 
 void Window::updateObjects() {
@@ -207,9 +267,25 @@ void Window::updateObjects() {
     objectsList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
     objectEnableCheckBox->setVisible(isSelected);
+    objectMobileLabel->setVisible(isSelected);
+    for (unsigned int i=0; i<3; i++) {
+        objectPosSpinBoxes[i]->setVisible(isSelected);
+        objectMobileSpinBoxes[i]->setVisible(isSelected);
+    }
+    objectMaterialsList->setVisible(isSelected);
     if (isSelected) {
-        bool isEnabled = scene->getObjects()[index]->isEnabled();
+        const Object *object = scene->getObjects()[index];
+        bool isEnabled = object->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
+        for (unsigned int i=0; i<3; i++) {
+            objectPosSpinBoxes[i]->disconnect();
+            objectPosSpinBoxes[i]->setValue(object->getTrans()[i]);
+            connect(objectPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectPos()));
+            objectMobileSpinBoxes[i]->disconnect();
+            objectMobileSpinBoxes[i]->setValue(object->getMobile()[i]);
+            connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectMobile()));
+        }
+        objectMaterialsList->setCurrentIndex(scene->getObjectMaterialIndex(index));
     }
 }
 
@@ -241,7 +317,9 @@ void Window::updateRealTime() {
         int quality = rayTracer->durtiestQuality;
         durtiestQualityComboBox->setCurrentIndex(quality);
         qualityDividerSpinBox->setVisible(quality == RayTracer::Quality::ONE_OVER_X);
+        qualityDividerSpinBox->disconnect();
         qualityDividerSpinBox->setValue(rayTracer->durtiestQualityDivider);
+        connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
     }
     else {
         qualityDividerSpinBox->setVisible(false);
@@ -278,9 +356,17 @@ void Window::updateStatus() {
     }
 }
 
-void Window::initControlWidget () {
+void Window::updateMotionBlur() {
     Scene *scene = controller->getScene();
     RayTracer *rayTracer = controller->getRayTracer();
+    mBlurGroupBox->setVisible(scene->hasMobile());
+    mBlurNbImagesSpinBox->disconnect();
+    mBlurNbImagesSpinBox->setValue(rayTracer->nbPictures);
+    connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+}
+
+void Window::initControlWidget () {
+    Scene *scene = controller->getScene();
 
     // Control widget
     controlWidget = new QGroupBox ();
@@ -331,7 +417,6 @@ void Window::initControlWidget () {
     AANbRaySpinBox->setMinimum(4);
     AANbRaySpinBox->setMaximum(10);
     AANbRaySpinBox->setVisible(false);
-    AANbRaySpinBox->setValue(rayTracer->nbRayAntiAliasing);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
     AALayout->addWidget(AANbRaySpinBox);
 
@@ -341,11 +426,10 @@ void Window::initControlWidget () {
     QGroupBox * AOGroupBox = new QGroupBox ("Ambient Occlusion", rayGroupBox);
     QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
 
-    QSpinBox *AONbRaysSpinBox = new QSpinBox(AOGroupBox);
+    AONbRaysSpinBox = new QSpinBox(AOGroupBox);
     AONbRaysSpinBox->setSuffix(" rays");
     AONbRaysSpinBox->setMinimum(0);
     AONbRaysSpinBox->setMaximum(1000);
-    AONbRaysSpinBox->setValue(rayTracer->nbRayAmbientOcclusion);
     AOLayout->addWidget(AONbRaysSpinBox);
     connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowChangeAmbientOcclusionNbRays(int)));
 
@@ -355,7 +439,6 @@ void Window::initControlWidget () {
     AOMaxAngleSpinBox->setMinimum (0);
     AOMaxAngleSpinBox->setMaximum (180);
     AOMaxAngleSpinBox->setVisible(false);
-    AOMaxAngleSpinBox->setValue(rayTracer->maxAngleAmbientOcclusion*360.0/(2.0*M_PI));
     connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
     AOLayout->addWidget(AOMaxAngleSpinBox);
 
@@ -363,7 +446,6 @@ void Window::initControlWidget () {
     AORadiusSpinBox->setPrefix("Radius: ");
     AORadiusSpinBox->setMinimum(0);
     AORadiusSpinBox->setSingleStep(0.1);
-    AORadiusSpinBox->setValue(rayTracer->radiusAmbientOcclusion);
     AORadiusSpinBox->setVisible(false);
     connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
@@ -390,7 +472,6 @@ void Window::initControlWidget () {
     shadowSpinBox->setMinimum (2);
     shadowSpinBox->setMaximum (1000);
     shadowSpinBox->setVisible (false);
-    shadowSpinBox->setValue(rayTracer->getShadowMode());
     connect (shadowSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetShadowNbRays (int)));
     shadowsLayout->addWidget (shadowSpinBox);
 
@@ -400,11 +481,10 @@ void Window::initControlWidget () {
     QGroupBox * PTGroupBox = new QGroupBox ("Path tracing", rayGroupBox);
     QVBoxLayout * PTLayout = new QVBoxLayout (PTGroupBox);
 
-    QSpinBox *PTDepthSpinBox = new QSpinBox(PTGroupBox);
+    PTDepthSpinBox = new QSpinBox(PTGroupBox);
     PTDepthSpinBox->setPrefix ("Depth: ");
     PTDepthSpinBox->setMinimum (0);
     PTDepthSpinBox->setMaximum (5);
-    PTDepthSpinBox->setValue(rayTracer->depthPathTracing);
     connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
     PTLayout->addWidget (PTDepthSpinBox);
 
@@ -413,7 +493,6 @@ void Window::initControlWidget () {
     PTNbRaySpinBox->setMinimum (1);
     PTNbRaySpinBox->setMaximum (1000);
     PTNbRaySpinBox->setVisible(false);
-    PTNbRaySpinBox->setValue(rayTracer->nbRayPathTracing);
     connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
 
@@ -423,15 +502,13 @@ void Window::initControlWidget () {
     PTMaxAngleSpinBox->setMinimum (0);
     PTMaxAngleSpinBox->setMaximum (180);
     PTMaxAngleSpinBox->setVisible(false);
-    PTMaxAngleSpinBox->setValue(rayTracer->maxAnglePathTracing*360.0/(2.0*M_PI));
     connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
 
-    QSpinBox * PTIntensitySpinBox = new QSpinBox(PTGroupBox);
+    PTIntensitySpinBox = new QSpinBox(PTGroupBox);
     PTIntensitySpinBox->setPrefix ("Intensity: ");
     PTIntensitySpinBox->setMinimum (1);
     PTIntensitySpinBox->setMaximum (1000);
-    PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
     connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetIntensityPathTracing (int)));
     PTLayout->addWidget (PTIntensitySpinBox);
 
@@ -482,19 +559,17 @@ void Window::initControlWidget () {
     rayLayout->addWidget(focalGroupBox);
 
     // RayGroup: Motion Blur
-    if(scene->hasMobile()) {
-        QGroupBox * mBlurGroupBox = new QGroupBox ("Motion blur", rayGroupBox);
-        QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
+    mBlurGroupBox = new QGroupBox ("Motion blur", rayGroupBox);
+    QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
 
-        QSpinBox * mBlurNbImagesSpinBox = new QSpinBox(PTGroupBox);
-        mBlurNbImagesSpinBox->setSuffix (" images");
-        mBlurNbImagesSpinBox->setMinimum (1);
-        mBlurNbImagesSpinBox->setMaximum (100);
-        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
-        mBlurLayout->addWidget (mBlurNbImagesSpinBox);
+    mBlurNbImagesSpinBox = new QSpinBox(PTGroupBox);
+    mBlurNbImagesSpinBox->setSuffix (" images");
+    mBlurNbImagesSpinBox->setMinimum (1);
+    mBlurNbImagesSpinBox->setMaximum (100);
+    connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+    mBlurLayout->addWidget (mBlurNbImagesSpinBox);
 
-        rayLayout->addWidget (mBlurGroupBox);
-    }
+    rayLayout->addWidget (mBlurGroupBox);
 
 
     layout->addWidget (rayGroupBox, 0, 1);
@@ -522,6 +597,42 @@ void Window::initControlWidget () {
     objectEnableCheckBox->setVisible(false);
     connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
     objectsLayout->addWidget(objectEnableCheckBox);
+
+    QHBoxLayout *objectPosLayout = new QHBoxLayout;
+    QString objectPosNames[3] = {"X: ", "Y: ", "Z: "};
+    for (unsigned int i=0; i<3; i++) {
+        objectPosSpinBoxes[i] = new QDoubleSpinBox(objectsGroupBox);
+        objectPosSpinBoxes[i]->setMinimum(-100);
+        objectPosSpinBoxes[i]->setMaximum(100);
+        objectPosSpinBoxes[i]->setSingleStep(0.01);
+        objectPosSpinBoxes[i]->setPrefix(objectPosNames[i]);
+        connect(objectPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectPos()));
+        objectPosLayout->addWidget(objectPosSpinBoxes[i]);
+    }
+    objectsLayout->addLayout(objectPosLayout);
+
+    objectMobileLabel = new QLabel("Movement: (nulify all to immobilise)", objectsGroupBox);
+    objectsLayout->addWidget(objectMobileLabel);
+
+    QHBoxLayout *objectMobileLayout = new QHBoxLayout;
+    QString objectMobileNames[3] = {"X: ", "Y: ", "Z: "};
+    for (unsigned int i=0; i<3; i++) {
+        objectMobileSpinBoxes[i] = new QDoubleSpinBox(objectsGroupBox);
+        objectMobileSpinBoxes[i]->setMinimum(-100);
+        objectMobileSpinBoxes[i]->setMaximum(100);
+        objectMobileSpinBoxes[i]->setSingleStep(0.01);
+        objectMobileSpinBoxes[i]->setPrefix(objectMobileNames[i]);
+        connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectMobile()));
+        objectMobileLayout->addWidget(objectMobileSpinBoxes[i]);
+    }
+    objectsLayout->addLayout(objectMobileLayout);
+
+    objectMaterialsList = new QComboBox(objectsGroupBox);
+    for (const Material *mat : scene->getMaterials()) {
+        objectMaterialsList->addItem(QString(mat->getName().c_str()));
+    }
+    connect(objectMaterialsList, SIGNAL(activated(int)), controller, SLOT(windowSetObjectMaterial(int)));
+    objectsLayout->addWidget(objectMaterialsList);
 
     sceneLayout->addWidget(objectsGroupBox);
 

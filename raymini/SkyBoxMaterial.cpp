@@ -88,7 +88,7 @@ Vec3Df SkyBoxMaterial::getColor(CubeSide side, int u, int v) const{
 }
 
 SkyBoxMaterial::SkyBoxMaterial(Controller *c, const char* textureFileName):
-    Material(c, 1.0f, 0.0f, Vec3Df(0.0f, 0.0f, 1.0f)) // Blue for OpenGL
+    Material(c, "Skybox", 1.0f, 0.0f, Vec3Df(0.0f, 0.0f, 1.0f)) // Blue for OpenGL
 {
     texture.loadPPM(textureFileName);
 }

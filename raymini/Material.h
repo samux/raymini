@@ -22,16 +22,16 @@ class Object;
 
 class Material {
 public:
-    inline Material(Controller *c) : controller(c),
+    inline Material(Controller *c, std::string name) : controller(c),
                                      diffuse (1.f), specular (1.f), color (0.7f, 0.7f, 1.f),
-                                     noise([](const Vertex &){ return 1.f; }), glossyRatio(0) {}
-    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color, float glossyRatio=0, float alpha = 1.5f)
+                                     noise([](const Vertex &){ return 1.f; }), glossyRatio(0), name(name) {}
+    inline Material(Controller *c, std::string name, float diffuse, float specular, const Vec3Df & color, float glossyRatio=0, float alpha = 1.5f)
         : controller(c), diffuse (diffuse), specular (specular), alpha(alpha), color (color),
-          noise([](const Vertex &){ return 1.f; }), glossyRatio(glossyRatio) {}
-    inline Material(Controller *c, float diffuse, float specular, const Vec3Df & color,
+          noise([](const Vertex &){ return 1.f; }), glossyRatio(glossyRatio), name(name) {}
+    inline Material(Controller *c, std::string name, float diffuse, float specular, const Vec3Df & color,
                     float (*noise)(const Vertex &), float glossyRatio=0, float alpha = 1.5f)
         : controller(c), diffuse (diffuse), specular (specular), alpha(alpha), color (color),
-          noise(noise), glossyRatio(glossyRatio) {}
+          noise(noise), glossyRatio(glossyRatio), name(name) {}
 
     virtual ~Material () {}
 
@@ -49,6 +49,8 @@ public:
     inline float getGlossyRatio() const {return glossyRatio;}
     inline bool isGlossy() const {return glossyRatio!=0;}
 
+    inline std::string getName() const {return name;}
+
 protected:
     Controller *controller;
 
@@ -58,17 +60,18 @@ protected:
     Vec3Df color;
     float (*noise)(const Vertex &);
     float glossyRatio;
+    std::string name;
 };
 
 class Mirror : public Material {
 public:
-    Mirror(Controller *c) : Material(c, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f, 30){}
+    Mirror(Controller *c, std::string name) : Material(c, name, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f, 30){}
 };
 
 class Glass : public Material {
 public:
-    Glass(Controller *c, float coeff) :
-        Material(c, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
+    Glass(Controller *c, std::string name, float coeff) :
+        Material(c, name, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
                              const std::vector<Light> & lights, Brdf::Type type) const;

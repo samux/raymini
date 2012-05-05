@@ -75,6 +75,9 @@ public slots :
     void windowSetLightColor();
     void windowSelectObject(int);
     void windowEnableObject(bool);
+    void windowSetObjectPos();
+    void windowSetObjectMobile();
+    void windowSetObjectMaterial(int);
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
     void windowSetQualityDivider(int);

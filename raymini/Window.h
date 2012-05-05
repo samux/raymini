@@ -38,6 +38,9 @@ public:
     Vec3Df getLightPos() const;
     Vec3Df getLightColor() const;
 
+    Vec3Df getObjectPos() const;
+    Vec3Df getObjectMobile() const;
+
 private :
     Controller *controller;
 
@@ -59,12 +62,17 @@ private :
     void updateProgressBar();
     // Updated by WindowModel
     void updateStatus();
+    // Updated by Scene and RayTracer
+    void updateMotionBlur();
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;
     QString currentDirectory;
 
     // Needed for further actions
+
+    QGroupBox *mBlurGroupBox;
+    QSpinBox * mBlurNbImagesSpinBox;
 
     QPushButton *stopRenderButton;
     QPushButton *renderButton;
@@ -77,19 +85,32 @@ private :
     QComboBox *shadowTypeList;
     QSpinBox *shadowSpinBox;
 
+    QSpinBox *PTDepthSpinBox;
     QSpinBox *PTNbRaySpinBox;
     QSpinBox *PTMaxAngleSpinBox;
     QCheckBox *PTOnlyCheckBox;
     QCheckBox *PBGICheckBox;
+    QSpinBox * PTIntensitySpinBox;
 
     QSpinBox *AANbRaySpinBox;
 
+    QSpinBox *AONbRaysSpinBox;
     QSpinBox *AOMaxAngleSpinBox;
     QDoubleSpinBox *AORadiusSpinBox;
     QCheckBox *AOOnlyCheckBox;
 
     QComboBox *objectsList;
     QCheckBox *objectEnableCheckBox;
+    QDoubleSpinBox *objectPosSpinBoxes[3];
+    QLabel *objectMobileLabel;
+    QDoubleSpinBox *objectMobileSpinBoxes[3];
+    QComboBox *objectMaterialsList;
+
+    QComboBox *materialsList;
+    QDoubleSpinBox *materialDiffuseSpinBox;
+    QDoubleSpinBox *materialSpecularSpinBox;
+    QDoubleSpinBox *materialColorSpinBoxes[3];
+    QDoubleSpinBox *materialGlossyRatio;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

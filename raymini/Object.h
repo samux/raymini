@@ -44,11 +44,13 @@ public:
 
     inline bool isMobile() const {return mobile!=Vec3Df(); }
     inline void setMobile(const Vec3Df & mobile) { this->mobile = mobile; }
+    inline Vec3Df getMobile() const {return mobile;}
 
     inline const Mesh & getMesh () const { return mesh; }
     inline Mesh & getMesh () { return mesh; }
 
     inline const Material & getMaterial () const { return *mat; }
+    inline void setMaterial(const Material *material) {mat = material;}
 
     inline const KDtree & getKDtree () const { return *tree; }
 

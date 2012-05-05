@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include "Scene.h"
 
@@ -35,21 +36,21 @@ void printUsage(char * name) {
 }
 
 Scene::Scene(Controller *c, int argc, char **argv) :
-    red      ({c, 1.f, .5f, {1.f, 0.f, 0.f}}),
-    green    ({c, 1.f, .5f, {0.f, 1.f, 0.f}}),
-    blue     ({c, 1.f, .5f, {.0f, 0.f, 1.f}}),
-    white    ({c, 1.f, .5f, {1.f, 1.f, 1.f}}),
-    black    ({c, 1.f, .5f, {0.f, 0.f, 0.f}}),
-    glossyMat({c, 1.f, 1.f, {1.f, 0.f, 0.f}, .1f}),
-    groundMat({c, 1.f, 0.f, {.2f, .6f, .2f},
+    red      ({c, "Red", 1.f, .5f, {1.f, 0.f, 0.f}}),
+    green    ({c, "Green", 1.f, .5f, {0.f, 1.f, 0.f}}),
+    blue     ({c, "Blue", 1.f, .5f, {.0f, 0.f, 1.f}}),
+    white    ({c, "White", 1.f, .5f, {1.f, 1.f, 1.f}}),
+    black    ({c, "Black", 1.f, .5f, {0.f, 0.f, 0.f}}),
+    glossyMat({c, "Glossy", 1.f, 1.f, {1.f, 0.f, 0.f}, .1f}),
+    groundMat({c, "Ground", 1.f, 0.f, {.2f, .6f, .2f},
                 [](const Vertex & v) -> float {
                     return Perlin(0.5f, 4, 10)(v.getPos());
                 }}),
-    rhinoMat ({c, 1.f, 0.2f, {.6f, .6f, .7f},
+    rhinoMat ({c, "Rhino", 1.f, 0.2f, {.6f, .6f, .7f},
                 [](const Vertex & v) -> float {
                     return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
                 }}),
-    mirrorMat({c}),
+    mirrorMat({c, "Mirror"}),
     skyBoxMaterial({c, "textures/skybox.ppm"}),
     controller(c) {
 
@@ -59,7 +60,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     if(!id.compare("room")) buildRoom();
     else if(!id.compare("rs")) buildRoom(&red);
     else if(!id.compare("rsm")) buildRoom(&mirrorMat);
-    else if(!id.compare("rsglas")) buildRoom(new Glass(c, 1.1f));
+    else if(!id.compare("rsglas")) buildRoom(new Glass(c, "Glass", 1.1f));
     else if(!id.compare("rsglos")) buildRoom(&glossyMat);
     else if(!id.compare("lights")) buildMultiLights();
     else if(!id.compare("meshs")) buildMultiMeshs();
@@ -67,7 +68,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     else if(!id.compare("pool")) buildPool();
     else if(!id.compare("mg")) buildMirrorGlass();
     else if(!id.compare("mesh"))
-        buildMesh(meshPath, new Material(c, 1.f, 1.f, Vec3Df (1.f, .6f, .2f)));
+        buildMesh(meshPath, new Material(c, "Mesh", 1.f, 1.f, Vec3Df (1.f, .6f, .2f)));
     else printUsage(argv[0]);
 
     updateBoundingBox ();
@@ -101,20 +102,26 @@ void Scene::buildRoom(Material *sphereMat) {
 
     groundMesh.rotate({0,1,0}, M_PI);
     objects.push_back(new Object(groundMesh, &white, "Ceiling", {0, 0, 4}));
+    materials.push_back(&white);
 
     groundMesh.rotate({0,1,0}, M_PI/2);
     objects.push_back(new Object(groundMesh, &red, "Right Wall", {2, 0, 2}));
+    materials.push_back(&red);
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &green, "Back Wall", {0, 2, 2}));
+    materials.push_back(&green);
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &blue, "Left Wall", {-2, 0, 2}));
+    materials.push_back(&blue);
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &black, "Front Wall", {0, -2, 2}));
+    materials.push_back(&black);
 
     if(sphereMat) {
+        materials.push_back(sphereMat);
         Mesh sphereMesh;
         sphereMesh.loadOFF("models/sphere.off");
         auto sphere = new Object(sphereMesh, sphereMat, "Sphere", {0, 0, 1});
@@ -139,18 +146,21 @@ void Scene::buildMesh(const std::string & path, Material *mat) {
 
     lights.push_back(new Light({1.f, 1.f, 1.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, 1.f));
+    materials.push_back(mat);
 }
 
 void Scene::buildMultiLights() {
-    auto ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
     objects.push_back(new Object(groundMesh, &white, "Ground"));
+    materials.push_back(&white);
 
     Mesh ramMesh;
     ramMesh.loadOFF("models/ram.off");
     objects.push_back(new Object(ramMesh, ramMat, "Ram"));
+    materials.push_back(ramMat);
 
     lights.push_back(new Light({0.f, -3.f, 3.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 0.f, 0.f}, 1.f));
@@ -161,31 +171,37 @@ void Scene::buildMultiLights() {
 }
 
 void Scene::buildMultiMeshs() {
-    auto ramMat = new Material(controller, 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
-    auto gargMat = new Material(controller, 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
+    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, Vec3Df (1.f, .6f, .2f));
+    auto gargMat = new Material(controller, "Gargoyle", 0.7f, 0.4f, Vec3Df (0.5f, 0.8f, 0.5f));
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
     objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
+    materials.push_back(&groundMat);
 
     Mesh wallMesh;
     wallMesh.loadOFF("models/wall.off");
     objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-1.9f, 0.f, 1.5f}));
+    materials.push_back(&mirrorMat);
 
     wallMesh.rotate({0.f, 0.f, 1.f}, 3*M_PI/2);
     objects.push_back(new Object(wallMesh, &red, "Back wall", {0.f, 1.9f, 1.5}));
+    materials.push_back(&red);
 
     Mesh ramMesh;
     ramMesh.loadOFF("models/ram.off");
     objects.push_back(new Object(ramMesh, ramMat, "Ram", {-1.f, 0.f, 0.f}, {0,-.5,0}));
+    materials.push_back(ramMat);
 
     Mesh gargMesh;
     gargMesh.loadOFF("models/gargoyle.off");
     objects.push_back(new Object(gargMesh, gargMat, "Gargoyle", {-1.f, 1.0f, 0.f}));
+    materials.push_back(gargMat);
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF("models/rhino.off");
     objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
+    materials.push_back(&rhinoMat);
 
     lights.push_back(new Light({2.f, -3.f, 5.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, 1.f));
@@ -196,25 +212,29 @@ void Scene::buildOutdor() {
     groundMesh.loadOFF("models/ground.off");
     groundMesh.scale(5);
     objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
+    materials.push_back(&groundMat);
 
     Mesh wallMesh;
     wallMesh.loadOFF("models/wall.off");
     objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-2.f, 0.f, 1.5f}));
+    materials.push_back(&mirrorMat);
 
     Mesh rhinoMesh;
     rhinoMesh.loadOFF("models/rhino.off");
     objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
+    materials.push_back(&rhinoMat);
 
     Mesh skyBoxMesh;
     skyBoxMesh.loadOFF("models/skybox.off");
     objects.push_back(new Object(skyBoxMesh, &skyBoxMaterial, "Skybox"));
+    materials.push_back(&skyBoxMaterial);
 
     lights.push_back(new Light({9.f, 9.f, 9.f}, 5.f, {1.f, 1.f, 1.f},
                                {1.f, 1.f, .4f}, 1.f));
 }
 
 void Scene::buildPool() {
-    auto pool = new Material(controller, 1.f, 0.f, {0.f, .3f, .1f},
+    auto pool = new Material(controller, "Pool", 1.f, 0.f, {0.f, .3f, .1f},
                              [](const Vertex & v) -> float {
                                  return min(1.f, 0.4f+Perlin(0.5f, 4, 10)(v.getPos()));
                              });
@@ -237,11 +257,15 @@ void Scene::buildPool() {
     groundMesh.scale(height*15);
 
     objects.push_back(new Object(groundMesh, pool, "Pool"));
+    materials.push_back(pool);
 
     for(int i = 0 ; i < 5 ; i++)
         for(int j = 0 ; j <= i ; j++) {
-            auto ball = new Material(controller, 1.f, 1.f, color[(i*(i+1))/2+j], .1f, 50);
-            objects.push_back(new Object(sphereMesh, ball, "Ball", {-i*delta, (2*j-i)*height, height}));
+            stringstream numberConvert;
+            numberConvert<<j;
+            auto ball = new Material(controller, "Ball #"+numberConvert.str(), 1.f, 1.f, color[(i*(i+1))/2+j], .1f, 50);
+            materials.push_back(ball);
+            objects.push_back(new Object(sphereMesh, ball, "Ball #"+numberConvert.str(), {-i*delta, (2*j-i)*height, height}));
         }
 
     lights.push_back(new Light({5.f, 5.f, 20.f}, 0.01, {0.f, 0.f, 1.f},
@@ -249,8 +273,8 @@ void Scene::buildPool() {
 }
 
 void Scene::buildMirrorGlass() {
-    auto groundMat = new Material(controller, 1.f, 1.f, {1.f, 1.f, 1.f}, .1f, 30);
-    auto wallMat = new Material(controller, 1.f, .5f, {.3f, .6f, .6f},
+    auto groundMat = new Material(controller, "Ground", 1.f, 1.f, {1.f, 1.f, 1.f}, .1f, 30);
+    auto wallMat = new Material(controller, "Wall", 1.f, .5f, {.3f, .6f, .6f},
                                 [](const Vertex & v) -> float {
                                     float perturbation = 0.05; // <1
                                     float f0 = 4;
@@ -258,19 +282,21 @@ void Scene::buildMirrorGlass() {
                                     double valeur = (1 - cos(lines * 2 * M_PI * ((v.getPos()[0]+v.getPos()[1]) / f0 + perturbation * Perlin(0.5f, 7, f0)(v.getPos())))) / 2;
                                     return valeur;
                                 });
-    auto ramMat = new Material(controller, 1.f, 0.3f, Vec3Df (.7f, .4f, .2f),
+    auto ramMat = new Material(controller, "Ram", 1.f, 0.3f, Vec3Df (.7f, .4f, .2f),
                                [](const Vertex & v) -> float {
                                    return min(1.f, .3f+Perlin(0.5f, 4, 15)(v.getPos()));
                                });
-    auto glassMat = new Glass(controller, 1.4f);
+    auto glassMat = new Glass(controller, "Glass", 1.4f);
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
 
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
+    materials.push_back(groundMat);
 
     groundMesh.rotate({0,1,0}, M_PI);
     objects.push_back(new Object(groundMesh, &white, "Ceiling", {0, 0, 4}));
+    materials.push_back(&white);
 
     groundMesh.rotate({0,1,0}, M_PI/2);
     objects.push_back(new Object(groundMesh, wallMat, "Right Wall", {2, 0, 2}));
@@ -280,9 +306,11 @@ void Scene::buildMirrorGlass() {
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, wallMat, "Left Wall", {-2, 0, 2}));
+    materials.push_back(wallMat);
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, &mirrorMat, "Mirror Wall", {0, -2, 2}));
+    materials.push_back(&mirrorMat);
 
     Mesh sphereMesh;
     sphereMesh.loadOFF("models/sphere.off");
@@ -292,6 +320,7 @@ void Scene::buildMirrorGlass() {
     Mesh ramMesh;
     ramMesh.loadOFF("models/ram.off");
     objects.push_back(new Object(ramMesh, ramMat, "Ram", {0.f, 0.f, .85f}));
+    materials.push_back(ramMat);
 
     sphereMesh.scale(0.5);
     objects.push_back(new Object(sphereMesh, &mirrorMat, "Mirror1", {-1 , 2, 1}));
@@ -300,9 +329,23 @@ void Scene::buildMirrorGlass() {
 
 
     auto glass = new Object(sphereMesh, glassMat, "glass", {1 , 1, 3});
+    // TODO can generate glitches if another object receives this material
     glassMat->setObject(glass);
     objects.push_back(glass);
+    materials.push_back(glassMat);
 
     lights.push_back(new Light({-1.3f, -2.9f, 3.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, .7f));
+}
+
+unsigned int Scene::getObjectMaterialIndex(unsigned int objectIndex) const {
+    const Object *object = objects[objectIndex];
+    unsigned int result = 0;
+    for (const Material *material : materials) {
+        if (material == &object->getMaterial()) {
+            return result;
+        }
+        result++;
+    }
+    return -1;
 }

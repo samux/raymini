@@ -381,6 +381,42 @@ void Controller::windowEnableObject(bool enabled) {
     scene->notifyAll();
 }
 
+void Controller::windowSetObjectPos() {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->setTrans(window->getObjectPos());
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetObjectMobile() {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->setMobile(window->getObjectMobile());
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetObjectMaterial(int index) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->setMaterial(scene->getMaterials()[index]);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
 void Controller::windowSelectLight(int l) {
     windowModel->setSelectedLightIndex(l-1);
     windowModel->notifyAll();

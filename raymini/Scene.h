@@ -30,6 +30,8 @@ public:
     inline std::vector<Light *> & getLights () { return lights; }
     inline const std::vector<Light *> & getLights () const { return lights; }
 
+    inline std::vector<Material *> &getMaterials() {return materials;}
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -53,11 +55,15 @@ public:
     Scene(Controller *, int argc, char **argv);
     virtual ~Scene ();
 
+    /** Return the index of the material of an object, -1 if not found */
+    unsigned int getObjectMaterialIndex(unsigned int objectIndex) const;
+
 private:
     Material red, green, blue, white, black;
     Material glossyMat, groundMat, rhinoMat;
     Mirror mirrorMat;
     SkyBoxMaterial skyBoxMaterial;
+    std::vector<Material *> materials;
 
     Controller *controller;
 
