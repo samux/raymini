@@ -78,6 +78,11 @@ public slots :
     void windowSetObjectPos();
     void windowSetObjectMobile();
     void windowSetObjectMaterial(int);
+    void windowSelectMaterial(int);
+    void windowSetMaterialDiffuse(double);
+    void windowSetMaterialSpecular(double);
+    void windowSetMaterialColor();
+    void windowSetMaterialGlossyRatio(double);
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
     void windowSetQualityDivider(int);

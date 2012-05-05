@@ -360,6 +360,59 @@ void Controller::windowSetOnlyPT(bool b) {
     rayTracer->notifyAll();
 }
 
+void Controller::windowSelectMaterial(int m) {
+    windowModel->setSelectedMaterialIndex(m-1);
+    windowModel->notifyAll();
+}
+
+void Controller::windowSetMaterialDiffuse(double d) {
+    ensureThreadStopped();
+    int m = windowModel->getSelectedMaterialIndex();
+    if (m == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[m]->setDiffuse(d);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetMaterialSpecular(double s) {
+    ensureThreadStopped();
+    int m = windowModel->getSelectedMaterialIndex();
+    if (m == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[m]->setSpecular(s);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetMaterialColor() {
+    ensureThreadStopped();
+    int m = windowModel->getSelectedMaterialIndex();
+    if (m == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[m]->setColor(window->getMaterialColor());
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetMaterialGlossyRatio(double g) {
+    ensureThreadStopped();
+    int m = windowModel->getSelectedMaterialIndex();
+    if (m == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[m]->setGlossyRatio(g);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
 void Controller::windowSelectObject(int o) {
     windowModel->setSelectedObjectIndex(o-1);
     windowModel->notifyAll();
@@ -369,7 +422,7 @@ void Controller::windowEnableObject(bool enabled) {
     ensureThreadStopped();
     int o = windowModel->getSelectedObjectIndex();
     if (o == -1) {
-        cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
         return;
     }
     if (!windowModel->isRealTime()) {
@@ -389,6 +442,7 @@ void Controller::windowSetObjectPos() {
         return;
     }
     scene->getObjects()[o]->setTrans(window->getObjectPos());
+    scene->updateBoundingBox();
     renderThread->hasToRedraw();
     scene->notifyAll();
 }

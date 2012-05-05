@@ -94,6 +94,14 @@ Vec3Df Window::getLightColor() const {
     return newColor;
 }
 
+Vec3Df Window::getMaterialColor() const {
+    Vec3Df newColor;
+    for (int i=0; i<3; i++) {
+        newColor[i] = materialColorSpinBoxes[i]->value();
+    }
+    return newColor;
+}
+
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
         updateFromScene();
@@ -119,6 +127,9 @@ void Window::updateFromScene() {
 
     // Objects
     updateObjects();
+
+    // Materials
+    updateMaterials();
 
     // Motion blur
     updateMotionBlur();
@@ -191,6 +202,9 @@ void Window::updateFromWindowModel() {
 
     // Objects
     updateObjects();
+
+    // Materials
+    updateMaterials();
 
     // Real time
     updateRealTime();
@@ -286,6 +300,39 @@ void Window::updateObjects() {
             connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectMobile()));
         }
         objectMaterialsList->setCurrentIndex(scene->getObjectMaterialIndex(index));
+    }
+}
+
+void Window::updateMaterials() {
+    Scene *scene = controller->getScene();
+    WindowModel *windowModel = controller->getWindowModel();
+
+    int index = windowModel->getSelectedMaterialIndex();
+    materialsList->setCurrentIndex(index+1);
+    bool isSelected = index != -1;
+    materialDiffuseSpinBox->setVisible(isSelected);
+    materialSpecularSpinBox->setVisible(isSelected);
+    for (unsigned int i=0; i<3; i++) {
+        materialColorSpinBoxes[i]->setVisible(isSelected);
+    }
+    materialGlossyRatio->setVisible(isSelected);
+
+    if (isSelected) {
+        const Material *material = scene->getMaterials()[index];
+        materialDiffuseSpinBox->disconnect();
+        materialDiffuseSpinBox->setValue(material->getDiffuse());
+        connect(materialDiffuseSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialDiffuse(double)));
+        materialSpecularSpinBox->disconnect();
+        materialSpecularSpinBox->setValue(material->getSpecular());
+        connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
+        for (unsigned int i=0; i<3; i++) {
+            materialColorSpinBoxes[i]->disconnect();
+            materialColorSpinBoxes[i]->setValue(material->getColor()[i]);
+            connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
+        }
+        materialGlossyRatio->disconnect();
+        materialGlossyRatio->setValue(material->getGlossyRatio());
+        connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
     }
 }
 
@@ -416,8 +463,6 @@ void Window::initControlWidget () {
     AANbRaySpinBox->setSuffix(" rays");
     AANbRaySpinBox->setMinimum(4);
     AANbRaySpinBox->setMaximum(10);
-    AANbRaySpinBox->setVisible(false);
-    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
     AALayout->addWidget(AANbRaySpinBox);
 
     rayLayout->addWidget(AAGroupBox);
@@ -431,23 +476,18 @@ void Window::initControlWidget () {
     AONbRaysSpinBox->setMinimum(0);
     AONbRaysSpinBox->setMaximum(1000);
     AOLayout->addWidget(AONbRaysSpinBox);
-    connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowChangeAmbientOcclusionNbRays(int)));
 
     AOMaxAngleSpinBox = new QSpinBox(AOGroupBox);
     AOMaxAngleSpinBox->setPrefix ("Max angle: ");
     AOMaxAngleSpinBox->setSuffix (" degrees");
     AOMaxAngleSpinBox->setMinimum (0);
     AOMaxAngleSpinBox->setMaximum (180);
-    AOMaxAngleSpinBox->setVisible(false);
-    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
     AOLayout->addWidget(AOMaxAngleSpinBox);
 
     AORadiusSpinBox = new QDoubleSpinBox(AOGroupBox);
     AORadiusSpinBox->setPrefix("Radius: ");
     AORadiusSpinBox->setMinimum(0);
     AORadiusSpinBox->setSingleStep(0.1);
-    AORadiusSpinBox->setVisible(false);
-    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
     AOLayout->addWidget(AORadiusSpinBox);
 
     QCheckBox * AOOnlyCheckBox = new QCheckBox ("Only ambient coloring", AOGroupBox);
@@ -471,8 +511,6 @@ void Window::initControlWidget () {
     shadowSpinBox->setSuffix (" rays");
     shadowSpinBox->setMinimum (2);
     shadowSpinBox->setMaximum (1000);
-    shadowSpinBox->setVisible (false);
-    connect (shadowSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetShadowNbRays (int)));
     shadowsLayout->addWidget (shadowSpinBox);
 
     rayLayout->addWidget (shadowsGroupBox);
@@ -485,15 +523,12 @@ void Window::initControlWidget () {
     PTDepthSpinBox->setPrefix ("Depth: ");
     PTDepthSpinBox->setMinimum (0);
     PTDepthSpinBox->setMaximum (5);
-    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
     PTLayout->addWidget (PTDepthSpinBox);
 
     PTNbRaySpinBox = new QSpinBox(PTGroupBox);
     PTNbRaySpinBox->setSuffix (" rays");
     PTNbRaySpinBox->setMinimum (1);
     PTNbRaySpinBox->setMaximum (1000);
-    PTNbRaySpinBox->setVisible(false);
-    connect (PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
 
     PTMaxAngleSpinBox = new QSpinBox(PTGroupBox);
@@ -501,25 +536,20 @@ void Window::initControlWidget () {
     PTMaxAngleSpinBox->setSuffix (" degrees");
     PTMaxAngleSpinBox->setMinimum (0);
     PTMaxAngleSpinBox->setMaximum (180);
-    PTMaxAngleSpinBox->setVisible(false);
-    connect (PTMaxAngleSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetMaxAnglePathTracing (int)));
     PTLayout->addWidget (PTMaxAngleSpinBox);
 
     PTIntensitySpinBox = new QSpinBox(PTGroupBox);
     PTIntensitySpinBox->setPrefix ("Intensity: ");
     PTIntensitySpinBox->setMinimum (1);
     PTIntensitySpinBox->setMaximum (1000);
-    connect (PTIntensitySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetIntensityPathTracing (int)));
     PTLayout->addWidget (PTIntensitySpinBox);
 
     PTOnlyCheckBox = new QCheckBox ("Only path tracing coloring", PTGroupBox);
     connect (PTOnlyCheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowSetOnlyPT (bool)));
-    PTOnlyCheckBox->setVisible(false);
     PTLayout->addWidget (PTOnlyCheckBox);
 
     PBGICheckBox = new QCheckBox ("PBGI mode", PTGroupBox);
     connect (PBGICheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowSetRayTracerMode (bool)));
-    PBGICheckBox->setVisible(true);
     PTLayout->addWidget (PBGICheckBox);
 
     rayLayout->addWidget (PTGroupBox);
@@ -536,15 +566,12 @@ void Window::initControlWidget () {
     focalLayout->addWidget(focusTypeComboBox);
 
     changeFocusFixingCheckBox = new QCheckBox("Focal point is fixed", focalGroupBox);
-    changeFocusFixingCheckBox->setVisible(false);
     connect(changeFocusFixingCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetFocalFixing(bool)));
     focalLayout->addWidget(changeFocusFixingCheckBox);
 
     focusNbRaysSpinBox = new QSpinBox(focalGroupBox);
     focusNbRaysSpinBox->setSuffix(" rays");
     focusNbRaysSpinBox->setMinimum(1);
-    focusNbRaysSpinBox->setVisible(false);
-    connect(focusNbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetFocusNbRays(int)));
     focalLayout->addWidget(focusNbRaysSpinBox);
 
     focusApertureSpinBox = new QDoubleSpinBox(focalGroupBox);
@@ -552,8 +579,6 @@ void Window::initControlWidget () {
     focusApertureSpinBox->setMinimum(0.01);
     focusApertureSpinBox->setMaximum(0.3);
     focusApertureSpinBox->setSingleStep(0.01);
-    focusApertureSpinBox->setVisible(false);
-    connect(focusApertureSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetFocusAperture(double)));
     focalLayout->addWidget(focusApertureSpinBox);
 
     rayLayout->addWidget(focalGroupBox);
@@ -566,7 +591,6 @@ void Window::initControlWidget () {
     mBlurNbImagesSpinBox->setSuffix (" images");
     mBlurNbImagesSpinBox->setMinimum (1);
     mBlurNbImagesSpinBox->setMaximum (100);
-    connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
     mBlurLayout->addWidget (mBlurNbImagesSpinBox);
 
     rayLayout->addWidget (mBlurGroupBox);
@@ -594,7 +618,6 @@ void Window::initControlWidget () {
     objectsLayout->addWidget(objectsList);
 
     objectEnableCheckBox = new QCheckBox("Enable");
-    objectEnableCheckBox->setVisible(false);
     connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
     objectsLayout->addWidget(objectEnableCheckBox);
 
@@ -606,7 +629,6 @@ void Window::initControlWidget () {
         objectPosSpinBoxes[i]->setMaximum(100);
         objectPosSpinBoxes[i]->setSingleStep(0.01);
         objectPosSpinBoxes[i]->setPrefix(objectPosNames[i]);
-        connect(objectPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectPos()));
         objectPosLayout->addWidget(objectPosSpinBoxes[i]);
     }
     objectsLayout->addLayout(objectPosLayout);
@@ -622,7 +644,6 @@ void Window::initControlWidget () {
         objectMobileSpinBoxes[i]->setMaximum(100);
         objectMobileSpinBoxes[i]->setSingleStep(0.01);
         objectMobileSpinBoxes[i]->setPrefix(objectMobileNames[i]);
-        connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectMobile()));
         objectMobileLayout->addWidget(objectMobileSpinBoxes[i]);
     }
     objectsLayout->addLayout(objectMobileLayout);
@@ -636,6 +657,53 @@ void Window::initControlWidget () {
 
     sceneLayout->addWidget(objectsGroupBox);
 
+
+    //  SceneGroup: Materials
+    QGroupBox *materialsGroupBox = new QGroupBox("Materials", sceneGroupBox);
+    QVBoxLayout *materialsLayout = new QVBoxLayout(materialsGroupBox);
+
+    materialsList = new QComboBox(materialsGroupBox);
+    materialsList->addItem("No material selected");
+    for (const Material *material : scene->getMaterials()) {
+        materialsList->addItem(QString(material->getName().c_str()));
+    }
+    connect(materialsList, SIGNAL(activated(int)), controller, SLOT(windowSelectMaterial(int)));
+    materialsLayout->addWidget(materialsList);
+
+    materialDiffuseSpinBox = new QDoubleSpinBox(materialsGroupBox);
+    materialDiffuseSpinBox->setPrefix("Diffuse: ");
+    materialDiffuseSpinBox->setMinimum(0);
+    materialDiffuseSpinBox->setMaximum(1);
+    materialDiffuseSpinBox->setSingleStep(0.01);
+    materialsLayout->addWidget(materialDiffuseSpinBox);
+
+    materialSpecularSpinBox = new QDoubleSpinBox(materialsGroupBox);
+    materialSpecularSpinBox->setPrefix("Specular: ");
+    materialSpecularSpinBox->setMinimum(0);
+    materialSpecularSpinBox->setMaximum(1);
+    materialSpecularSpinBox->setSingleStep(0.01);
+    materialsLayout->addWidget(materialSpecularSpinBox);
+
+    QHBoxLayout *materialColorLayout = new QHBoxLayout;
+    QString materialColorsName[3] = {"R: ", "G: ", "B: "};
+    for (unsigned int i=0; i<3; i++) {
+        materialColorSpinBoxes[i] = new QDoubleSpinBox(materialsGroupBox);
+        materialColorSpinBoxes[i]->setMinimum(0);
+        materialColorSpinBoxes[i]->setMaximum(1);
+        materialColorSpinBoxes[i]->setSingleStep(0.01);
+        materialColorSpinBoxes[i]->setPrefix(materialColorsName[i]);
+        materialColorLayout->addWidget(materialColorSpinBoxes[i]);
+    }
+    materialsLayout->addLayout(materialColorLayout);
+
+    materialGlossyRatio = new QDoubleSpinBox(materialsGroupBox);
+    materialGlossyRatio->setMinimum(0);
+    materialGlossyRatio->setMaximum(1);
+    materialGlossyRatio->setSingleStep(0.01);
+    materialGlossyRatio->setPrefix("Glossy ratio: ");
+    materialsLayout->addWidget(materialGlossyRatio);
+
+    sceneLayout->addWidget(materialsGroupBox);
 
     //  SceneGroup: Lights
     QGroupBox *lightsGroupBox = new QGroupBox("Lights", sceneGroupBox);
@@ -652,7 +720,6 @@ void Window::initControlWidget () {
     lightsLayout->addWidget(lightsList);
 
     lightEnableCheckBox = new QCheckBox("Enable");
-    lightEnableCheckBox->setVisible(false);
     connect(lightEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableLight(bool)));
     lightsLayout->addWidget(lightEnableCheckBox);
 
@@ -665,18 +732,14 @@ void Window::initControlWidget () {
         lightPosSpinBoxes[i]->setSingleStep(0.1);
         lightPosSpinBoxes[i]->setMinimum(-100);
         lightPosSpinBoxes[i]->setMaximum(100);
-        lightPosSpinBoxes[i]->setVisible(false);
         lightPosSpinBoxes[i]->setPrefix(axis[i]);
         lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
-        connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
         lightColorSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
         lightColorSpinBoxes[i]->setSingleStep(0.01);
         lightColorSpinBoxes[i]->setMinimum(0);
         lightColorSpinBoxes[i]->setMaximum(1);
-        lightColorSpinBoxes[i]->setVisible(false);
         lightColorSpinBoxes[i]->setPrefix(colors[i]);
         lightsColorLayout->addWidget(lightColorSpinBoxes[i]);
-        connect(lightColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightColor()));
     }
     lightsLayout->addLayout(lightsPosLayout);
     lightsLayout->addLayout(lightsColorLayout);
@@ -685,18 +748,14 @@ void Window::initControlWidget () {
     lightRadiusSpinBox->setSingleStep(0.01);
     lightRadiusSpinBox->setMinimum(0);
     lightRadiusSpinBox->setMaximum(100);
-    lightRadiusSpinBox->setVisible(false);
     lightRadiusSpinBox->setPrefix ("Radius: ");
-    connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
     lightsLayout->addWidget(lightRadiusSpinBox);
 
     lightIntensitySpinBox = new QDoubleSpinBox(lightsGroupBox);
     lightIntensitySpinBox->setSingleStep(0.1);
     lightIntensitySpinBox->setMinimum(0);
     lightIntensitySpinBox->setMaximum(100);
-    lightIntensitySpinBox->setVisible(false);
     lightIntensitySpinBox->setPrefix("Intensity: ");
-    connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
     lightsLayout->addWidget(lightIntensitySpinBox);
 
     sceneLayout->addWidget(lightsGroupBox);
@@ -707,7 +766,6 @@ void Window::initControlWidget () {
 
     stopRenderButton = new QPushButton("Stop", sceneGroupBox);
     actionLayout->addWidget(stopRenderButton);
-    stopRenderButton->setVisible(false);
     connect(stopRenderButton, SIGNAL(clicked()), controller, SLOT(windowStopRendering()));
 
     renderButton = new QPushButton ("Render", sceneGroupBox);
@@ -747,7 +805,6 @@ void Window::initControlWidget () {
     qualityDividerSpinBox = new SquareSpinBox(sceneGroupBox);
     qualityDividerSpinBox->setMinimum(2);
     qualityDividerSpinBox->setMaximum(1000);
-    connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
     durtiestLayout->addWidget(qualityDividerSpinBox);
 
     actionLayout->addLayout(durtiestLayout);

@@ -5,6 +5,7 @@ WindowModel::WindowModel(Controller *c):
     controller(c),
     selectedLightIndex(-1),
     selectedObjectIndex(-1),
+    selectedMaterialIndex(-1),
     wireframe(false),
     focusMode(false),
     renderingMode(SMOOTH),

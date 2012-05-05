@@ -46,6 +46,7 @@ public:
     inline void setSpecular (float s) { specular = s; }
     inline void setColor (const Vec3Df & c) { color = c; }
 
+    inline void setGlossyRatio(float g) {glossyRatio = g;}
     inline float getGlossyRatio() const {return glossyRatio;}
     inline bool isGlossy() const {return glossyRatio!=0;}
 

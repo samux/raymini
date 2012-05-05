@@ -41,6 +41,8 @@ public:
     Vec3Df getObjectPos() const;
     Vec3Df getObjectMobile() const;
 
+    Vec3Df getMaterialColor() const;
+
 private :
     Controller *controller;
 
@@ -53,11 +55,11 @@ private :
 
     // Updated by both WindowModel and Scene
     void updateLights();
+    void updateObjects();
+    void updateMaterials();
     // Updated by both WindowModel and RayTracer
     void updateFocus();
     void updateRealTime();
-    // Updated by both WindowModel and Scene
-    void updateObjects();
     // Updated by RenderThread
     void updateProgressBar();
     // Updated by WindowModel
