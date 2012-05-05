@@ -239,6 +239,7 @@ void Scene::buildPool() {
                                  return min(1.f, 0.4f+Perlin(0.5f, 4, 10)(v.getPos()));
                              });
 
+    // TODO: real pool balls ?
     const vector<Vec3Df> color = {
         {1.f, 1.f, .0f},
         {1.f, .0f, .5f}, {.3f, .3f, .8f},
@@ -259,13 +260,16 @@ void Scene::buildPool() {
     objects.push_back(new Object(groundMesh, pool, "Pool"));
     materials.push_back(pool);
 
+    // Feeling lazy...
+    int ballNumber = 0;
     for(int i = 0 ; i < 5 ; i++)
         for(int j = 0 ; j <= i ; j++) {
             stringstream numberConvert;
-            numberConvert<<j;
+            numberConvert<<ballNumber;
             auto ball = new Material(controller, "Ball #"+numberConvert.str(), 1.f, 1.f, color[(i*(i+1))/2+j], .1f, 50);
             materials.push_back(ball);
             objects.push_back(new Object(sphereMesh, ball, "Ball #"+numberConvert.str(), {-i*delta, (2*j-i)*height, height}));
+            ballNumber++;
         }
 
     lights.push_back(new Light({5.f, 5.f, 20.f}, 0.01, {0.f, 0.f, 1.f},
