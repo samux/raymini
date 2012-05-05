@@ -53,7 +53,6 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
     Scene *scene = controller->getScene();
     vector<Color> buffer;
     qualityDivider = quality==ONE_OVER_X?qualityDivider:1;
-    cout<<quality<<" "<<qualityDivider<<endl;
     // To avoid black pixels on the top of the screen
     unsigned int computedScreenWidth = ceil((float)screenWidth/(float)qualityDivider);
     unsigned int computedScreenHeight = ceil((float)screenHeight/(float)qualityDivider);

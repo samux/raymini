@@ -624,9 +624,18 @@ void Window::initControlWidget () {
     connect(durtiestQualityComboBox, SIGNAL(activated(int)), controller, SLOT(windowSetDurtiestQuality(int)));
     durtiestLayout->addWidget(durtiestQualityComboBox);
 
-    qualityDividerSpinBox = new QSpinBox(sceneGroupBox);
-    qualityDividerSpinBox->setSuffix("^2 pixels");
+    class SquareSpinBox: public QSpinBox {
+    public:
+        SquareSpinBox(QWidget *w): QSpinBox(w) {}
+    protected:
+        QString textFromValue(int value) const
+        {
+            return QString("%1 x %1 pixels").arg(value);
+        }
+    };
+    qualityDividerSpinBox = new SquareSpinBox(sceneGroupBox);
     qualityDividerSpinBox->setMinimum(2);
+    qualityDividerSpinBox->setMaximum(1000);
     connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
     durtiestLayout->addWidget(qualityDividerSpinBox);
 
