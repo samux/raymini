@@ -114,7 +114,7 @@ void GLViewer::updateLights() {
 
 void GLViewer::updateWireframe() {
     WindowModel *windowModel = controller->getWindowModel();
-    if (windowModel->getDisplayMode() == WindowModel::RayDisplayMode) {
+    if (windowModel->getDisplayMode() != WindowModel::RayDisplayMode) {
         if (windowModel->isWireframe()) {
             glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
         }
