@@ -239,3 +239,32 @@ void Mesh::setDefaultTextureMapping() {
         }
     }
 }
+
+void Mesh::setSquareTextureMapping(unsigned indexTriangle0, unsigned indexTriangle1) {
+    Triangle &triangle0 = triangles[indexTriangle0];
+    Triangle &triangle1 = triangles[indexTriangle1];
+    // Be able to detect equals triangles
+    unsigned int commonIndexes0[3];
+    unsigned int commonIndexes1[3];
+    int found = 0;
+    for (unsigned int i=0; i<3; i++) {
+        for (unsigned int j=0; j<3; j++) {
+            if (triangle0.getVertex(i) == triangle1.getVertex(j)) {
+                commonIndexes0[found] = i;
+                commonIndexes1[found] = j;
+                found++;
+                break;
+            }
+        }
+    }
+    if (found != 2) {
+        cerr<<__FUNCTION__<<": the two triangles are not a square !"<<endl;
+        return;
+    }
+    triangle0.setUV(commonIndexes0[0], 0, 0);
+    triangle1.setUV(commonIndexes1[0], 0, 0);
+    triangle0.setUV(commonIndexes0[1], 1, 1);
+    triangle1.setUV(commonIndexes1[1], 1, 1);
+    triangle0.setUV(3-commonIndexes0[0]-commonIndexes0[1], 0, 1);
+    triangle1.setUV(3-commonIndexes1[0]-commonIndexes1[1], 1, 0);
+}

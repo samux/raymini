@@ -65,6 +65,9 @@ public:
     /** Give vertices default spherical texture mapping */
     void setDefaultTextureMapping();
 
+    /** Give two triangles the whole texture mapped */
+    void setSquareTextureMapping(unsigned t0=0, unsigned t1=1);
+
 private:
     std::vector<Vertex> vertices;
     std::vector<Triangle> triangles;

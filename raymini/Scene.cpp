@@ -79,6 +79,9 @@ Scene::~Scene () {
 
     for(auto l : lights)
         delete l;
+
+    for(auto m : materials)
+        delete m;
 }
 
 void Scene::updateBoundingBox () {
@@ -96,6 +99,7 @@ void Scene::updateBoundingBox () {
 void Scene::buildRoom(Material *sphereMat) {
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
 
     objects.push_back(new Object(groundMesh, &white, "Ground"));
 
@@ -152,6 +156,7 @@ void Scene::buildMultiLights() {
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
     objects.push_back(new Object(groundMesh, &white, "Ground"));
     materials.push_back(&white);
 
@@ -174,11 +179,13 @@ void Scene::buildMultiMeshs() {
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
     objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
     materials.push_back(&groundMat);
 
     Mesh wallMesh;
     wallMesh.loadOFF("models/wall.off");
+    wallMesh.setSquareTextureMapping();
     objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-1.9f, 0.f, 1.5f}));
     materials.push_back(&mirrorMat);
 
@@ -201,6 +208,11 @@ void Scene::buildMultiMeshs() {
     objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
     materials.push_back(&rhinoMat);
 
+    SkyBoxMaterial *skyBoxMaterial = new SkyBoxMaterial(controller);
+    objects.push_back(SkyBox::generateSkyBox(skyBoxMaterial));
+    materials.push_back(skyBoxMaterial);
+
+
     lights.push_back(new Light({2.f, -3.f, 5.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, 1.f));
 }
@@ -208,12 +220,16 @@ void Scene::buildMultiMeshs() {
 void Scene::buildOutdor() {
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
     groundMesh.scale(5);
+    groundMesh.setSquareTextureMapping();
     objects.push_back(new Object(groundMesh, &groundMat, "Ground"));
     materials.push_back(&groundMat);
 
     Mesh wallMesh;
     wallMesh.loadOFF("models/wall.off");
+    wallMesh.setSquareTextureMapping();
+    wallMesh.setSquareTextureMapping();
     objects.push_back(new Object(wallMesh, &mirrorMat, "Left wall", {-2.f, 0.f, 1.5f}));
     materials.push_back(&mirrorMat);
 
@@ -247,6 +263,7 @@ void Scene::buildPool() {
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
     Mesh sphereMesh;
     sphereMesh.loadOFF("models/sphere.off");
 
@@ -291,6 +308,7 @@ void Scene::buildMirrorGlass() {
 
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
 
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
     materials.push_back(groundMat);
