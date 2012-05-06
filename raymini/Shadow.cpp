@@ -1,5 +1,4 @@
 #include "Shadow.h"
-#include "SkyBoxMaterial.h"
 
 #include "RayTracer.h"
 

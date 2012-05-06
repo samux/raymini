@@ -14,6 +14,7 @@
 #include "Vertex.h"
 #include "Brdf.h"
 #include "Light.h"
+#include "Ray.h"
 
 // This model assumes a white specular color (1.0, 1.0, 1.0)
 
@@ -39,7 +40,8 @@ public:
     inline float getSpecular () const { return specular; }
     inline Vec3Df getColor () const { return color; }
 
-    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
+    virtual Vec3Df genColor (const Vec3Df & camPos,
+                             const Object *o, Ray *intersectingRay,
                              const std::vector<Light> & lights, Brdf::Type type = Brdf::All) const;
 
     inline void setDiffuse (float d) { diffuse = d; }
@@ -74,15 +76,24 @@ public:
     Glass(Controller *c, std::string name, float coeff) :
         Material(c, name, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff) {}
 
-    virtual Vec3Df genColor (const Vec3Df & camPos, const Vertex & closestIntersection,
+    virtual Vec3Df genColor (const Vec3Df & camPos,
+                             const Object *o, Ray *intersectingRay,
                              const std::vector<Light> & lights, Brdf::Type type) const;
-    void setObject(const Object * o) { this->o = o; }//XXX 2bfix
 
 private:
     float coeff;
-    const Object *o;
 };
 
+class SkyBoxMaterial: public Material {
+public:
+    SkyBoxMaterial(Controller *c):
+        Material(c, "Skybox", 1, 0, {0, 0, 1})
+        {}
+    
+    virtual Vec3Df genColor (const Vec3Df & camPos,
+                             const Object *o, Ray *intersectingRay,
+                             const std::vector<Light> & lights, Brdf::Type type) const;
+};
 
 #endif // MATERIAL_H
 

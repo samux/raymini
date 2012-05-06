@@ -5,15 +5,19 @@
 /** Load PPM */
 class Texture
 {
-	public:
-        unsigned int width,
-                     height,
-                     max;
-		unsigned char *v;
+public:
+    Texture();
+    ~Texture();
+    void loadPPM(const char *name);
 
-		Texture();
-		~Texture();
-		void loadPPM(const char *name);
+    Vec3Df getColor(unsigned int x, unsigned int y) const;
 
-        Vec3Df getColor(unsigned int x, unsigned int y) const;
+    unsigned int getWidth() const {return width;}
+    unsigned int getHeight() const {return height;}
+private:
+    unsigned int width,
+                 height,
+                 max;
+    unsigned char *values;
+
 };

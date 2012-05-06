@@ -22,7 +22,7 @@ HEADERS = Window.h \
           AntiAliasing.h \
           Color.h \
           Shadow.h \
-          SkyBoxMaterial.h \
+          SkyBox.h \
           Texture.h \
           Observer.h \
           Observable.h \
@@ -54,7 +54,7 @@ SOURCES = Window.cpp \
           Brdf.cpp \
           Noise.cpp \
           AntiAliasing.cpp \
-          SkyBoxMaterial.cpp \
+          SkyBox.cpp \
           Texture.cpp \
           Color.cpp \
           Shadow.cpp \

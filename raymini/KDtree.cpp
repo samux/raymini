@@ -82,7 +82,7 @@ bool KDtree::intersect(Ray &ray) const {
             const Vertex & v1 = mesh.getVertices() [t.getVertex(1)];
             const Vertex & v2 = mesh.getVertices() [t.getVertex(2)];
 
-            ray.intersect(v0, v1, v2);
+            ray.intersect(t, v0, v1, v2);
         }
         return ray.intersect();
     }

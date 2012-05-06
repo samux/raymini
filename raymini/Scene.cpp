@@ -12,7 +12,7 @@
 #include "Scene.h"
 
 #include "Noise.h"
-#include "SkyBoxMaterial.h"
+#include "SkyBox.h"
 
 using namespace std;
 
@@ -51,7 +51,6 @@ Scene::Scene(Controller *c, int argc, char **argv) :
                     return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
                 }}),
     mirrorMat({c, "Mirror"}),
-    skyBoxMaterial({c, "textures/skybox.ppm"}),
     controller(c) {
 
     string id(argc>1?argv[1]:"");
@@ -128,7 +127,6 @@ void Scene::buildRoom(Material *sphereMat) {
         auto glass = dynamic_cast<Glass*>(sphereMat);
         if(glass) {
             sphere->setTrans({0,0,1.5});
-            glass->setObject(sphere);
         }
         if(dynamic_cast<Mirror*>(sphereMat))sphere->setTrans({0,0,0});
         objects.push_back(sphere);
@@ -224,10 +222,9 @@ void Scene::buildOutdor() {
     objects.push_back(new Object(rhinoMesh, &rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
     materials.push_back(&rhinoMat);
 
-    Mesh skyBoxMesh;
-    skyBoxMesh.loadOFF("models/skybox.off");
-    objects.push_back(new Object(skyBoxMesh, &skyBoxMaterial, "Skybox"));
-    materials.push_back(&skyBoxMaterial);
+    SkyBoxMaterial *skyBoxMaterial = new SkyBoxMaterial(controller);
+    objects.push_back(SkyBox::generateSkyBox(skyBoxMaterial));
+    materials.push_back(skyBoxMaterial);
 
     lights.push_back(new Light({9.f, 9.f, 9.f}, 5.f, {1.f, 1.f, 1.f},
                                {1.f, 1.f, .4f}, 1.f));
@@ -333,8 +330,6 @@ void Scene::buildMirrorGlass() {
 
 
     auto glass = new Object(sphereMesh, glassMat, "glass", {1 , 1, 3});
-    // TODO can generate glitches if another object receives this material
-    glassMat->setObject(glass);
     objects.push_back(glass);
     materials.push_back(glassMat);
 

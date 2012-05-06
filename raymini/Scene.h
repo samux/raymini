@@ -16,7 +16,6 @@
 #include "BoundingBox.h"
 #include "Vec3D.h"
 #include "Observable.h"
-#include "SkyBoxMaterial.h"
 #include "Material.h"
 
 
@@ -62,7 +61,6 @@ private:
     Material red, green, blue, white, black;
     Material glossyMat, groundMat, rhinoMat;
     Mirror mirrorMat;
-    SkyBoxMaterial skyBoxMaterial;
     std::vector<Material *> materials;
 
     Controller *controller;

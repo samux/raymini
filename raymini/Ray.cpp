@@ -66,10 +66,10 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
 }
 
 
-bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
-    Vec3Df u = v1.getPos() - v3.getPos();
-    Vec3Df v = v2.getPos() - v3.getPos();
-    Vec3Df nn = Vec3Df::crossProduct(u, v);
+bool Ray::intersect(const Triangle &t, const Vertex & v1, const Vertex & v2, const Vertex & v3) {
+    Vec3Df vecU = v1.getPos() - v3.getPos();
+    Vec3Df vecV = v2.getPos() - v3.getPos();
+    Vec3Df nn = Vec3Df::crossProduct(vecU, vecV);
     Vec3Df Otr = origin - v3.getPos();
     float norm = Vec3Df::dotProduct(nn, direction);
 
@@ -84,19 +84,19 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
     }
 
     // Coordinates into triangle
-    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, v), direction)/norm;
+    float Iu = Vec3Df::dotProduct(Vec3Df::crossProduct(Otr, vecV), direction)/norm;
 
-    if ( (0>Iu) || (Iu >1) ) {
+    if ( (0>Iu) || (Iu>1) ) {
         return false;
     }
 
-    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(u, Otr), direction)/norm;
+    float Iv = Vec3Df::dotProduct(Vec3Df::crossProduct(vecU, Otr), direction)/norm;
 
-    if ( (0>Iv) || (Iv >1) || (Iu+Iv>1) ) {
+    if ( (0>Iv) || (Iv>1) || (Iu+Iv>1) ) {
         return false;
     }
 
-    Vec3Df pos = v3.getPos() + Iu*u + Iv*v;
+    Vec3Df pos = v3.getPos() + Iu*vecU + Iv*vecV;
     float distance = Vec3Df::squaredDistance (pos, origin);
 
     if (!hasIntersection || distance < intersectionDistance) {
@@ -104,6 +104,9 @@ bool Ray::intersect(const Vertex & v1, const Vertex & v2, const Vertex & v3) {
         intersectionDistance = distance;
         intersection = pos;
         a = &v1; b = &v2 ; c = &v3;
+        u = Iu;
+        v = Iv;
+        this->t = &t;
     }
 
     return true;

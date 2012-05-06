@@ -15,17 +15,34 @@
 
 class Vertex {
 public:
-    inline Vertex ()
-        : pos (Vec3Df (0.0,0.0,0.0)), normal (Vec3Df (0.0, 0.0, 1.0)),
-          marked (false), id (-1) {}
-    inline Vertex (const Vec3Df & pos)
-        : pos (pos), normal (Vec3Df (0.0, 0.0, 1.0)),
-          marked (false), id (-1) {}
-    inline Vertex (const Vec3Df & pos, const Vec3Df & normal)
-        : pos (pos), normal (normal),
-          marked (false), id (-1) {}
-    inline Vertex (const Vertex & v) : pos (v.pos), normal (v.normal),
-                                       marked (v.marked), id (-1) {}
+    inline Vertex():
+        pos(Vec3Df(0.0,0.0,0.0)),
+        normal(Vec3Df(0.0, 0.0, 1.0)),
+        marked(false),
+        id (-1)
+    {}
+
+    inline Vertex(const Vec3Df & pos):
+        pos(pos),
+        normal(Vec3Df (0.0, 0.0, 1.0)),
+        marked(false),
+        id(-1)
+    {}
+
+    inline Vertex(const Vec3Df & pos, const Vec3Df & normal):
+        pos(pos),
+        normal(normal),
+        marked(false),
+        id(-1)
+    {}
+
+    inline Vertex(const Vertex & v):
+        pos(v.pos),
+        normal(v.normal),
+        marked(v.marked),
+        id(-1)
+    {}
+
     inline virtual ~Vertex () {}
     inline Vertex & operator= (const Vertex & vertex) {
         pos = vertex.pos;

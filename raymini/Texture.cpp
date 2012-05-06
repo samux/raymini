@@ -6,13 +6,14 @@
 using namespace std;
 
 Texture::Texture():
-    v(NULL)
+    values(NULL)
 {}
 
 Texture::~Texture()
 {
-	if (v)
-		delete []v;
+	if (values) {
+		delete []values;
+    }
 }
 
 void Texture::loadPPM(const char *name)
@@ -22,14 +23,15 @@ void Texture::loadPPM(const char *name)
 	getline(in, type);
 	getline(in, type);
 	in >> width >> height >> max;
-	if (max > 255)
-		cerr << "More than byte is not supported." << endl;
-	v = new unsigned char[width*height*3];
+	if (max > 255) {
+		cerr << "More than byte size is not supported." << endl;
+    }
+	values = new unsigned char[width*height*3];
 	for (unsigned int i=0; i<height*width*3; i++)
 	{
 		unsigned int j;
 		in >> j;
-		v[i] = j;
+		values[i] = j;
 	}
 	in.close();
 }
@@ -37,5 +39,5 @@ void Texture::loadPPM(const char *name)
 Vec3Df Texture::getColor(unsigned int x, unsigned int y) const{
     unsigned int index = (x + y * width) * 3;
 
-    return Vec3Df(v[index], v[index+1], v[index+2]);
+    return Vec3Df(values[index], values[index+1], values[index+2]);
 }
