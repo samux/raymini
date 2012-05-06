@@ -56,6 +56,7 @@ public slots :
     void windowSetAmbientOcclusionMaxAngle(int);
     void windowSetAmbientOcclusionRadius(double);
     void windowSetAmbientOcclusionIntensity(int);
+    void windowSetAmbientOcclusionNbRays(int);
     void windowSetOnlyAO(bool);
     void windowSetFocusType(int);
     void windowSetFocusNbRays(int);

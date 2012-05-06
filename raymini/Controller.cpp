@@ -84,7 +84,7 @@ void Controller::windowSetShadowMode(int i) {
 
 void Controller::windowSetShadowNbRays (int i) {
     ensureThreadStopped();
-    rayTracer->setShadowNbImpule(i);
+    rayTracer->setShadowNbImpulse(i);
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
@@ -267,6 +267,13 @@ void Controller::windowSetAmbientOcclusionRadius(double f) {
 void Controller::windowSetAmbientOcclusionIntensity(int i) {
     ensureThreadStopped();
     rayTracer->intensityAmbientOcclusion = float(i)/100;
+    renderThread->hasToRedraw();
+    rayTracer->notifyAll();
+}
+
+void Controller::windowSetAmbientOcclusionNbRays(int i) {
+    ensureThreadStopped();
+    rayTracer->nbRayAmbientOcclusion = i;
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }

@@ -64,7 +64,8 @@ public:
 
     void setShadowMode(Shadow::Mode m) { shadow.mode = m; }
     Shadow::Mode getShadowMode() { return shadow.mode; }
-    void setShadowNbImpule(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
+    void setShadowNbImpulse(unsigned nbImpulse) { shadow.nbImpulse = nbImpulse; }
+    unsigned getShadowNbImpulse() const {return shadow.nbImpulse;}
     /*        End Config         */
 
     const Vec3Df & getBackgroundColor () const { return backgroundColor;}
