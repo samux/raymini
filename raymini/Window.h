@@ -106,6 +106,7 @@ private :
     QDoubleSpinBox *objectPosSpinBoxes[3];
     QLabel *objectMobileLabel;
     QDoubleSpinBox *objectMobileSpinBoxes[3];
+    QLabel *objectMaterialLabel;
     QComboBox *objectMaterialsList;
 
     QComboBox *materialsList;

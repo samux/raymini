@@ -291,6 +291,7 @@ void Window::updateObjects() {
         objectPosSpinBoxes[i]->setVisible(isSelected);
         objectMobileSpinBoxes[i]->setVisible(isSelected);
     }
+    objectMaterialLabel->setVisible(isSelected);
     objectMaterialsList->setVisible(isSelected);
     if (isSelected) {
         const Object *object = scene->getObjects()[index];
@@ -667,12 +668,19 @@ void Window::initControlWidget () {
     }
     objectsLayout->addLayout(objectMobileLayout);
 
+    QHBoxLayout *objectMaterialsLayout = new QHBoxLayout;
+
+    objectMaterialLabel = new QLabel("Material:", objectsGroupBox);
+    objectMaterialsLayout->addWidget(objectMaterialLabel);
+
     objectMaterialsList = new QComboBox(objectsGroupBox);
     for (const Material *mat : scene->getMaterials()) {
         objectMaterialsList->addItem(QString(mat->getName().c_str()));
     }
     connect(objectMaterialsList, SIGNAL(activated(int)), controller, SLOT(windowSetObjectMaterial(int)));
-    objectsLayout->addWidget(objectMaterialsList);
+    objectMaterialsLayout->addWidget(objectMaterialsList);
+
+    objectsLayout->addLayout(objectMaterialsLayout);
 
     sceneLayout->addWidget(objectsGroupBox);
 
