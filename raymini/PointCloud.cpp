@@ -45,7 +45,6 @@ void PointCloud::generatePoints() {
                 if(!mat.isGlossy()) {
                     Vec3Df color = mat.genColor(
                             position,
-                            object,
                             &bestRay,
                             {*light},
                             type);

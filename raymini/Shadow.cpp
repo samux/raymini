@@ -1,6 +1,7 @@
 #include "Shadow.h"
 
 #include "RayTracer.h"
+#include "Material.h"
 
 using namespace std;
 

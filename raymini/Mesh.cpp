@@ -208,6 +208,7 @@ void Mesh::loadOFF (const std::string & filename) {
     }
     input.close ();
     recomputeSmoothVertexNormals (0);
+    setDefaultTextureMapping();
 }
 
 void Mesh::rotate(const Vec3Df &axis, const float &angle) {
@@ -225,5 +226,16 @@ void Mesh::rotate(const Vec3Df &axis, const float &angle) {
 void Mesh::scale(const float &s) {
     for (Vertex & v : vertices) {
         v.setPos(v.getPos().scale(s));
+    }
+}
+
+void Mesh::setDefaultTextureMapping() {
+    // See: http://www.mvps.org/directx/articles/spheremap.htm
+    for (Triangle &t : triangles) {
+        for (unsigned int i=0; i<3; i++) {
+            const Vertex &v = vertices[t.getVertex(i)];
+            Vec3Df normal = v.getNormal();
+            t.setUV(i, asin(normal[0])/M_PI+0.5, asin(normal[2])/M_PI+0.5);
+        }
     }
 }

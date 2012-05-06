@@ -190,7 +190,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
         const vector<Light> & light = getLights(bestRay.getIntersection());
 
         Color color = mat.genColor(camPos,
-                                   intersectedObject, &bestRay,
+                                   &bestRay,
                                    light,
                                    type);
 
@@ -206,9 +206,9 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
                     break;
             }
 
-            Color ptColor = mat.genColor(camPos, intersectedObject, &bestRay,
-                                          lights,
-                                          Brdf::Diffuse);
+            Color ptColor = mat.genColor(camPos, &bestRay,
+                                         lights,
+                                         Brdf::Diffuse);
 
             if(onlyPathTracing && depth == 0)
                 color = ptColor;

@@ -13,9 +13,9 @@
 
 class Triangle {
 public:
-    inline Triangle () { init (0, 0, 0, (unsigned int[]){0, 0, 0}, (unsigned int[]){0, 0, 0}); }
-    inline Triangle (unsigned int v0, unsigned int v1, unsigned int v2) { init (v0, v1, v2, (unsigned int[]){0, 0, 0}, (unsigned int[]){0, 0, 0}); }
-    inline Triangle (const unsigned int * vp) { init (vp[0], vp[1], vp[2], (unsigned int[]){0, 0, 0}, (unsigned int[]){0, 0, 0}); }
+    inline Triangle () { init (0, 0, 0, (float[]){0, 0, 0}, (float[]){0, 0, 0}); }
+    inline Triangle (unsigned int v0, unsigned int v1, unsigned int v2) { init (v0, v1, v2, (float[]){0, 0, 0}, (float[]){0, 0, 0}); }
+    inline Triangle (const unsigned int * vp) { init (vp[0], vp[1], vp[2], (float[]){0, 0, 0}, (float[]){0, 0, 0}); }
     inline Triangle (const Triangle & it) { init (it.vertices[0], it.vertices[1], it.vertices[2], it.us, it.vs); }
     inline virtual ~Triangle () {}
     inline Triangle & operator=(const Triangle & it) {
@@ -35,16 +35,16 @@ public:
         return equals;
     }
     inline unsigned int getVertex (unsigned int i) const { return vertices[i]; }
-    inline unsigned int getU(unsigned int i) const {return us[i];}
-    inline unsigned int getV(unsigned int i) const {return vs[i];}
-    inline void setU(unsigned int i, unsigned int u) {us[i] = u;}
-    inline void setV(unsigned int i, unsigned int v) {vs[i] = v;}
-    inline void setUV(unsigned int i, unsigned int u, unsigned int v) {us[i] = u; vs[i] = v;}
+    inline float getU(unsigned int i) const {return us[i];}
+    inline float getV(unsigned int i) const {return vs[i];}
+    inline void setU(unsigned int i, float u) {us[i] = std::min(1.0f, std::max(0.0f, u));}
+    inline void setV(unsigned int i, float v) {vs[i] = std::min(1.0f, std::max(0.0f, v));}
+    inline void setUV(unsigned int i, float u, float v) {setU(i, u); setV(i, v);}
     inline void setVertex (unsigned int i, unsigned int vertex) { vertices[i] = vertex; }
     inline bool contains (unsigned int vertex) const { return (vertices[0] == vertex || vertices[1] == vertex || vertices[2] == vertex); }
 
 protected:
-    inline void init (unsigned int v0, unsigned int v1, unsigned int v2, const unsigned int us[3], const unsigned int vs[3]) {
+    inline void init (unsigned int v0, unsigned int v1, unsigned int v2, const float us[3], const float vs[3]) {
         vertices[0] = v0; vertices[1] = v1; vertices[2] = v2;
         for (unsigned int i=0; i<3; i++) {
             this->us[i] = us[i];
@@ -54,8 +54,8 @@ protected:
 
 private:
     unsigned int vertices[3];
-    unsigned int us[3];
-    unsigned int vs[3];
+    float us[3];
+    float vs[3];
 };
 
 extern std::ostream & operator<< (std::ostream & output, const Triangle & t);

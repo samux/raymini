@@ -2,10 +2,7 @@
 
 #include "Object.h"
 
-#include "Material.h"
-
-class Texture;
-class Material;
+class SkyBoxMaterial;
 class Mesh;
 
 /** Skybox object */
@@ -20,5 +17,5 @@ public:
     static SkyBox *generateSkyBox(const SkyBoxMaterial *);
 
 private:
-    SkyBox(Texture *, const SkyBoxMaterial *, Mesh);
+    SkyBox(const SkyBoxMaterial *, Mesh);
 };

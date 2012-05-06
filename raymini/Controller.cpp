@@ -15,9 +15,12 @@ Controller::~Controller()
     delete scene;
     delete rayTracer;
     delete windowModel;
+    delete basicTexture;
 }
 
 void Controller::initAll(int argc, char **argv) {
+    basicTexture = new BasicTexture();
+
     scene = new Scene(this, argc, argv);
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);

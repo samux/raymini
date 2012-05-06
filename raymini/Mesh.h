@@ -62,6 +62,9 @@ public:
         inline const std::string & getMessage () const { return msg; }
     };
 
+    /** Give vertices default spherical texture mapping */
+    void setDefaultTextureMapping();
+
 private:
     std::vector<Vertex> vertices;
     std::vector<Triangle> triangles;

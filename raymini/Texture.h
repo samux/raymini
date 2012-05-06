@@ -7,10 +7,10 @@ class Texture
 {
 public:
     Texture();
-    ~Texture();
+    virtual ~Texture();
     void loadPPM(const char *name);
 
-    Vec3Df getColor(unsigned int x, unsigned int y) const;
+    virtual Vec3Df getColor(float x, float y) const;
 
     unsigned int getWidth() const {return width;}
     unsigned int getHeight() const {return height;}
@@ -20,4 +20,13 @@ private:
                  max;
     unsigned char *values;
 
+};
+
+/** Basic debug texture, no memory space needed */
+class BasicTexture: public Texture {
+public:
+    BasicTexture();
+    virtual ~BasicTexture();
+
+    virtual Vec3Df getColor(float x, float y) const;
 };
