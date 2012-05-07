@@ -118,17 +118,21 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     }
 
 Scene::~Scene () {
-    for(auto o : objects)
+    for(auto o : objects) {
         delete o;
+    }
 
-    for(auto l : lights)
+    for(auto l : lights) {
         delete l;
+    }
 
-    for(auto m : materials)
+    for(auto m : materials) {
         delete m;
+    }
 
-    for (auto t : textures)
+    for (auto t : textures) {
         delete t;
+    }
 }
 
 void Scene::updateBoundingBox () {

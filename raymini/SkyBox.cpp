@@ -66,10 +66,7 @@ SkyBox::SkyBox(const SkyBoxMaterial *mat, Mesh m):
     ts[11].setUV(2, 3.0*boxWidth, 1.0*boxHeight+0.002);
 }
 
-SkyBox::~SkyBox()
-{
-    delete mat;
-}
+SkyBox::~SkyBox() {}
 
 SkyBox *SkyBox::generateSkyBox(const SkyBoxMaterial *m) {
     Mesh mesh;
