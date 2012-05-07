@@ -445,10 +445,28 @@ void Window::updateStatus() {
 void Window::updateMotionBlur() {
     Scene *scene = controller->getScene();
     RayTracer *rayTracer = controller->getRayTracer();
-    mBlurGroupBox->setVisible(scene->hasMobile());
-    mBlurNbImagesSpinBox->disconnect();
-    mBlurNbImagesSpinBox->setValue(rayTracer->nbPictures);
-    connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+
+    bool isMobile = scene->hasMobile();
+    int widgetIndex = -1;
+    for (int i=0; i<rayTabs->count(); i++) {
+        if (rayTabs->widget(i) == mBlurGroupBox) {
+            widgetIndex = i;
+            break;
+        }
+    }
+    //rayTabs->setTabEnabled(widgetIndex, isMobile);
+    if (isMobile && widgetIndex == -1) {
+        rayTabs->addTab(mBlurGroupBox, "Motion Blur");
+    }
+    if (!isMobile && widgetIndex != -1) {
+        rayTabs->removeTab(widgetIndex);
+    }
+    mBlurNbImagesSpinBox->setVisible(isMobile);
+    if (isMobile) {
+        mBlurNbImagesSpinBox->disconnect();
+        mBlurNbImagesSpinBox->setValue(rayTracer->nbPictures);
+        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+    }
 }
 
 void Window::initControlWidget () {
@@ -500,7 +518,7 @@ void Window::initControlWidget () {
     // Ray tracing
     QGroupBox * rayGroupBox = new QGroupBox("Ray Tracing", controlWidget);
     QVBoxLayout *rayLayout = new QVBoxLayout(rayGroupBox);
-    QTabWidget * rayTabs = new QTabWidget(rayGroupBox);
+    rayTabs = new QTabWidget(rayGroupBox);
     rayTabs->setUsesScrollButtons(false);
 
     //  RayGroup: Anti Aliasing
@@ -653,21 +671,20 @@ void Window::initControlWidget () {
 
     // RayGroup: Motion Blur
     mBlurGroupBox = new QWidget(rayTabs);
-    QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
+    QVBoxLayout * mBlurLayout = new QVBoxLayout(mBlurGroupBox);
 
     mBlurNbImagesSpinBox = new QSpinBox(PTGroupBox);
     mBlurNbImagesSpinBox->setSuffix (" images");
     mBlurNbImagesSpinBox->setMinimum (1);
     mBlurNbImagesSpinBox->setMaximum (100);
+    mBlurNbImagesSpinBox->setVisible(false);
     connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
     mBlurLayout->addWidget (mBlurNbImagesSpinBox);
 
-    rayTabs->addTab(mBlurGroupBox, "Motion Blur");
-
     rayLayout->addWidget(rayTabs);
 
-    layout->addWidget(rayGroupBox, 0, 1, 3, 1);
 
+    layout->addWidget(rayGroupBox, 0, 1, 3, 1);
 
 
     // scene param

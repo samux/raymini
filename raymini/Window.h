@@ -75,6 +75,8 @@ private :
 
     // Needed for further actions
 
+    QTabWidget *rayTabs;
+
     QCheckBox *wireframeCheckBox;
     QComboBox *modeList;
     QCheckBox *surfelsCheckBox;
