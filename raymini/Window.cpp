@@ -94,13 +94,13 @@ Vec3Df Window::getLightColor() const {
     return newColor;
 }
 
-Vec3Df Window::getMaterialColor() const {
-    Vec3Df newColor;
-    for (int i=0; i<3; i++) {
-        newColor[i] = materialColorSpinBoxes[i]->value();
-    }
-    return newColor;
-}
+//Vec3Df Window::getMaterialColor() const {
+//Vec3Df newColor;
+//for (int i=0; i<3; i++) {
+//newColor[i] = materialColorSpinBoxes[i]->value();
+//}
+//return newColor;
+//}
 
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
@@ -318,9 +318,9 @@ void Window::updateMaterials() {
     bool isSelected = index != -1;
     materialDiffuseSpinBox->setVisible(isSelected);
     materialSpecularSpinBox->setVisible(isSelected);
-    for (unsigned int i=0; i<3; i++) {
-        materialColorSpinBoxes[i]->setVisible(isSelected);
-    }
+    //for (unsigned int i=0; i<3; i++) {
+    //materialColorSpinBoxes[i]->setVisible(isSelected);
+    //}
     materialGlossyRatio->setVisible(isSelected);
 
     if (isSelected) {
@@ -331,11 +331,11 @@ void Window::updateMaterials() {
         materialSpecularSpinBox->disconnect();
         materialSpecularSpinBox->setValue(material->getSpecular());
         connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
-        for (unsigned int i=0; i<3; i++) {
-            materialColorSpinBoxes[i]->disconnect();
-            materialColorSpinBoxes[i]->setValue(material->getColor()[i]);
-            connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
-        }
+        //for (unsigned int i=0; i<3; i++) {
+        //materialColorSpinBoxes[i]->disconnect();
+        //materialColorSpinBoxes[i]->setValue(material->getColor()[i]);
+        //connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
+        //}
         materialGlossyRatio->disconnect();
         materialGlossyRatio->setValue(material->getGlossyRatio());
         connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
@@ -713,18 +713,18 @@ void Window::initControlWidget () {
     connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
     materialsLayout->addWidget(materialSpecularSpinBox);
 
-    QHBoxLayout *materialColorLayout = new QHBoxLayout;
-    QString materialColorsName[3] = {"R: ", "G: ", "B: "};
-    for (unsigned int i=0; i<3; i++) {
-        materialColorSpinBoxes[i] = new QDoubleSpinBox(materialsGroupBox);
-        materialColorSpinBoxes[i]->setMinimum(0);
-        materialColorSpinBoxes[i]->setMaximum(1);
-        materialColorSpinBoxes[i]->setSingleStep(0.01);
-        materialColorSpinBoxes[i]->setPrefix(materialColorsName[i]);
-        connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
-        materialColorLayout->addWidget(materialColorSpinBoxes[i]);
-    }
-    materialsLayout->addLayout(materialColorLayout);
+    //QHBoxLayout *materialColorLayout = new QHBoxLayout;
+    //QString materialColorsName[3] = {"R: ", "G: ", "B: "};
+    //for (unsigned int i=0; i<3; i++) {
+    //materialColorSpinBoxes[i] = new QDoubleSpinBox(materialsGroupBox);
+    //materialColorSpinBoxes[i]->setMinimum(0);
+    //materialColorSpinBoxes[i]->setMaximum(1);
+    //materialColorSpinBoxes[i]->setSingleStep(0.01);
+    //materialColorSpinBoxes[i]->setPrefix(materialColorsName[i]);
+    //connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
+    //materialColorLayout->addWidget(materialColorSpinBoxes[i]);
+    //}
+    //materialsLayout->addLayout(materialColorLayout);
 
     materialGlossyRatio = new QDoubleSpinBox(materialsGroupBox);
     materialGlossyRatio->setMinimum(0);

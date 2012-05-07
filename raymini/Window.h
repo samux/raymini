@@ -41,7 +41,7 @@ public:
     Vec3Df getObjectPos() const;
     Vec3Df getObjectMobile() const;
 
-    Vec3Df getMaterialColor() const;
+    /*Vec3Df getMaterialColor() const;*/
 
 private :
     Controller *controller;
@@ -112,7 +112,7 @@ private :
     QComboBox *materialsList;
     QDoubleSpinBox *materialDiffuseSpinBox;
     QDoubleSpinBox *materialSpecularSpinBox;
-    QDoubleSpinBox *materialColorSpinBoxes[3];
+    /*QDoubleSpinBox *materialColorSpinBoxes[3];*/
     QDoubleSpinBox *materialGlossyRatio;
 
     QComboBox *lightsList;

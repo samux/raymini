@@ -15,12 +15,9 @@ Controller::~Controller()
     delete scene;
     delete rayTracer;
     delete windowModel;
-    delete basicTexture;
 }
 
 void Controller::initAll(int argc, char **argv) {
-    basicTexture = new BasicTexture();
-
     scene = new Scene(this, argc, argv);
     rayTracer = new RayTracer(this);
     windowModel = new WindowModel(this);
@@ -399,17 +396,17 @@ void Controller::windowSetMaterialSpecular(double s) {
     scene->notifyAll();
 }
 
-void Controller::windowSetMaterialColor() {
-    ensureThreadStopped();
-    int m = windowModel->getSelectedMaterialIndex();
-    if (m == -1) {
-        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
-        return;
-    }
-    scene->getMaterials()[m]->setColor(window->getMaterialColor());
-    renderThread->hasToRedraw();
-    scene->notifyAll();
-}
+//void Controller::windowSetMaterialColor() {
+//ensureThreadStopped();
+//int m = windowModel->getSelectedMaterialIndex();
+//if (m == -1) {
+//cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+//return;
+//}
+//scene->getMaterials()[m]->setColor(window->getMaterialColor());
+//renderThread->hasToRedraw();
+//scene->notifyAll();
+//}
 
 void Controller::windowSetMaterialGlossyRatio(double g) {
     ensureThreadStopped();

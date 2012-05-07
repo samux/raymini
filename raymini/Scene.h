@@ -31,6 +31,8 @@ public:
 
     inline std::vector<Material *> &getMaterials() {return materials;}
 
+    inline const std::vector<Texture *> &getTextures() const {return textures;}
+
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox ();
 
@@ -58,9 +60,10 @@ public:
     unsigned int getObjectMaterialIndex(unsigned int objectIndex) const;
 
 private:
-    Material red, green, blue, white, black;
-    Material glossyMat, groundMat, rhinoMat;
-    Mirror mirrorMat;
+    Material *red, *green, *blue, *white, *black;
+    Material *glossyMat, *groundMat, *rhinoMat;
+    SkyBoxMaterial *skyBoxMaterial;
+    Mirror *mirrorMat;
     std::vector<Material *> materials;
 
     Controller *controller;
@@ -74,6 +77,10 @@ private:
     void buildMesh(const std::string & path, Material *mat);
     std::vector<Object *> objects;
     std::vector<Light *> lights;
+
+    NoiseTexture *poolTexture;
+    ColorTexture *whiteTexture;
+    std::vector<Texture *> textures;
     BoundingBox bbox;
 };
 

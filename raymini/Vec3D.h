@@ -36,6 +36,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 
@@ -362,6 +363,12 @@ public:
         return directions;
     }
 
+    std::string toString() const {
+        std::ostringstream stream;
+        stream << p[0] << " " << p[1] << " " << p[2];
+        return stream.str();
+    }
+
 protected:
     T p[3];
 };
@@ -373,7 +380,7 @@ template <class T> inline Vec3D<T> swap (Vec3D<T> & P, Vec3D<T> & Q) {
 }
 
 template <class T> std::ostream & operator<< (std::ostream & output, const Vec3D<T> & v) {
-    output << v[0] << " " << v[1] << " " << v[2];
+    output << v.toString();
     return output;
 }
 

@@ -25,18 +25,14 @@ class Object;
 
 class Material {
 public:
-    Material(Controller *c, std::string name);
+    Material(Controller *c, std::string name, const Texture *t);
     Material(Controller *c, std::string name, float diffuse, float specular,
-             const Vec3Df & color, float glossyRatio=0, float alpha = 1.5f);
-    Material(Controller *c, std::string name, float diffuse, float specular,
-             const Vec3Df & color, float (*noise)(const Vertex &),
-             float glossyRatio=0, float alpha = 1.5f);
+             const Texture *t, float glossyRatio=0, float alpha = 1.5f);
 
     virtual ~Material () {}
 
     inline float getDiffuse () const { return diffuse; }
     inline float getSpecular () const { return specular; }
-    inline Vec3Df getColor () const { return color; }
 
     virtual Vec3Df genColor (const Vec3Df & camPos,
                              Ray *intersectingRay,
@@ -44,7 +40,6 @@ public:
 
     inline void setDiffuse (float d) { diffuse = d; }
     inline void setSpecular (float s) { specular = s; }
-    inline void setColor (const Vec3Df & c) { color = c; }
 
     inline void setGlossyRatio(float g) {glossyRatio = g;}
     inline float getGlossyRatio() const {return glossyRatio;}
@@ -56,21 +51,12 @@ public:
     inline void setTexture(Texture *t) {texture = t;}
     inline const Texture *getTexture() const {return texture;}
 
-    /**
-     * Return the texture color of a point intersected by the ray.
-     * Be sure to configure u,v for each vertex of the mesh
-     * Return Vec3Df() if texture equals null pointer, or if the ray didn't intersect
-     **/
-    Vec3Df getTextureColor(const Ray *intersectingRay) const;
-
 protected:
     Controller *controller;
 
     float diffuse;
     float specular;
     float alpha; //for specular computation
-    Vec3Df color;
-    float (*noise)(const Vertex &);
     float glossyRatio;
     std::string name;
     const Texture *texture;
@@ -78,13 +64,13 @@ protected:
 
 class Mirror : public Material {
 public:
-    Mirror(Controller *c, std::string name) : Material(c, name, 0.5f, 1.f, {0.7f, 0.7f, 1.f}, 1.f, 30){}
+    Mirror(Controller *c, std::string name, const Texture *t) : Material(c, name, 0.5f, 1.f, t, 1.f, 30){}
 };
 
 class Glass : public Material {
 public:
-    Glass(Controller *c, std::string name, float coeff) :
-        Material(c, name, 1.f, 1.f, {0.7f, 0.7f, 1.f}), coeff(coeff), o(o) {}
+    Glass(Controller *c, std::string name, float coeff, Texture *dummy) :
+        Material(c, name, 1.f, 1.f, dummy), coeff(coeff) {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos,
                              Ray *intersectingRay,
@@ -99,15 +85,9 @@ private:
 
 class SkyBoxMaterial: public Material {
 public:
-    SkyBoxMaterial(Controller *c):
-        Material(c, "Skybox", 1, 0, {0, 0, 1})
-        {
-            Texture *t = new Texture();
-            t->loadPPM(SkyBox::textureFileName);
-            texture = t;
-        }
-
-    virtual ~SkyBoxMaterial() {delete texture;}
+    SkyBoxMaterial(Controller *c, std::string name, const Texture *t):
+        Material(c, name, 1, 0, t)
+    {}
     
     virtual Vec3Df genColor (const Vec3Df & camPos,
                              Ray *intersectingRay,

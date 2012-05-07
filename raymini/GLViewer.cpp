@@ -324,7 +324,7 @@ void GLViewer::draw () {
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
         const Material & mat = o->getMaterial ();
-        const Vec3Df & color = mat.getColor ();
+        const Vec3Df & color = mat.getTexture()->getRepresentativeColor();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();
         static GLfloat glMatDiff[4];

@@ -7,6 +7,7 @@
 #include "Material.h"
 #include "RayTracer.h"
 #include "Controller.h"
+#include "SkyBox.h"
 
 using namespace std;
 
@@ -28,7 +29,6 @@ void PointCloud::generatePoints() {
         // For each pixel
         for (const Vec3Df &direction : directions) {
             Ray bestRay;
-            Brdf::Type type = Brdf::Diffuse;
             const Object *object;
 
             // We add the surfel
@@ -42,20 +42,20 @@ void PointCloud::generatePoints() {
                 Vec3Df normalizedDirection(direction);
                 normalizedDirection.normalize();
                 float radius = (1.0+abs(Vec3Df::crossProduct(normalizedDirection, intNorm).getLength()))*distance/(pixelDistance*resolution);
-                if(!mat.isGlossy()) {
+                auto isSkyBox = dynamic_cast<const SkyBox*>(object);
+                if(!mat.isGlossy() && !isSkyBox) {
+                    vector<Light> singleLight({*light});
                     Vec3Df color = mat.genColor(
                             position,
                             &bestRay,
-                            {*light},
-                            type);
+                            singleLight,
+                            Brdf::Diffuse);
                     Surfel surfel(
                             intPos,
                             intNorm,
                             radius,
                             color,
                             &mat);
-                    if (bestRay.getIntersection().getNormal() == Vec3Df(1, 0, 0)) {
-                    }
                     surfels.push_back(surfel);
                 }
             }

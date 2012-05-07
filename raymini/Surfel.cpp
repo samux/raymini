@@ -19,8 +19,7 @@ Surfel::Surfel(
     material(material)
 {}
 
-Surfel::~Surfel()
-{}
+Surfel::~Surfel() {}
 
 Object Surfel::generateObject(unsigned int precision) const{
     vector<Vertex> vertices;

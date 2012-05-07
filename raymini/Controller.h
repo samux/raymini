@@ -13,7 +13,6 @@
 #include "Scene.h"
 #include "GLViewer.h"
 #include "PBGI.h"
-#include "Texture.h"
 
 class Controller : public QObject {
     Q_OBJECT
@@ -83,7 +82,7 @@ public slots :
     void windowSelectMaterial(int);
     void windowSetMaterialDiffuse(double);
     void windowSetMaterialSpecular(double);
-    void windowSetMaterialColor();
+    /*void windowSetMaterialColor();*/
     void windowSetMaterialGlossyRatio(double);
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
@@ -110,14 +109,9 @@ public:
     // Return true iff quality was already optimal
     bool threadImproveRenderingQuality();
 
-    inline const BasicTexture *getBasicTexture() const {return basicTexture;}
-
 private:
     /** Stop thread if running */
     void ensureThreadStopped();
-
-    /** Basic texture for all objects */
-    const BasicTexture *basicTexture;
 
     // Views
     Window *window;

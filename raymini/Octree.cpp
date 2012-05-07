@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "Surfel.h"
 #include "Controller.h"
+#include "Texture.h"
 
 using namespace std;
 
@@ -68,7 +69,7 @@ Surfel Octree::getMeanSurfel() const {
             color += s.getColor();
         }
         n.normalize();
-        return Surfel(p/surfels.size(), n, radius/surfels.size(), color/surfels.size(), new Material(c, "Surfel", 1.0f, 0.0f, color/255.0));
+        return Surfel(p/surfels.size(), n, radius/surfels.size(), color/surfels.size(), new Material(c, "Surfel", 1.0f, 0.0f, new ColorTexture(color/255.0)));
     }
     for(unsigned int i = 0; i < 8; i++) {
         Surfel s = sons[i]->getMeanSurfel();
@@ -78,7 +79,7 @@ Surfel Octree::getMeanSurfel() const {
         color += s.getColor();
     }
     n.normalize();
-    return Surfel(p/8.0, n, radius/8.0, color/8.0, new Material(c, "Surfel", 1.0f, 0.0f, color/255.0));
+    return Surfel(p/8.0, n, radius/8.0, color/8.0, new Material(c, "Surfel", 1.0f, 0.0f, new ColorTexture(color/255.0)));
 }
 
 bool Octree::sort_octree(pair<float, bool> p1, pair<float, bool> p2) {
