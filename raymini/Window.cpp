@@ -34,6 +34,7 @@
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QComboBox>
+#include <QTabWidget>
 
 #include "RayTracer.h"
 #include "Scene.h"
@@ -325,6 +326,7 @@ void Window::updateMaterials() {
     materialDiffuseSpinBox->setVisible(isSelected);
     materialSpecularSpinBox->setVisible(isSelected);
     materialGlossyRatio->setVisible(isSelected);
+    materialTextureLabel->setVisible(isSelected);
     materialTexturesList->setVisible(isSelected);
 
     if (isSelected) {
@@ -370,7 +372,6 @@ void Window::updateProgressBar() {
     bool isRealTime = windowModel->isRealTime();
     stopRenderButton->setVisible(isRendering||isRealTime);
     renderButton->setVisible(!isRendering && !isRealTime);
-    renderProgressBar->setVisible(isRendering || isRealTime);
     if (isRendering) {
         float percent = renderThread->getPercent();
         renderProgressBar->setValue(percent);
@@ -464,17 +465,19 @@ void Window::initControlWidget () {
     connect (snapshotButton, SIGNAL(clicked ()) ,controller, SLOT(windowExportGLImage()));
     previewLayout->addWidget (snapshotButton);
 
-    layout->addWidget (previewGroupBox, 1, 0);
+    layout->addWidget(previewGroupBox, 0, 0, 2, 1);
 
 
 
 
     // Ray tracing
-    QGroupBox * rayGroupBox = new QGroupBox ("Ray Tracing", controlWidget);
-    QHBoxLayout * rayLayout = new QHBoxLayout (rayGroupBox);
+    QGroupBox * rayGroupBox = new QGroupBox("Ray Tracing", controlWidget);
+    QVBoxLayout *rayLayout = new QVBoxLayout(rayGroupBox);
+    QTabWidget * rayTabs = new QTabWidget(rayGroupBox);
+    rayTabs->setUsesScrollButtons(false);
 
     //  RayGroup: Anti Aliasing
-    QGroupBox * AAGroupBox = new QGroupBox ("Anti aliasing", rayGroupBox);
+    QWidget * AAGroupBox = new QWidget(rayTabs);
     QVBoxLayout * AALayout = new QVBoxLayout (AAGroupBox);
 
     QComboBox *antiAliasingList = new QComboBox(AAGroupBox);
@@ -493,10 +496,10 @@ void Window::initControlWidget () {
     AALayout->addWidget(AANbRaySpinBox);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
 
-    rayLayout->addWidget(AAGroupBox);
+    rayTabs->addTab(AAGroupBox, "Anti Aliasing");
 
     //  RayGroup: Ambient occlusion
-    QGroupBox * AOGroupBox = new QGroupBox ("Ambient Occlusion", rayGroupBox);
+    QWidget * AOGroupBox = new QWidget(rayTabs);
     QVBoxLayout * AOLayout = new QVBoxLayout (AOGroupBox);
 
     AONbRaysSpinBox = new QSpinBox(AOGroupBox);
@@ -525,10 +528,10 @@ void Window::initControlWidget () {
     connect (AOOnlyCheckBox, SIGNAL (toggled (bool)), controller, SLOT(windowSetOnlyAO (bool)));
     AOLayout->addWidget (AOOnlyCheckBox);
 
-    rayLayout->addWidget(AOGroupBox);
+    rayTabs->addTab(AOGroupBox, "Ambient Occlusion");
 
     //  RayGroup: Shadows
-    QGroupBox * shadowsGroupBox = new QGroupBox ("Shadows", rayGroupBox);
+    QWidget * shadowsGroupBox = new QWidget(rayTabs);
     QVBoxLayout * shadowsLayout = new QVBoxLayout (shadowsGroupBox);
 
     shadowTypeList = new QComboBox(shadowsGroupBox);
@@ -545,10 +548,10 @@ void Window::initControlWidget () {
     connect(shadowSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetShadowNbRays(int)));
     shadowsLayout->addWidget (shadowSpinBox);
 
-    rayLayout->addWidget (shadowsGroupBox);
+    rayTabs->addTab(shadowsGroupBox, "Shadows");
 
     //  RayGroup: Path Tracing
-    QGroupBox * PTGroupBox = new QGroupBox ("Path tracing", rayGroupBox);
+    QWidget * PTGroupBox = new QWidget(rayTabs);
     QVBoxLayout * PTLayout = new QVBoxLayout (PTGroupBox);
 
     PTDepthSpinBox = new QSpinBox(PTGroupBox);
@@ -588,10 +591,10 @@ void Window::initControlWidget () {
     connect (PBGICheckBox, SIGNAL (clicked (bool)), controller, SLOT (windowSetRayTracerMode (bool)));
     PTLayout->addWidget (PBGICheckBox);
 
-    rayLayout->addWidget (PTGroupBox);
+    rayTabs->addTab(PTGroupBox, "Path Tracing");
 
     //  RayGroup: Focal
-    QGroupBox * focalGroupBox = new QGroupBox("Focal", rayGroupBox);
+    QWidget * focalGroupBox = new QWidget(rayTabs);
     QVBoxLayout * focalLayout = new QVBoxLayout(focalGroupBox);
 
     focusTypeComboBox = new QComboBox(focalGroupBox);
@@ -619,10 +622,10 @@ void Window::initControlWidget () {
     connect(focusApertureSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetFocusAperture(double)));
     focalLayout->addWidget(focusApertureSpinBox);
 
-    rayLayout->addWidget(focalGroupBox);
+    rayTabs->addTab(focalGroupBox, "Focal");
 
     // RayGroup: Motion Blur
-    mBlurGroupBox = new QGroupBox ("Motion blur", rayGroupBox);
+    mBlurGroupBox = new QWidget(rayTabs);
     QVBoxLayout * mBlurLayout = new QVBoxLayout (mBlurGroupBox);
 
     mBlurNbImagesSpinBox = new QSpinBox(PTGroupBox);
@@ -632,19 +635,22 @@ void Window::initControlWidget () {
     connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
     mBlurLayout->addWidget (mBlurNbImagesSpinBox);
 
-    rayLayout->addWidget (mBlurGroupBox);
+    rayTabs->addTab(mBlurGroupBox, "Motion Blur");
 
+    rayLayout->addWidget(rayTabs);
 
-    layout->addWidget (rayGroupBox, 0, 1);
+    layout->addWidget(rayGroupBox, 0, 1, 3, 1);
 
 
 
     // scene param
-    QGroupBox * sceneGroupBox = new QGroupBox ("Scene", controlWidget);
-    QHBoxLayout * sceneLayout = new QHBoxLayout (sceneGroupBox);
+    QGroupBox *sceneGroupBox = new QGroupBox("Scene", controlWidget);
+    QVBoxLayout *sceneLayout = new QVBoxLayout(sceneGroupBox);
+    QTabWidget *sceneTabs = new QTabWidget(sceneGroupBox);
+    sceneTabs->setUsesScrollButtons(false);
 
     //  SceneGroup: Objects
-    QGroupBox *objectsGroupBox = new QGroupBox("Objects", sceneGroupBox);
+    QWidget *objectsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
 
     objectsList = new QComboBox(objectsGroupBox);
@@ -703,11 +709,11 @@ void Window::initControlWidget () {
 
     objectsLayout->addLayout(objectMaterialsLayout);
 
-    sceneLayout->addWidget(objectsGroupBox);
+    sceneTabs->addTab(objectsGroupBox, "Objects");
 
 
     //  SceneGroup: Materials
-    QGroupBox *materialsGroupBox = new QGroupBox("Materials", sceneGroupBox);
+    QWidget *materialsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *materialsLayout = new QVBoxLayout(materialsGroupBox);
 
     materialsList = new QComboBox(materialsGroupBox);
@@ -742,18 +748,25 @@ void Window::initControlWidget () {
     connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
     materialsLayout->addWidget(materialGlossyRatio);
 
+    QHBoxLayout *materialTexturesLayout = new QHBoxLayout;
+
+    materialTextureLabel = new QLabel("Texture:", materialsGroupBox);
+    materialTexturesLayout->addWidget(materialTextureLabel);
+
     materialTexturesList = new QComboBox(materialsGroupBox);
     for (const Texture * t : scene->getTextures()) {
         materialTexturesList->addItem(t->getName().c_str());
     }
     connect(materialTexturesList, SIGNAL(activated(int)), controller, SLOT(windowSetMaterialTexture(int)));
-    materialsLayout->addWidget(materialTexturesList);
+    materialTexturesLayout->addWidget(materialTexturesList);
 
-    sceneLayout->addWidget(materialsGroupBox);
+    materialsLayout->addLayout(materialTexturesLayout);
+
+    sceneTabs->addTab(materialsGroupBox, "Materials");
 
     // SceneGroup: Textures
 
-    QGroupBox *texturesGroupBox = new QGroupBox("Textures", sceneGroupBox);
+    QWidget *texturesGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *texturesLayout = new QVBoxLayout(texturesGroupBox);
 
     texturesList = new QComboBox(texturesGroupBox);
@@ -777,10 +790,10 @@ void Window::initControlWidget () {
     }
     texturesLayout->addLayout(textureColorLayout);
 
-    sceneLayout->addWidget(texturesGroupBox);
+    sceneTabs->addTab(texturesGroupBox, "Textures");
 
     //  SceneGroup: Lights
-    QGroupBox *lightsGroupBox = new QGroupBox("Lights", sceneGroupBox);
+    QWidget *lightsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
 
     lightsList = new QComboBox(lightsGroupBox);
@@ -836,35 +849,40 @@ void Window::initControlWidget () {
     connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
     lightsLayout->addWidget(lightIntensitySpinBox);
 
-    sceneLayout->addWidget(lightsGroupBox);
+    sceneTabs->addTab(lightsGroupBox, "Lights");
 
-    // SceneGroup: Render
-    QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneGroupBox);
+    sceneLayout->addWidget(sceneTabs);
+
+    layout->addWidget(sceneGroupBox, 3, 1, 3, 1);
+
+
+    // Render
+    QGroupBox * ActionGroupBox = new QGroupBox ("Action", sceneTabs);
     QVBoxLayout * actionLayout = new QVBoxLayout (ActionGroupBox);
 
-    stopRenderButton = new QPushButton("Stop", sceneGroupBox);
+    stopRenderButton = new QPushButton("Stop", sceneTabs);
     actionLayout->addWidget(stopRenderButton);
     connect(stopRenderButton, SIGNAL(clicked()), controller, SLOT(windowStopRendering()));
 
-    renderButton = new QPushButton ("Render", sceneGroupBox);
+    renderButton = new QPushButton ("Render", sceneTabs);
     actionLayout->addWidget (renderButton);
     connect (renderButton, SIGNAL (clicked ()), controller, SLOT (windowRenderRayImage ()));
 
-    renderProgressBar = new QProgressBar(sceneGroupBox);
+    renderProgressBar = new QProgressBar(sceneTabs);
     renderProgressBar->setMinimum(0);
     renderProgressBar->setMaximum(100);
     actionLayout->addWidget(renderProgressBar);
 
-    realTimeCheckBox = new QCheckBox("Real time", sceneGroupBox);
+    realTimeCheckBox = new QCheckBox("Real time", sceneTabs);
     connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
     actionLayout->addWidget(realTimeCheckBox);
 
-    durtiestQualityLabel = new QLabel("Durtiest quality:", sceneGroupBox);
+    durtiestQualityLabel = new QLabel("Durtiest quality:", sceneTabs);
     actionLayout->addWidget(durtiestQualityLabel);
 
     QHBoxLayout *durtiestLayout = new QHBoxLayout;
 
-    durtiestQualityComboBox = new QComboBox(sceneGroupBox);
+    durtiestQualityComboBox = new QComboBox(sceneTabs);
     durtiestQualityComboBox->addItem("Optimal");
     durtiestQualityComboBox->addItem("Basic");
     durtiestQualityComboBox->addItem("One over");
@@ -880,7 +898,7 @@ void Window::initControlWidget () {
             return QString("%1 x %1 pixels").arg(value);
         }
     };
-    qualityDividerSpinBox = new SquareSpinBox(sceneGroupBox);
+    qualityDividerSpinBox = new SquareSpinBox(sceneTabs);
     qualityDividerSpinBox->setMinimum(2);
     qualityDividerSpinBox->setMaximum(1000);
     connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
@@ -888,18 +906,15 @@ void Window::initControlWidget () {
 
     actionLayout->addLayout(durtiestLayout);
 
-    QPushButton * showButton = new QPushButton ("Show", sceneGroupBox);
+    QPushButton * showButton = new QPushButton ("Show", sceneTabs);
     actionLayout->addWidget (showButton);
     connect (showButton, SIGNAL (clicked ()), controller, SLOT (windowShowRayImage ()));
 
-    QPushButton * saveButton  = new QPushButton ("Save", sceneGroupBox);
+    QPushButton * saveButton  = new QPushButton ("Save", sceneTabs);
     connect (saveButton, SIGNAL (clicked ()) , controller, SLOT (windowExportRayImage ()));
     actionLayout->addWidget (saveButton);
 
-    sceneLayout->addWidget (ActionGroupBox);
-
-    layout->addWidget (sceneGroupBox, 1, 1);
-
+    layout->addWidget(ActionGroupBox, 2, 0, 2, 1);
 
 
     // Global settings
@@ -918,5 +933,5 @@ void Window::initControlWidget () {
     connect (quitButton, SIGNAL (clicked()) , qApp, SLOT (closeAllWindows()));
     globalLayout->addWidget (quitButton);
 
-    layout->addWidget (globalGroupBox, 0, 0);
+    layout->addWidget (globalGroupBox, 4, 0, 2, 1);
 }

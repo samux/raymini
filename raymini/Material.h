@@ -72,6 +72,8 @@ public:
     Glass(Controller *c, std::string name, float coeff, Texture *dummy) :
         Material(c, name, 1.f, 1.f, dummy), coeff(coeff) {}
 
+    virtual ~Glass() {}
+
     virtual Vec3Df genColor (const Vec3Df & camPos,
                              Ray *intersectingRay,
                              const std::vector<Light> & lights, Brdf::Type type) const;
@@ -88,6 +90,8 @@ public:
     SkyBoxMaterial(Controller *c, std::string name, const Texture *t):
         Material(c, name, 1, 0, t)
     {}
+
+    virtual ~SkyBoxMaterial() {}
     
     virtual Vec3Df genColor (const Vec3Df & camPos,
                              Ray *intersectingRay,

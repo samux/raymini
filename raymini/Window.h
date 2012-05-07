@@ -74,7 +74,7 @@ private :
 
     // Needed for further actions
 
-    QGroupBox *mBlurGroupBox;
+    QWidget *mBlurGroupBox;
     QSpinBox * mBlurNbImagesSpinBox;
 
     QPushButton *stopRenderButton;
@@ -114,6 +114,7 @@ private :
     QDoubleSpinBox *materialDiffuseSpinBox;
     QDoubleSpinBox *materialSpecularSpinBox;
     QDoubleSpinBox *materialGlossyRatio;
+    QLabel *materialTextureLabel;
     QComboBox *materialTexturesList;
 
     QComboBox *texturesList;
