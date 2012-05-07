@@ -223,6 +223,17 @@ void Window::updateFromWindowModel() {
 
     // Status
     updateStatus();
+
+    // Preview
+    updatePreview();
+}
+
+void Window::updatePreview() {
+    WindowModel *windowModel = controller->getWindowModel();
+    wireframeCheckBox->setChecked(windowModel->isWireframe());
+    modeList->setCurrentIndex(windowModel->getRenderingMode());
+    surfelsCheckBox->setChecked(windowModel->isShowSurfel());
+    kdtreeCheckBox->setChecked(windowModel->isShowKDTree());
 }
 
 void Window::updateLights() {
@@ -451,15 +462,23 @@ void Window::initControlWidget () {
     QGroupBox * previewGroupBox = new QGroupBox ("Preview", controlWidget);
     QVBoxLayout * previewLayout = new QVBoxLayout (previewGroupBox);
 
-    QCheckBox * wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
+    wireframeCheckBox = new QCheckBox ("Wireframe", previewGroupBox);
     connect(wireframeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetWireframe(bool)));
     previewLayout->addWidget (wireframeCheckBox);
 
-    QComboBox *modeList = new QComboBox(previewGroupBox);
+    modeList = new QComboBox(previewGroupBox);
     modeList->addItem("Smooth");
     modeList->addItem("Flat");
     previewLayout->addWidget(modeList);
     connect (modeList, SIGNAL(activated (int)), controller, SLOT(viewerSetRenderingMode(int)));
+
+    surfelsCheckBox = new QCheckBox("Show surfels", previewGroupBox);
+    connect(surfelsCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetShowSurfel(bool)));
+    previewLayout->addWidget(surfelsCheckBox);
+
+    kdtreeCheckBox = new QCheckBox("Show KD-tree", previewGroupBox);
+    connect(kdtreeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetShowKDTree(bool)));
+    previewLayout->addWidget(kdtreeCheckBox);
 
     QPushButton * snapshotButton  = new QPushButton ("Save preview", previewGroupBox);
     connect (snapshotButton, SIGNAL(clicked ()) ,controller, SLOT(windowExportGLImage()));

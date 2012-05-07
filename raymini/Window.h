@@ -61,10 +61,11 @@ private :
     // Updated by both WindowModel and RayTracer
     void updateFocus();
     void updateRealTime();
-    // Updated by RenderThread
+    // Updated by RenderThread and WindowModel
     void updateProgressBar();
-    // Updated by WindowModel
     void updateStatus();
+    // Updated by WindowModel
+    void updatePreview();
     // Updated by Scene and RayTracer
     void updateMotionBlur();
 
@@ -73,6 +74,11 @@ private :
     QString currentDirectory;
 
     // Needed for further actions
+
+    QCheckBox *wireframeCheckBox;
+    QComboBox *modeList;
+    QCheckBox *surfelsCheckBox;
+    QCheckBox *kdtreeCheckBox;
 
     QWidget *mBlurGroupBox;
     QSpinBox * mBlurNbImagesSpinBox;

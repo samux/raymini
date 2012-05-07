@@ -21,7 +21,7 @@ Surfel::Surfel(
 
 Surfel::~Surfel() {}
 
-Object Surfel::generateObject(unsigned int precision) const{
+Object *Surfel::generateObject(unsigned int precision) const{
     vector<Vertex> vertices;
     vector<Triangle> triangles;
 
@@ -51,7 +51,7 @@ Object Surfel::generateObject(unsigned int precision) const{
         triangles.push_back(Triangle(previousIndex, i, 0));
     }
 
-    return Object(Mesh(vertices, triangles), material);
+    return new Object(Mesh(vertices, triangles), material);
 }
 
 const Vec3Df &Surfel::getPos() const {

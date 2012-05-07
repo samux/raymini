@@ -33,6 +33,10 @@ public:
 
     inline bool isWireframe() const {return wireframe;}
     inline void setWireframe(bool w) {wireframe = w;}
+    inline bool isShowSurfel() const {return showSurfels;}
+    inline void setShowSurfels(bool s) {showSurfels = s;}
+    inline bool isShowKDTree() const {return showKDTree;}
+    inline void setShowKDTree(bool s) {showKDTree = s;}
     inline int getRenderingMode() const {return renderingMode;}
     inline void setRenderingMode(RenderingMode r) {renderingMode = r;}
     inline int getDisplayMode() const {return displayMode;}
@@ -62,6 +66,8 @@ private:
     int selectedTextureIndex;
     bool wireframe;
     bool focusMode;
+    bool showSurfels;
+    bool showKDTree;
     RenderingMode renderingMode;
     DisplayMode displayMode;
     QImage rayImage;

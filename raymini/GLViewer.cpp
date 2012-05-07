@@ -13,6 +13,8 @@
 #include "RayTracer.h"
 #include "Controller.h"
 #include "Light.h"
+#include "KDtree.h"
+#include "Object.h"
 
 using namespace std;
 
@@ -253,6 +255,11 @@ void GLViewer::draw_octree(const Octree * t) {
     drawCube(t->bBox.getMin(), t->bBox.getMax());
 }
 
+bool drawNode(const KDtree *t) {
+    GLViewer::drawCube(t->bBox.getMin(), t->bBox.getMax());
+    return true;
+}
+
 void GLViewer::draw () {
     WindowModel *windowModel = controller->getWindowModel();
     Scene * scene = controller->getScene();
@@ -315,8 +322,14 @@ void GLViewer::draw () {
     }
 
     // Draw the scene
-    for (unsigned int i = 0; i < scene->getObjects ().size (); i++) {
-        const Object * o = scene->getObjects ()[i];
+    vector<Object *> objectsToDraw;
+    if (windowModel->isShowSurfel()) {
+        objectsToDraw = controller->getPBGI()->getPointCloud()->getObjects();
+    }
+    else {
+        objectsToDraw = scene->getObjects();
+    }
+    for (const Object *o : objectsToDraw) {
         if (!o->isEnabled()) {
             continue;
         }
@@ -345,5 +358,17 @@ void GLViewer::draw () {
         glEnable (GL_LIGHTING);
         o->getMesh().renderGL(windowModel->getRenderingMode() == WindowModel::FLAT);
         glPopMatrix ();
+    }
+
+    if (windowModel->isShowKDTree()) {
+        glDisable(GL_LIGHTING);
+        glColor3f(0, 0, 0);
+        for (const Object *o : scene->getObjects()) {
+            const Vec3Df & trans = o->getTrans ();
+            glPushMatrix ();
+            glTranslatef (trans[0], trans[1], trans[2]);
+            o->getKDtree().exec(drawNode);
+            glPopMatrix ();
+        }
     }
 }

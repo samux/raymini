@@ -9,6 +9,8 @@ WindowModel::WindowModel(Controller *c):
     selectedTextureIndex(-1),
     wireframe(false),
     focusMode(false),
+    showSurfels(false),
+    showKDTree(false),
     renderingMode(SMOOTH),
     displayMode(OpenGLDisplayMode),
     focusPoint(Vec3Df(), Vec3Df(0, 0, 1)),

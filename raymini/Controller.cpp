@@ -326,6 +326,16 @@ void Controller::viewerSetFocusPoint(Vertex point) {
     windowModel->notifyAll();
 }
 
+void Controller::viewerSetShowSurfel(bool s) {
+    windowModel->setShowSurfels(s);
+    windowModel->notifyAll();
+}
+
+void Controller::viewerSetShowKDTree(bool s) {
+    windowModel->setShowKDTree(s);
+    windowModel->notifyAll();
+}
+
 void Controller::windowSetDepthPathTracing(int i) {
     ensureThreadStopped();
     rayTracer->depthPathTracing = i;

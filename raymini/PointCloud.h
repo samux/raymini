@@ -16,7 +16,7 @@ class PointCloud {
 private:
     Controller * c;
     std::vector<Surfel> surfels;
-    std::vector<Object> objects;
+    std::vector<Object*> objects;
     float resolution;
 
 public:
@@ -26,7 +26,7 @@ public:
     ~PointCloud();
 
     /** Return the objects, generate them if null */
-    const std::vector<Object>& getObjects(unsigned int precision=20);
+    const std::vector<Object*>& getObjects(unsigned int precision=20);
 
     /** Return the surfels */
     const std::vector<Surfel>& getSurfels() const;

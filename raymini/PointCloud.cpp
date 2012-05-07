@@ -15,6 +15,9 @@ PointCloud::PointCloud(Controller * c): c(c), resolution(256) {}
 
 
 PointCloud::~PointCloud() {
+    for (Object *o:objects) {
+        delete o;
+    }
 }
 
 void PointCloud::generatePoints() {
@@ -72,7 +75,7 @@ void PointCloud::generateObjects(unsigned int precision) {
     }
 }
 
-const vector<Object>& PointCloud::getObjects(unsigned int precision) {
+const vector<Object*>& PointCloud::getObjects(unsigned int precision) {
     if (objects.empty()) {
         generateObjects(precision);
     }

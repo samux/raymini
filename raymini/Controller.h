@@ -97,6 +97,8 @@ public slots :
     void viewerSetDisplayMode(int m);
     void viewerSetRayImage(const QImage & image);
     void viewerSetFocusPoint(Vertex point);
+    void viewerSetShowSurfel(bool);
+    void viewerSetShowKDTree(bool);
 
     void threadRenderRayImage();
     void threadSetElapsed(int);

@@ -33,5 +33,5 @@ public:
     const Material * getMaterial() const;
 
     /** Return an object representing the surfel */
-    Object generateObject(unsigned int precision) const;
+    Object *generateObject(unsigned int precision) const;
 };
