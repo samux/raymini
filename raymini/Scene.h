@@ -59,6 +59,9 @@ public:
     /** Return the index of the material of an object, -1 if not found */
     unsigned int getObjectMaterialIndex(unsigned int objectIndex) const;
 
+    /** Return the index of the texture of a material, -1 if not found */
+    unsigned int getMaterialTextureIndex(unsigned int materialIndex) const;
+
 private:
     Material *red, *green, *blue, *white, *black;
     Material *glossyMat, *groundMat, *rhinoMat;

@@ -94,13 +94,13 @@ Vec3Df Window::getLightColor() const {
     return newColor;
 }
 
-//Vec3Df Window::getMaterialColor() const {
-//Vec3Df newColor;
-//for (int i=0; i<3; i++) {
-//newColor[i] = materialColorSpinBoxes[i]->value();
-//}
-//return newColor;
-//}
+Vec3Df Window::getTextureColor() const {
+    Vec3Df newColor;
+    for (int i=0; i<3; i++) {
+        newColor[i] = textureColorSpinBoxes[i]->value();
+    }
+    return newColor;
+}
 
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
@@ -130,6 +130,9 @@ void Window::updateFromScene() {
 
     // Materials
     updateMaterials();
+
+    // Textures
+    updateTextures();
 
     // Motion blur
     updateMotionBlur();
@@ -210,6 +213,9 @@ void Window::updateFromWindowModel() {
 
     // Materials
     updateMaterials();
+
+    // Textures
+    updateTextures();
 
     // Real time
     updateRealTime();
@@ -318,10 +324,8 @@ void Window::updateMaterials() {
     bool isSelected = index != -1;
     materialDiffuseSpinBox->setVisible(isSelected);
     materialSpecularSpinBox->setVisible(isSelected);
-    //for (unsigned int i=0; i<3; i++) {
-    //materialColorSpinBoxes[i]->setVisible(isSelected);
-    //}
     materialGlossyRatio->setVisible(isSelected);
+    materialTexturesList->setVisible(isSelected);
 
     if (isSelected) {
         const Material *material = scene->getMaterials()[index];
@@ -331,14 +335,31 @@ void Window::updateMaterials() {
         materialSpecularSpinBox->disconnect();
         materialSpecularSpinBox->setValue(material->getSpecular());
         connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
-        //for (unsigned int i=0; i<3; i++) {
-        //materialColorSpinBoxes[i]->disconnect();
-        //materialColorSpinBoxes[i]->setValue(material->getColor()[i]);
-        //connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
-        //}
         materialGlossyRatio->disconnect();
         materialGlossyRatio->setValue(material->getGlossyRatio());
         connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
+        materialTexturesList->setCurrentIndex(scene->getMaterialTextureIndex(index));
+    }
+}
+
+void Window::updateTextures() {
+    Scene *scene = controller->getScene();
+    WindowModel *windowModel = controller->getWindowModel();
+
+    int index = windowModel->getSelectedTextureIndex();
+    texturesList->setCurrentIndex(index+1);
+    bool isSelected = index != -1;
+    for (unsigned int i=0; i<3; i++) {
+        textureColorSpinBoxes[i]->setVisible(isSelected);
+    }
+
+    if (isSelected) {
+        const Texture *texture = scene->getTextures()[index];
+        for (unsigned int i=0; i<3; i++) {
+            textureColorSpinBoxes[i]->disconnect();
+            textureColorSpinBoxes[i]->setValue(texture->getRepresentativeColor()[i]);
+            connect(textureColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetTextureColor()));
+        }
     }
 }
 
@@ -713,19 +734,6 @@ void Window::initControlWidget () {
     connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
     materialsLayout->addWidget(materialSpecularSpinBox);
 
-    //QHBoxLayout *materialColorLayout = new QHBoxLayout;
-    //QString materialColorsName[3] = {"R: ", "G: ", "B: "};
-    //for (unsigned int i=0; i<3; i++) {
-    //materialColorSpinBoxes[i] = new QDoubleSpinBox(materialsGroupBox);
-    //materialColorSpinBoxes[i]->setMinimum(0);
-    //materialColorSpinBoxes[i]->setMaximum(1);
-    //materialColorSpinBoxes[i]->setSingleStep(0.01);
-    //materialColorSpinBoxes[i]->setPrefix(materialColorsName[i]);
-    //connect(materialColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialColor()));
-    //materialColorLayout->addWidget(materialColorSpinBoxes[i]);
-    //}
-    //materialsLayout->addLayout(materialColorLayout);
-
     materialGlossyRatio = new QDoubleSpinBox(materialsGroupBox);
     materialGlossyRatio->setMinimum(0);
     materialGlossyRatio->setMaximum(1);
@@ -734,7 +742,42 @@ void Window::initControlWidget () {
     connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
     materialsLayout->addWidget(materialGlossyRatio);
 
+    materialTexturesList = new QComboBox(materialsGroupBox);
+    for (const Texture * t : scene->getTextures()) {
+        materialTexturesList->addItem(t->getName().c_str());
+    }
+    connect(materialTexturesList, SIGNAL(activated(int)), controller, SLOT(windowSetMaterialTexture(int)));
+    materialsLayout->addWidget(materialTexturesList);
+
     sceneLayout->addWidget(materialsGroupBox);
+
+    // SceneGroup: Textures
+
+    QGroupBox *texturesGroupBox = new QGroupBox("Textures", sceneGroupBox);
+    QVBoxLayout *texturesLayout = new QVBoxLayout(texturesGroupBox);
+
+    texturesList = new QComboBox(texturesGroupBox);
+    texturesList->addItem("No texture selected");
+    for (const Texture *t : scene->getTextures()) {
+        texturesList->addItem(t->getName().c_str());
+    }
+    connect(texturesList, SIGNAL(activated(int)), controller, SLOT(windowSelectTexture(int)));
+    texturesLayout->addWidget(texturesList);
+
+    QHBoxLayout *textureColorLayout = new QHBoxLayout;
+    QString textureColorsName[3] = {"R: ", "G: ", "B: "};
+    for (unsigned int i=0; i<3; i++) {
+        textureColorSpinBoxes[i] = new QDoubleSpinBox(texturesGroupBox);
+        textureColorSpinBoxes[i]->setMinimum(0);
+        textureColorSpinBoxes[i]->setMaximum(1);
+        textureColorSpinBoxes[i]->setSingleStep(0.01);
+        textureColorSpinBoxes[i]->setPrefix(textureColorsName[i]);
+        connect(textureColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetTextureColor()));
+        textureColorLayout->addWidget(textureColorSpinBoxes[i]);
+    }
+    texturesLayout->addLayout(textureColorLayout);
+
+    sceneLayout->addWidget(texturesGroupBox);
 
     //  SceneGroup: Lights
     QGroupBox *lightsGroupBox = new QGroupBox("Lights", sceneGroupBox);

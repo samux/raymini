@@ -396,18 +396,6 @@ void Controller::windowSetMaterialSpecular(double s) {
     scene->notifyAll();
 }
 
-//void Controller::windowSetMaterialColor() {
-//ensureThreadStopped();
-//int m = windowModel->getSelectedMaterialIndex();
-//if (m == -1) {
-//cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
-//return;
-//}
-//scene->getMaterials()[m]->setColor(window->getMaterialColor());
-//renderThread->hasToRedraw();
-//scene->notifyAll();
-//}
-
 void Controller::windowSetMaterialGlossyRatio(double g) {
     ensureThreadStopped();
     int m = windowModel->getSelectedMaterialIndex();
@@ -416,6 +404,35 @@ void Controller::windowSetMaterialGlossyRatio(double g) {
         return;
     }
     scene->getMaterials()[m]->setGlossyRatio(g);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetMaterialTexture(int index) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedMaterialIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[o]->setTexture(scene->getTextures()[index]);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSelectTexture(int t) {
+    windowModel->setSelectedTextureIndex(t-1);
+    windowModel->notifyAll();
+}
+
+void Controller::windowSetTextureColor() {
+    ensureThreadStopped();
+    int t = windowModel->getSelectedTextureIndex();
+    if (t == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    scene->getTextures()[t]->setRepresentativeColor(window->getTextureColor());
     renderThread->hasToRedraw();
     scene->notifyAll();
 }

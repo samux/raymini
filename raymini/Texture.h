@@ -19,6 +19,7 @@ public:
     virtual Vec3Df getColor(Ray *intersectingRay) const = 0;
 
     Vec3Df getRepresentativeColor() const;
+    void setRepresentativeColor(Vec3Df c);
 
     std::string getName() const;
 

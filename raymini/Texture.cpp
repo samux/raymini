@@ -16,6 +16,10 @@ Vec3Df Texture::getRepresentativeColor() const {
     return color;
 }
 
+void Texture::setRepresentativeColor(Vec3Df c) {
+    color = c;
+}
+
 string Texture::getName() const {
     return name;
 }

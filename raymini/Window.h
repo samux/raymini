@@ -41,7 +41,7 @@ public:
     Vec3Df getObjectPos() const;
     Vec3Df getObjectMobile() const;
 
-    /*Vec3Df getMaterialColor() const;*/
+    Vec3Df getTextureColor() const;
 
 private :
     Controller *controller;
@@ -57,6 +57,7 @@ private :
     void updateLights();
     void updateObjects();
     void updateMaterials();
+    void updateTextures();
     // Updated by both WindowModel and RayTracer
     void updateFocus();
     void updateRealTime();
@@ -112,8 +113,11 @@ private :
     QComboBox *materialsList;
     QDoubleSpinBox *materialDiffuseSpinBox;
     QDoubleSpinBox *materialSpecularSpinBox;
-    /*QDoubleSpinBox *materialColorSpinBoxes[3];*/
     QDoubleSpinBox *materialGlossyRatio;
+    QComboBox *materialTexturesList;
+
+    QComboBox *texturesList;
+    QDoubleSpinBox *textureColorSpinBoxes[3];
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

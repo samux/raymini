@@ -414,3 +414,15 @@ unsigned int Scene::getObjectMaterialIndex(unsigned int objectIndex) const {
     }
     return -1;
 }
+
+unsigned int Scene::getMaterialTextureIndex(unsigned int materialIndex) const {
+    const Material *material = materials[materialIndex];
+    unsigned int result = 0;
+    for (const Texture *texture : textures) {
+        if (texture == material->getTexture()) {
+            return result;
+        }
+        result++;
+    }
+    return -1;
+}

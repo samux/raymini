@@ -28,6 +28,9 @@ public:
     inline int getSelectedMaterialIndex() const {return selectedMaterialIndex;}
     inline void setSelectedMaterialIndex(int index) {selectedMaterialIndex = index;}
 
+    inline int getSelectedTextureIndex() const {return selectedTextureIndex;}
+    inline void setSelectedTextureIndex(int index) {selectedTextureIndex = index;}
+
     inline bool isWireframe() const {return wireframe;}
     inline void setWireframe(bool w) {wireframe = w;}
     inline int getRenderingMode() const {return renderingMode;}
@@ -56,6 +59,7 @@ private:
     int selectedLightIndex;
     int selectedObjectIndex;
     int selectedMaterialIndex;
+    int selectedTextureIndex;
     bool wireframe;
     bool focusMode;
     RenderingMode renderingMode;
