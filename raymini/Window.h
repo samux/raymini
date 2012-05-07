@@ -99,10 +99,9 @@ private :
 
     QSpinBox *PTDepthSpinBox;
     QSpinBox *PTNbRaySpinBox;
-    QSpinBox *PTMaxAngleSpinBox;
     QCheckBox *PTOnlyCheckBox;
     QCheckBox *PBGICheckBox;
-    QSpinBox * PTIntensitySpinBox;
+    QDoubleSpinBox * PTIntensitySpinBox;
 
     QSpinBox *AANbRaySpinBox;
 

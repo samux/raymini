@@ -25,9 +25,9 @@ inline int clamp (float f) {
 }
 
 RayTracer::RayTracer(Controller *c):
-    mode(Mode::RAY_TRACING_MODE),
-    depthPathTracing(0), nbRayPathTracing(50), maxAnglePathTracing(M_PI/2.f),
-    intensityPathTracing(3.f), onlyPathTracing(false),
+    mode(Mode::PATH_TRACING_MODE),
+    depthPathTracing(0), nbRayPathTracing(50),
+    intensityPathTracing(2.0f), onlyPathTracing(false),
     radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/3),
     intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
@@ -60,7 +60,10 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
 
     vector<pair<float, float>> singleNulOffset;
     singleNulOffset.push_back(pair<float, float>(0, 0));
-    const vector<pair<float, float>> offsets = quality==OPTIMAL?AntiAliasing::generateOffsets(typeAntiAliasing, nbRayAntiAliasing):singleNulOffset;
+    
+    int nbRay = max(nbRayAntiAliasing, (depthPathTracing) ? nbRayPathTracing : 0);
+    const vector<pair<float, float>> offsets =  (quality==OPTIMAL) ? 
+                                                AntiAliasing::generateOffsets(typeAntiAliasing, nbRay) : singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
     const float tang = tan (fieldOfView);
@@ -183,42 +186,42 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathT
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
+
     Object *intersectedObject;
 
-    if(intersect(dir, camPos, bestRay, intersectedObject)) {
-        const Material & mat = intersectedObject->getMaterial();
-        const vector<Light> & light = getLights(bestRay.getIntersection());
 
-        Color color = mat.genColor(camPos,
-                                   &bestRay,
-                                   light,
-                                   type);
+    if(!intersect(dir, camPos, bestRay, intersectedObject)) {
+        return backgroundColor;
+    } 
 
-        if((depth < depthPathTracing) || (mode == PBGI_MODE && quality == OPTIMAL)) {
+    // hit something
+    const Material & mat = intersectedObject->getMaterial();
+    const vector<Light> & lights = getLights(bestRay.getIntersection());
 
-            vector<Light> lights;
-            switch(mode) {
-                case RAY_TRACING_MODE:
-                    lights = getLightsPT(bestRay.getIntersection(), depth);
-                    break;
-                case PBGI_MODE:
-                    lights = controller->getPBGI()->getLights(bestRay);
-                    break;
-            }
+    Color color = mat.genColor(camPos, &bestRay, lights, type);
 
-            Color ptColor = mat.genColor(camPos, &bestRay,
-                                         lights,
-                                         Brdf::Diffuse);
-
-            if(onlyPathTracing && depth == 0)
-                color = ptColor;
-            else
-                color += ptColor;
-        }
+    if(mode == PBGI_MODE && quality == OPTIMAL) {
+        vector<Light> lights_pbgi = controller->getPBGI()->getLights(bestRay);
+        color += mat.genColor(camPos, &bestRay, lights_pbgi, Brdf::Diffuse);
         return color();
     }
 
-    return backgroundColor;
+    // PATH TRACING
+    if(depth < depthPathTracing) {
+        Vec3Df new_orig = bestRay.getIntersection().getPos();
+        Vec3Df new_dir = Vec3Df::getRandomOnHemisphere(bestRay.getIntersection().getNormal());
+
+        Color ptColor = getColor(new_dir, new_orig, bestRay, depth+1, Brdf::Diffuse); 
+        if(!(ptColor() == backgroundColor)) {
+            float coeff = intensityPathTracing/pow(1.0 + bestRay.getIntersectionDistance(), 3*(depth+1));
+            ptColor *= coeff;
+            color += ptColor;
+        }
+        if(onlyPathTracing && depth == 0)
+            color = ptColor;
+    }
+
+    return color();
 }
 
 vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
@@ -236,28 +239,6 @@ vector<Light> RayTracer::getLights(const Vertex & closestIntersection) const {
     }
 
     return enabledLights;
-}
-
-vector<Light> RayTracer::getLightsPT(const Vertex & closestIntersection, unsigned depth) const {
-    vector<Light> lights;
-
-    Vec3Df pos = closestIntersection.getPos();
-    vector<Vec3Df> dirs = closestIntersection.getNormal().randRotate(maxAnglePathTracing,
-                                                                     nbRayPathTracing);
-
-    for (const Vec3Df & dir : dirs) {
-        Ray bestRay;
-        Vec3Df color = getColor(dir, pos, bestRay, depth+1, Brdf::Diffuse);
-
-        if(bestRay.intersect()) {
-            float d = bestRay.getIntersectionDistance();
-            float intensity = intensityPathTracing / pow(1+d,3);
-
-            lights.push_back(Light(bestRay.getIntersection().getPos(),
-                                   color, intensity));
-        }
-    }
-    return lights;
 }
 
 float RayTracer::getAmbientOcclusion(Vertex intersection) const {

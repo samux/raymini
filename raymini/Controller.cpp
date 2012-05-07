@@ -91,7 +91,7 @@ void Controller::windowSetShadowNbRays (int i) {
 
 void Controller::windowSetRayTracerMode (bool b) {
     ensureThreadStopped();
-    rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::RAY_TRACING_MODE;
+    rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::PATH_TRACING_MODE;
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
@@ -338,6 +338,7 @@ void Controller::viewerSetShowKDTree(bool s) {
 void Controller::windowSetDepthPathTracing(int i) {
     ensureThreadStopped();
     rayTracer->depthPathTracing = i;
+    rayTracer->typeAntiAliasing = AntiAliasing::UNIFORM;
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
@@ -348,16 +349,10 @@ void Controller::windowSetNbRayPathTracing(int i) {
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }
-void Controller::windowSetMaxAnglePathTracing(int i) {
-    ensureThreadStopped();
-    rayTracer->maxAnglePathTracing = (float)i*2.0*M_PI/360.0;
-    renderThread->hasToRedraw();
-    rayTracer->notifyAll();
-}
 
-void Controller::windowSetIntensityPathTracing(int i) {
+void Controller::windowSetIntensityPathTracing(double i) {
     ensureThreadStopped();
-    rayTracer->intensityPathTracing = float(i);
+    rayTracer->intensityPathTracing = i;
     renderThread->hasToRedraw();
     rayTracer->notifyAll();
 }

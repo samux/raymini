@@ -31,14 +31,13 @@ class Controller;
 class RayTracer: public Observable {
 public:
 
-    enum Mode {RAY_TRACING_MODE = 0, PBGI_MODE};
+    enum Mode {PATH_TRACING_MODE = 0, PBGI_MODE};
     enum Quality {OPTIMAL, BASIC, ONE_OVER_X};
 
     /*          Config           */
     Mode mode;
     unsigned depthPathTracing;
     unsigned nbRayPathTracing;
-    float maxAnglePathTracing;
     float intensityPathTracing;
     bool onlyPathTracing;
 
@@ -114,7 +113,6 @@ private:
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth = 0, Brdf::Type type = Brdf::All) const;
     std::vector<Light> getLights(const Vertex & closestIntersection) const;
-    std::vector<Light> getLightsPT(const Vertex & closestIntersection, unsigned depth = 0) const;
 };
 
 

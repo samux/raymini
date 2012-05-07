@@ -64,8 +64,7 @@ public slots :
     void windowSetFocalFixing(bool);
     void windowSetDepthPathTracing(int);
     void windowSetNbRayPathTracing(int);
-    void windowSetMaxAnglePathTracing(int);
-    void windowSetIntensityPathTracing(int);
+    void windowSetIntensityPathTracing(double);
     void windowSetOnlyPT(bool);
     void windowSetNbImagesSpinBox(int);
     void windowSelectLight(int);

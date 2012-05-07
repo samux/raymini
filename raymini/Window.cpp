@@ -134,7 +134,8 @@ void Window::updateFromRayTracer() {
     connect(shadowSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetShadowNbRays(int)));
 
     // Anti aliasing
-    AANbRaySpinBox->setVisible(rayTracer->typeAntiAliasing != AntiAliasing::NONE);
+    bool isPT = rayTracer->depthPathTracing != 0;
+    AANbRaySpinBox->setVisible((!isPT) && rayTracer->typeAntiAliasing != AntiAliasing::NONE);
     AANbRaySpinBox->disconnect();
     AANbRaySpinBox->setValue(rayTracer->nbRayAntiAliasing);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
@@ -158,25 +159,19 @@ void Window::updateFromRayTracer() {
     updateFocus();
 
     // Path tracing
-    bool isPT = rayTracer->depthPathTracing != 0;
     PTDepthSpinBox->disconnect();
     PTDepthSpinBox->setValue(rayTracer->depthPathTracing);
     connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
     PTNbRaySpinBox->setVisible(isPT);
-    PTMaxAngleSpinBox->setVisible(isPT);
     PTOnlyCheckBox->setVisible(isPT);
     PBGICheckBox->setVisible(!isPT);
     if (isPT) {
         PTNbRaySpinBox->disconnect();
         PTNbRaySpinBox->setValue(rayTracer->nbRayPathTracing);
         connect(PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
-        PTMaxAngleSpinBox->disconnect();
-        int PTAngle = rayTracer->maxAnglePathTracing*360.0/(2.0*M_PI) + 0.5;
-        PTMaxAngleSpinBox->setValue(PTAngle);
-        connect(PTMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetMaxAnglePathTracing(int)));
         PTIntensitySpinBox->disconnect();
         PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
-        connect(PTIntensitySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetIntensityPathTracing(int)));
+        connect(PTIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetIntensityPathTracing(double)));
     }
 
     // Real time
@@ -526,7 +521,7 @@ void Window::initControlWidget () {
     AANbRaySpinBox = new QSpinBox(AAGroupBox);
     AANbRaySpinBox->setSuffix(" rays");
     AANbRaySpinBox->setMinimum(4);
-    AANbRaySpinBox->setMaximum(10);
+    AANbRaySpinBox->setMaximum(10000);
     AALayout->addWidget(AANbRaySpinBox);
     connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
 
@@ -598,23 +593,16 @@ void Window::initControlWidget () {
     PTNbRaySpinBox = new QSpinBox(PTGroupBox);
     PTNbRaySpinBox->setSuffix (" rays");
     PTNbRaySpinBox->setMinimum (1);
-    PTNbRaySpinBox->setMaximum (1000);
+    PTNbRaySpinBox->setMaximum (10000);
     connect(PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
     PTLayout->addWidget (PTNbRaySpinBox);
 
-    PTMaxAngleSpinBox = new QSpinBox(PTGroupBox);
-    PTMaxAngleSpinBox->setPrefix ("Max angle: ");
-    PTMaxAngleSpinBox->setSuffix (" degrees");
-    PTMaxAngleSpinBox->setMinimum (0);
-    PTMaxAngleSpinBox->setMaximum (180);
-    connect(PTMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetMaxAnglePathTracing(int)));
-    PTLayout->addWidget (PTMaxAngleSpinBox);
-
-    PTIntensitySpinBox = new QSpinBox(PTGroupBox);
+    PTIntensitySpinBox = new QDoubleSpinBox(PTGroupBox);
     PTIntensitySpinBox->setPrefix ("Intensity: ");
-    PTIntensitySpinBox->setMinimum (1);
-    PTIntensitySpinBox->setMaximum (1000);
-    connect(PTIntensitySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetIntensityPathTracing(int)));
+    PTIntensitySpinBox->setMinimum (0.2);
+    PTIntensitySpinBox->setMaximum (10.0);
+    PTIntensitySpinBox->setSingleStep(0.2);
+    connect(PTIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetIntensityPathTracing(double)));
     PTLayout->addWidget (PTIntensitySpinBox);
 
     PTOnlyCheckBox = new QCheckBox ("Only path tracing coloring", PTGroupBox);

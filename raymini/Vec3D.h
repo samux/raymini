@@ -307,6 +307,18 @@ public:
                       n[0]*q[0] + n[1]*q[1] + n[2]*q[2]);
     }
 
+    static inline Vec3D getRandomOnHemisphere(const Vec3D & dir) {
+        Vec3D q ( rand()/float(RAND_MAX) - 0.5,
+                    rand()/float(RAND_MAX) - 0.5,
+                    rand()/float(RAND_MAX) - 0.5);
+        q.normalize();
+        if(dotProduct(q, dir) < 0.0)
+            q = -q;
+
+        return q;
+        
+    }
+
     /** Rotate given normalized axis and angle */
     inline Vec3D rotate(const Vec3D &axis, const T &angle) const {
         Vec3D<T> result;
