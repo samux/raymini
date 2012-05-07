@@ -63,7 +63,7 @@ public:
     };
 
     /** Give vertices default spherical texture mapping */
-    void setDefaultTextureMapping();
+    void setDefaultTextureMapping(bool useNormals=true);
 
     /** Give two triangles the whole texture mapped */
     void setSquareTextureMapping(unsigned t0=0, unsigned t1=1);

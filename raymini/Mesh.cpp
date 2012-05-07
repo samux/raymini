@@ -229,13 +229,19 @@ void Mesh::scale(const float &s) {
     }
 }
 
-void Mesh::setDefaultTextureMapping() {
+void Mesh::setDefaultTextureMapping(bool useNormals) {
     // See: http://www.mvps.org/directx/articles/spheremap.htm
     for (Triangle &t : triangles) {
         for (unsigned int i=0; i<3; i++) {
             const Vertex &v = vertices[t.getVertex(i)];
-            Vec3Df normal = v.getNormal();
-            t.setUV(i, asin(normal[0])/M_PI+0.5, asin(normal[2])/M_PI+0.5);
+            if (useNormals) {
+                Vec3Df normal = v.getNormal();
+                t.setUV(i, asin(normal[0])/M_PI+0.5, asin(normal[2])/M_PI+0.5);
+            } else {
+                Vec3Df pos = v.getPos();
+                pos.normalize();
+                t.setUV(i, asin(pos[0])/M_PI+0.5, asin(pos[2])/M_PI+0.5);
+            }
         }
     }
 }
