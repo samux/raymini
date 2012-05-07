@@ -396,7 +396,6 @@ void Scene::buildMirrorGlass() {
 
 
     auto glass = new Object(sphereMesh, glassMat, "glass", {1 , 1, 3});
-    glassMat->setObject(glass);
     objects.push_back(glass);
 
     lights.push_back(new Light({-1.3f, -2.9f, 3.f}, 0.01, {0.f, 0.f, 1.f},

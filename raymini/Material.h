@@ -78,11 +78,8 @@ public:
                              Ray *intersectingRay,
                              const std::vector<Light> & lights, Brdf::Type type) const;
 
-    void setObject(const Object *o) {this->o = o;}
-
 private:
     float coeff;
-    const Object *o;
 };
 
 class SkyBoxMaterial: public Material {

@@ -16,6 +16,8 @@
 #include "Vertex.h"
 #include "Triangle.h"
 
+class Object;
+
 class Ray {
 public:
     inline Ray () : hasIntersection(false) , intersectionDistance(1000000.f){}
@@ -44,7 +46,7 @@ public:
     }
 
     bool intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const;
-    bool intersect (const Triangle &t, const Vertex & v1, const Vertex & v2, const Vertex & v3);
+    bool intersect (const Triangle &t, const Vertex & v1, const Vertex & v2, const Vertex & v3, const Object *o);
     bool intersectDisc(const Vec3Df & center, const Vec3Df & normal, float radius) ;
 
     /** Debug ray drawing using OpenGL */
@@ -60,6 +62,8 @@ public:
     inline float getV() const {return v;}
 
     const Triangle *getTriangle() const {return t;}
+
+    const Object *getIntersectedObject() const {return intersectedObject;}
 
 private:
     static constexpr float BBOX_INTERSEC_DELTA = 0.1f;
@@ -78,6 +82,7 @@ private:
     Vec3Df computeNormal() const;
     float u;
     float v;
+    const Object *intersectedObject;
 };
 
 

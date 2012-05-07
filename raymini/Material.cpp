@@ -85,6 +85,7 @@ Vec3Df Material::genColor (const Vec3Df & camPos,
 Vec3Df Glass::genColor (const Vec3Df & camPos,
                         Ray *r,
                         const std::vector<Light> &, Brdf::Type) const {
+    const Object *o = r->getIntersectedObject();
     float size = o->getBoundingBox().getRadius();
     const Vertex &closestIntersection = r->getIntersection();
     const Vec3Df & pos = closestIntersection.getPos();
