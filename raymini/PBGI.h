@@ -24,6 +24,18 @@ public:
     std::vector<Light> getLights(Ray & r) const;
     void setResolution(unsigned int r) {res = r;}
 
+    void update() {
+        if (cloud) {
+            delete cloud;
+        }
+        if (octree) {
+            delete octree;
+        }
+        cloud = new PointCloud(c);
+        cloud->generatePoints();
+        octree = new Octree(c, *cloud);
+    }
+
 private:
     Controller * c;
     unsigned int res;

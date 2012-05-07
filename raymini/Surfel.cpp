@@ -43,7 +43,7 @@ Object *Surfel::generateObject(unsigned int precision) const{
     for (unsigned int i=1; i<=precision; i++) {
         Vec3Df offset = cos(angle)*rightVector + sin(angle)*upVector;
         offset.normalize();
-        offset *= radius;
+        offset *= 0.05;
         Vec3Df newPosition = position + offset;
         vertices.push_back(Vertex(newPosition, normal));
         angle += deltaAngle;

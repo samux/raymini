@@ -472,9 +472,17 @@ void Window::initControlWidget () {
     previewLayout->addWidget(modeList);
     connect (modeList, SIGNAL(activated (int)), controller, SLOT(viewerSetRenderingMode(int)));
 
+    QHBoxLayout *surfelsLayout = new QHBoxLayout;
+
     surfelsCheckBox = new QCheckBox("Show surfels", previewGroupBox);
     connect(surfelsCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetShowSurfel(bool)));
-    previewLayout->addWidget(surfelsCheckBox);
+    surfelsLayout->addWidget(surfelsCheckBox);
+
+    QPushButton *surfelUpdateButton = new QPushButton("Update point cloud", previewGroupBox);
+    connect(surfelUpdateButton, SIGNAL(clicked()), controller, SLOT(windowUpdatePBGI()));
+    surfelsLayout->addWidget(surfelUpdateButton);
+
+    previewLayout->addLayout(surfelsLayout);
 
     kdtreeCheckBox = new QCheckBox("Show KD-tree", previewGroupBox);
     connect(kdtreeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(viewerSetShowKDTree(bool)));

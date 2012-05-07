@@ -602,6 +602,12 @@ void Controller::windowSetQualityDivider(int divider) {
     rayTracer->notifyAll();
 }
 
+void Controller::windowUpdatePBGI() {
+    pbgi->update();
+    windowModel->notifyAll();
+    scene->notifyAll();
+}
+
 void Controller::viewerSetWireframe(bool b) {
     windowModel->setWireframe(b);
     windowModel->notifyAll();
