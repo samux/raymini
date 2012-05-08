@@ -589,6 +589,7 @@ void Controller::windowSetRealTime(bool r) {
     }
     else {
         ensureThreadStopped();
+        windowSetDragEnabled(false);
     }
 
     windowModel->notifyAll();
