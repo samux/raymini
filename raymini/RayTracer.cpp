@@ -150,12 +150,12 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
 bool RayTracer::intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
                           Ray & bestRay,
-                          const Object* & intersectedObject) const {
+                          Object* & intersectedObject) const {
     Scene * scene = controller->getScene();
     bestRay = Ray();
 
 
-    for (const Object * o : scene->getObjects()) {
+    for (Object * o : scene->getObjects()) {
         if (!o->isEnabled()) {
             continue;
         }
@@ -183,7 +183,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathT
 }
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
-    const Object *intersectedObject;
+    Object *intersectedObject;
 
     if(intersect(dir, camPos, bestRay, intersectedObject)) {
         const Material & mat = intersectedObject->getMaterial();
@@ -269,7 +269,7 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     for (Vec3Df & direction : directions) {
         const Vec3Df & pos = intersection.getPos();
 
-        const Object *intersectedObject;
+        Object *intersectedObject;
         Ray bestRay;
         if (intersect(direction, pos, bestRay, intersectedObject)) {
             if (bestRay.getIntersectionDistance() < radiusAmbientOcclusion) {

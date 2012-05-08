@@ -6,7 +6,7 @@
 using namespace std;
 
 bool Shadow::hard(const Vec3Df & pos, const Vec3Df& light) const {
-    const Object *ioShadow;
+    Object *ioShadow;
     Ray riShadow;
 
     Vec3Df dir = light - pos;

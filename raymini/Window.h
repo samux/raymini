@@ -89,6 +89,7 @@ private :
     QPushButton *renderButton;
     QProgressBar *renderProgressBar;
     QCheckBox *realTimeCheckBox;
+    QCheckBox *dragCheckBox;
     QLabel *durtiestQualityLabel;
     QComboBox *durtiestQualityComboBox;
     QSpinBox *qualityDividerSpinBox;

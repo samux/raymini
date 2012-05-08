@@ -153,19 +153,9 @@ void Controller::renderProgressed(float percent) {
 
 void Controller::windowRenderRayImage () {
     ensureThreadStopped();
-    qglviewer::Camera * cam = viewer->camera ();
-    qglviewer::Vec p = cam->position ();
-    qglviewer::Vec d = cam->viewDirection ();
-    qglviewer::Vec u = cam->upVector ();
-    qglviewer::Vec r = cam->rightVector ();
-    Vec3Df camPos (p[0], p[1], p[2]);
-    Vec3Df viewDirection (d[0], d[1], d[2]);
-    Vec3Df upVector (u[0], u[1], u[2]);
-    Vec3Df rightVector (r[0], r[1], r[2]);
-    float fieldOfView = cam->fieldOfView ();
-    float aspectRatio = cam->aspectRatio ();
-    unsigned int screenWidth = cam->screenWidth ();
-    unsigned int screenHeight = cam->screenHeight ();
+    Vec3Df camPos, viewDirection, upVector, rightVector;
+    float fieldOfView, aspectRatio, screenWidth, screenHeight;
+    viewer->getCameraInformation(fieldOfView, aspectRatio, screenWidth, screenHeight, camPos, viewDirection, upVector, rightVector);
     renderThread->startRendering(camPos, viewDirection, upVector, rightVector,
             fieldOfView, aspectRatio, screenWidth, screenHeight);
 }
@@ -652,5 +642,43 @@ void Controller::viewerSetDisplayMode(int m) {
 
 void Controller::viewerSetRayImage(const QImage & image) {
     windowModel->setRayImage(image);
+    windowModel->notifyAll();
+}
+
+void Controller::windowSetDragEnabled(bool e) {
+    windowModel->setDragEnabled(e);
+    if (!e) {
+        windowModel->setDraggedObject(nullptr);
+    }
+    windowModel->notifyAll();
+}
+
+void Controller::viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float r) {
+    windowModel->setDraggedObject(o);
+    windowModel->setInitialDraggedObjectPosition(i);
+    windowModel->setStartedDraggingPoint(p);
+    windowModel->setMovingRatio(r);
+    windowModel->notifyAll();
+}
+
+void Controller::viewerMovesWhileDragging(QPoint p) {
+    float fov, ar, screenWidth, screenHeight;
+    Vec3Df camPos;
+    Vec3Df viewDirection;
+    Vec3Df upVector;
+    Vec3Df rightVector;
+    viewer->getCameraInformation(fov, ar, screenWidth, screenHeight, camPos, viewDirection, upVector, rightVector);
+    QPoint lastPos = windowModel->getStartedDraggingPoint();
+    Vec3Df oPos = windowModel->getInitialDraggedObjectPosition();
+    float ratio = windowModel->getMovingRatio();
+    float xMove = (float)(p.x()-lastPos.x())/(float)screenWidth/ratio;
+    float yMove = (float)(lastPos.y()-p.y())/(float)screenHeight/ratio;
+    Object *o = windowModel->getDraggedObject();
+    o->setTrans(oPos+rightVector*xMove+upVector*yMove);
+    scene->notifyAll();
+}
+
+void Controller::viewerStopsDragging() {
+    windowModel->setDraggedObject(nullptr);
     windowModel->notifyAll();
 }

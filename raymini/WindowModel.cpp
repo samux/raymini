@@ -15,7 +15,9 @@ WindowModel::WindowModel(Controller *c):
     displayMode(OpenGLDisplayMode),
     focusPoint(Vec3Df(), Vec3Df(0, 0, 1)),
     realTime(false),
-    elapsedTime(0)
+    elapsedTime(0),
+    dragEnabled(false),
+    draggedObject(nullptr)
 {}
 
 WindowModel::~WindowModel() {

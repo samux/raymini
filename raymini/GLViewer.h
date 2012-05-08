@@ -18,6 +18,7 @@
 
 class Controller;
 class Octree;
+class Object;
 
 class GLViewer : public QGLViewer, public Observer  {
     Q_OBJECT
@@ -37,6 +38,8 @@ public:
     virtual void update(Observable *);
     static void draw_octree(const Octree * t);
     static void drawCube(const Vec3Df min, const Vec3Df max);
+
+    void getCameraInformation(float &fov, float &aspectRatio, float &width, float &height, Vec3Df &camPos, Vec3Df &viewDirection, Vec3Df &upVector, Vec3Df &rightVector);
 
 protected :
     void init();

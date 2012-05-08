@@ -383,9 +383,11 @@ void Window::updateRealTime() {
     WindowModel *windowModel = controller->getWindowModel();
     bool isRealTime = windowModel->isRealTime();
     realTimeCheckBox->setChecked(isRealTime);
+    dragCheckBox->setVisible(isRealTime);
     durtiestQualityComboBox->setVisible(isRealTime);
     durtiestQualityLabel->setVisible(isRealTime);
     if (isRealTime) {
+        dragCheckBox->setChecked(windowModel->isDragEnabled());
         RayTracer *rayTracer = controller->getRayTracer();
         int quality = rayTracer->durtiestQuality;
         durtiestQualityComboBox->setCurrentIndex(quality);
@@ -892,6 +894,10 @@ void Window::initControlWidget () {
     realTimeCheckBox = new QCheckBox("Real time", sceneTabs);
     connect(realTimeCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetRealTime(bool)));
     actionLayout->addWidget(realTimeCheckBox);
+
+    dragCheckBox = new QCheckBox("Mouse moves objects", sceneTabs);
+    connect(dragCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowSetDragEnabled(bool)));
+    actionLayout->addWidget(dragCheckBox);
 
     durtiestQualityLabel = new QLabel("Durtiest quality:", sceneTabs);
     actionLayout->addWidget(durtiestQualityLabel);

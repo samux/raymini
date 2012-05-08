@@ -34,7 +34,7 @@ void PointCloud::generatePoints() {
         // For each pixel
         for (const Vec3Df &direction : directions) {
             Ray bestRay;
-            const Object *object;
+            Object *object;
 
             // We add the surfel
             if (rayTracer->intersect(direction, position, bestRay, object)) {

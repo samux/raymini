@@ -9,6 +9,7 @@
 #include "GLViewer.h"
 
 #include <iostream>
+#include <QMouseEvent>
 
 #include "RayTracer.h"
 #include "Controller.h"
@@ -59,7 +60,50 @@ void GLViewer::keyReleaseEvent (QKeyEvent * /*event*/) {
 
 }
 
-void GLViewer::mousePressEvent (QMouseEvent * event) {
+void GLViewer::getCameraInformation(float &fov, float &aspectRatio, float &width, float &height, Vec3Df &camPos, Vec3Df &viewDirection, Vec3Df &upVector, Vec3Df &rightVector) {
+    qglviewer::Camera * cam = camera ();
+    qglviewer::Vec p = cam->position ();
+    qglviewer::Vec d = cam->viewDirection ();
+    qglviewer::Vec u = cam->upVector ();
+    qglviewer::Vec r = cam->rightVector ();
+    camPos = Vec3Df(p[0], p[1], p[2]);
+    viewDirection = Vec3Df(d[0], d[1], d[2]);
+    upVector = Vec3Df(u[0], u[1], u[2]);
+    rightVector = Vec3Df(r[0], r[1], r[2]);
+    fov = cam->fieldOfView ();
+    aspectRatio = cam->aspectRatio ();
+    width = cam->screenWidth ();
+    height = cam->screenHeight ();
+}
+
+void GLViewer::mousePressEvent(QMouseEvent * event) {
+    WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel->isDragEnabled()) {
+        float fov, ar;
+        float screenWidth;
+        float screenHeight;
+        Vec3Df camPos;
+        Vec3Df viewDirection;
+        Vec3Df upVector;
+        Vec3Df rightVector;
+        getCameraInformation(fov, ar, screenWidth, screenHeight, camPos, viewDirection, upVector, rightVector);
+        float tanX = tan(fov)*ar;
+        float tanY = tan(fov);
+        Vec3Df stepX = (float (event->x()) - screenWidth/2.f)/screenWidth * tanX * rightVector;
+        Vec3Df stepY = (float (screenHeight-event->y()) - screenHeight/2.f)/screenHeight * tanY * upVector;
+        Vec3Df step = stepX + stepY;
+        Vec3Df dir = viewDirection + step;
+        float distanceCameraScreen = dir.getLength();
+        dir.normalize();
+        Ray ray;
+        Object *o;
+        if (controller->getRayTracer()->intersect(dir, camPos, ray, o)) {
+            QPoint p = event->globalPos();
+            Vec3Df oPos = o->getTrans();
+            float ratio = distanceCameraScreen/sqrt(ray.getIntersectionDistance());
+            controller->viewerStartsDragging(o, oPos, p, ratio);
+        }
+    }
     if (!controller->getWindowModel()->isRealTime()) {
         controller->viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
     }
@@ -75,11 +119,18 @@ void GLViewer::mouseReleaseEvent (QMouseEvent *event) {
     if (rayTracer->typeFocus != Focus::NONE && windowModel->isFocusMode()) {
         controller->viewerSetFocusPoint(currentFocusPoint);
     }
+    controller->viewerStopsDragging();
     QGLViewer::mouseReleaseEvent(event);
 }
 
 void GLViewer::mouseMoveEvent(QMouseEvent *event) {
-    QGLViewer::mouseMoveEvent(event);
+    WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel->getDraggedObject()) {
+        controller->viewerMovesWhileDragging(event->globalPos());
+        controller->getRenderThread()->hasToRedraw();
+    } else {
+        QGLViewer::mouseMoveEvent(event);
+    }
 }
 
 
@@ -182,7 +233,7 @@ void GLViewer::changeFocusPoint() {
         Vec3Df camPos (p[0], p[1], p[2]);
         Vec3Df viewDirection (d[0], d[1], d[2]);
         Ray focusSelect = Ray(camPos, viewDirection);
-        const Object *object;
+        Object *object;
         if (rayTracer->intersect(viewDirection, camPos, focusSelect, object)) {
             currentFocusPoint = focusSelect.getIntersection();
         }

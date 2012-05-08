@@ -90,6 +90,7 @@ public slots :
     void windowSetDurtiestQuality(int);
     void windowSetQualityDivider(int);
     void windowUpdatePBGI();
+    void windowSetDragEnabled(bool);
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
@@ -113,6 +114,10 @@ public:
     void threadSetDurtiestRenderingQuality();
     // Return true iff quality was already optimal
     bool threadImproveRenderingQuality();
+
+    void viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float ratio);
+    void viewerMovesWhileDragging(QPoint);
+    void viewerStopsDragging();
 
     /**
      * Ask for a color and return a [0,1] color, or -1 on each field in not valid

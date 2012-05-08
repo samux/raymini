@@ -10,6 +10,7 @@
 #include "Observable.h"
 
 class Controller;
+class Object;
 
 class WindowModel: public Observable {
 public:
@@ -57,6 +58,18 @@ public:
     inline void setElapsedTime(int e) {elapsedTime = e;}
     inline int getElapsedTime() const {return elapsedTime;}
 
+    inline void setDraggedObject(Object *o) {draggedObject = o;}
+    inline void setInitialDraggedObjectPosition(Vec3Df p) {initialDraggedObjectPosition=p;}
+    inline void setStartedDraggingPoint(QPoint p) {startedDraggingPoint = p;}
+    inline void setMovingRatio(float r) {movingRatio = r;}
+    inline Object * getDraggedObject() {return draggedObject;}
+    inline QPoint getStartedDraggingPoint() const {return startedDraggingPoint;}
+    inline float getMovingRatio() const {return movingRatio;}
+    inline Vec3Df getInitialDraggedObjectPosition() const {return initialDraggedObjectPosition;}
+
+    inline void setDragEnabled(bool e) {dragEnabled = e;}
+    inline bool isDragEnabled() const {return dragEnabled;}
+
 private:
     Controller *controller;
 
@@ -74,4 +87,11 @@ private:
     Vertex focusPoint;
     bool realTime;
     int elapsedTime;
+
+    // Viewer drag and drop
+    bool dragEnabled;
+    Object *draggedObject;
+    Vec3Df initialDraggedObjectPosition;
+    QPoint startedDraggingPoint;
+    float movingRatio;
 };
