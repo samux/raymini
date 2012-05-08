@@ -64,7 +64,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
                     },
             "Rhino Texture");
     textures.push_back(rhinoTexture);
-    auto skyBoxTexture = new PPMTexture(SkyBox::textureFileName, "Sky Box");
+    auto skyBoxTexture = new ImageTexture(SkyBox::textureFileName, "Sky Box");
     textures.push_back(skyBoxTexture);
     poolTexture = new NoiseTexture(
             {0.f, .3f, .1f},

@@ -4,6 +4,8 @@
 #include "Ray.h"
 #include "Vertex.h"
 
+#include <QImage>
+
 /** Generic texture [ABSTRACT] */
 class Texture
 {
@@ -50,24 +52,17 @@ public:
     virtual Vec3Df getColor(float u, float v) const = 0;
 };
 
-/** Load PPM */
-class PPMTexture: public MappedTexture {
+/** Load image from file */
+class ImageTexture: public MappedTexture {
 public:
-    PPMTexture(const char *fileName, std::string name="PPM Texture");
-    ~PPMTexture();
+    ImageTexture(const char *fileName, std::string name="Image Texture");
+    ~ImageTexture();
 
     /** @override */
     virtual Vec3Df getColor(float u, float v) const;
 
 protected:
-    unsigned int width;
-    unsigned int height;
-    unsigned int max;
-    unsigned char *values;
-
-    void loadPPM(const char *name);
-    
-    void setColorToMeanValue();
+    QImage *image;
 };
 
 /** Basic debug texture, no memory space needed */

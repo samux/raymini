@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <QColor>
+
 using namespace std;
 
 /********** TEXTURE *****************/
@@ -64,45 +66,27 @@ Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
     return color;
 }
 
-/********** PPM TEXTURE ***********/
+/********** IMAGE TEXTURE ***********/
 
-PPMTexture::PPMTexture(const char *fileName, string name):
+ImageTexture::ImageTexture(const char *fileName, string name):
     MappedTexture(name),
-    values(nullptr)
+    image(nullptr)
 {
-    loadPPM(fileName);
-    setColorToMeanValue();
-}
-
-PPMTexture::~PPMTexture()
-{
-	if (values) {
-		delete []values;
+    color = Vec3Df(1, 0, 1);
+    image = new QImage(fileName);
+    if (!image) {
+        cerr<<__FUNCTION__<<": cannot read image "<<fileName<<endl;
     }
 }
 
-void PPMTexture::loadPPM(const char *name)
+ImageTexture::~ImageTexture()
 {
-	string type;
-	ifstream in(name);
-	getline(in, type);
-	getline(in, type);
-	in >> width >> height >> max;
-	if (max > 255) {
-		cerr << "More than byte size is not supported." << endl;
-        return;
-    }
-	values = new unsigned char[width*height*3];
-	for (unsigned int i=0; i<height*width*3; i++)
-	{
-		unsigned int j;
-		in >> j;
-		values[i] = j;
-	}
-	in.close();
+    delete image;
 }
 
-Vec3Df PPMTexture::getColor(float x, float y) const{
+Vec3Df ImageTexture::getColor(float x, float y) const{
+    unsigned int width = image->width();
+    unsigned int height = image->height();
     unsigned int u = x * width;
     if (u == width) {
         u = width - 1;
@@ -111,23 +95,9 @@ Vec3Df PPMTexture::getColor(float x, float y) const{
     if (v == height) {
         v = height - 1;
     }
-    unsigned int index = (u + v * width) * 3;
+    QColor pixel = QColor(image->pixel(u, v));
 
-    return Vec3Df(values[index], values[index+1], values[index+2])/255.0;
-}
-
-void PPMTexture::setColorToMeanValue() {
-    Vec3Df mean;
-    unsigned long count=0;
-    const unsigned int widthTakenCount=200;
-    const unsigned int heightTakenCount=100;
-    for (unsigned int i=0; i<widthTakenCount; i++) {
-        for (unsigned int j=0; j<heightTakenCount; j++) {
-            mean += getColor((float)i/(float)widthTakenCount, (float)j/(float)heightTakenCount);
-            count++;
-        }
-    }
-    color = mean/count;
+    return Vec3Df(pixel.red(), pixel.green(), pixel.blue())/255.0;
 }
 
 /*********** BASIC TEXTURE ***********/
