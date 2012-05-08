@@ -36,12 +36,12 @@ public:
     virtual void update(Observable *);
 
     Vec3Df getLightPos() const;
-    Vec3Df getLightColor() const;
 
     Vec3Df getObjectPos() const;
     Vec3Df getObjectMobile() const;
 
-    Vec3Df getTextureColor() const;
+    /** Get a program color [0-1] and create a Qt Icon */
+    static QIcon createIconFromColor(Vec3Df color);
 
 private :
     Controller *controller;
@@ -126,12 +126,12 @@ private :
     QComboBox *materialTexturesList;
 
     QComboBox *texturesList;
-    QDoubleSpinBox *textureColorSpinBoxes[3];
+    QPushButton *textureColorButton;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;
     QDoubleSpinBox *lightPosSpinBoxes[3];
-    QDoubleSpinBox *lightColorSpinBoxes[3];
+    QPushButton *lightColorButton;
     QDoubleSpinBox *lightRadiusSpinBox;
     QDoubleSpinBox *lightIntensitySpinBox;
 
@@ -139,6 +139,8 @@ private :
     QCheckBox *changeFocusFixingCheckBox;
     QSpinBox *focusNbRaysSpinBox;
     QDoubleSpinBox *focusApertureSpinBox;
+
+    QPushButton * bgColorButton;
 };
 
 #endif // WINDOW_H

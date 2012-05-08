@@ -114,6 +114,12 @@ public:
     // Return true iff quality was already optimal
     bool threadImproveRenderingQuality();
 
+    /**
+     * Ask for a color and return a [0,1] color, or -1 on each field in not valid
+     * programColor is a [0,1] color
+     */
+    Vec3Df userSelectsColor(Vec3Df programColor);
+
 private:
     /** Stop thread if running */
     void ensureThreadStopped();

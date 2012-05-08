@@ -87,22 +87,6 @@ Vec3Df Window::getLightPos() const {
     return newPos;
 }
 
-Vec3Df Window::getLightColor() const {
-    Vec3Df newColor;
-    for (int i=0; i<3; i++) {
-        newColor[i] = lightColorSpinBoxes[i]->value();
-    }
-    return newColor;
-}
-
-Vec3Df Window::getTextureColor() const {
-    Vec3Df newColor;
-    for (int i=0; i<3; i++) {
-        newColor[i] = textureColorSpinBoxes[i]->value();
-    }
-    return newColor;
-}
-
 void Window::update(Observable *observable) {
     if (observable == controller->getScene()) {
         updateFromScene();
@@ -200,6 +184,17 @@ void Window::updateFromRayTracer() {
 
     // Motion blur
     updateMotionBlur();
+
+    // Background color
+    bgColorButton->setIcon(createIconFromColor(rayTracer->getBackgroundColor()));
+}
+
+QIcon Window::createIconFromColor(Vec3Df color) {
+    QPixmap image(16, 16);
+    QPainter p(&image);
+    QColor BColor(color[0]*255, color[1]*255, color[2]*255);
+    p.fillRect(0, 0, 16, 16, BColor);
+    return QIcon(image);
 }
 
 void Window::updateFromWindowModel() {
@@ -247,8 +242,8 @@ void Window::updateLights() {
     lightEnableCheckBox->setVisible(isLightSelected);
     for (int i=0; i<3; i++) {
         lightPosSpinBoxes[i]->setVisible(isLightEnabled);
-        lightColorSpinBoxes[i]->setVisible(isLightEnabled);
     }
+    lightColorButton->setVisible(isLightEnabled);
     lightRadiusSpinBox->setVisible(isLightEnabled);
     lightIntensitySpinBox->setVisible(isLightEnabled);
 
@@ -264,10 +259,8 @@ void Window::updateLights() {
             lightPosSpinBoxes[i]->disconnect();
             lightPosSpinBoxes[i]->setValue(pos[i]);
             connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
-            lightColorSpinBoxes[i]->disconnect();
-            lightColorSpinBoxes[i]->setValue(color[i]);
-            connect(lightColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightColor()));
         }
+        lightColorButton->setIcon(createIconFromColor(color));
         lightIntensitySpinBox->disconnect();
         lightIntensitySpinBox->setValue(intensity);
         connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
@@ -362,17 +355,11 @@ void Window::updateTextures() {
     int index = windowModel->getSelectedTextureIndex();
     texturesList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
-    for (unsigned int i=0; i<3; i++) {
-        textureColorSpinBoxes[i]->setVisible(isSelected);
-    }
+    textureColorButton->setVisible(isSelected);
 
     if (isSelected) {
         const Texture *texture = scene->getTextures()[index];
-        for (unsigned int i=0; i<3; i++) {
-            textureColorSpinBoxes[i]->disconnect();
-            textureColorSpinBoxes[i]->setValue(texture->getRepresentativeColor()[i]);
-            connect(textureColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetTextureColor()));
-        }
+        textureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
     }
 }
 
@@ -821,18 +808,9 @@ void Window::initControlWidget () {
     connect(texturesList, SIGNAL(activated(int)), controller, SLOT(windowSelectTexture(int)));
     texturesLayout->addWidget(texturesList);
 
-    QHBoxLayout *textureColorLayout = new QHBoxLayout;
-    QString textureColorsName[3] = {"R: ", "G: ", "B: "};
-    for (unsigned int i=0; i<3; i++) {
-        textureColorSpinBoxes[i] = new QDoubleSpinBox(texturesGroupBox);
-        textureColorSpinBoxes[i]->setMinimum(0);
-        textureColorSpinBoxes[i]->setMaximum(1);
-        textureColorSpinBoxes[i]->setSingleStep(0.01);
-        textureColorSpinBoxes[i]->setPrefix(textureColorsName[i]);
-        connect(textureColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetTextureColor()));
-        textureColorLayout->addWidget(textureColorSpinBoxes[i]);
-    }
-    texturesLayout->addLayout(textureColorLayout);
+    textureColorButton = new QPushButton(texturesGroupBox);
+    connect(textureColorButton, SIGNAL(clicked()), controller, SLOT(windowSetTextureColor()));
+    texturesLayout->addWidget(textureColorButton);
 
     sceneTabs->addTab(texturesGroupBox, "Textures");
 
@@ -855,9 +833,7 @@ void Window::initControlWidget () {
     lightsLayout->addWidget(lightEnableCheckBox);
 
     QHBoxLayout *lightsPosLayout = new QHBoxLayout;
-    QHBoxLayout *lightsColorLayout = new QHBoxLayout;
     QString axis[3] = {"X: ", "Y: ", "Z: "};
-    QString colors[3] = {"R: ", "G: ", "B: "};
     for (int i=0; i<3; i++) {
         lightPosSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
         lightPosSpinBoxes[i]->setSingleStep(0.1);
@@ -866,16 +842,12 @@ void Window::initControlWidget () {
         lightPosSpinBoxes[i]->setPrefix(axis[i]);
         connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
         lightsPosLayout->addWidget(lightPosSpinBoxes[i]);
-        lightColorSpinBoxes[i] = new QDoubleSpinBox(lightsGroupBox);
-        lightColorSpinBoxes[i]->setSingleStep(0.01);
-        lightColorSpinBoxes[i]->setMinimum(0);
-        lightColorSpinBoxes[i]->setMaximum(1);
-        lightColorSpinBoxes[i]->setPrefix(colors[i]);
-        connect(lightColorSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightColor()));
-        lightsColorLayout->addWidget(lightColorSpinBoxes[i]);
     }
     lightsLayout->addLayout(lightsPosLayout);
-    lightsLayout->addLayout(lightsColorLayout);
+
+    lightColorButton = new QPushButton("Color", lightsGroupBox);
+    connect(lightColorButton, SIGNAL(clicked()), controller, SLOT(windowSetLightColor()));
+    lightsLayout->addWidget(lightColorButton);
 
     lightRadiusSpinBox = new QDoubleSpinBox(lightsGroupBox);
     lightRadiusSpinBox->setSingleStep(0.01);
@@ -965,7 +937,7 @@ void Window::initControlWidget () {
     QGroupBox * globalGroupBox = new QGroupBox ("Global Settings", controlWidget);
     QVBoxLayout * globalLayout = new QVBoxLayout (globalGroupBox);
 
-    QPushButton * bgColorButton  = new QPushButton ("Background Color", globalGroupBox);
+    bgColorButton = new QPushButton ("Background Color", globalGroupBox);
     connect (bgColorButton, SIGNAL (clicked()) , controller, SLOT (windowSetBGColor()));
     globalLayout->addWidget (bgColorButton);
 

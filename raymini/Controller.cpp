@@ -170,12 +170,21 @@ void Controller::windowRenderRayImage () {
             fieldOfView, aspectRatio, screenWidth, screenHeight);
 }
 
+Vec3Df Controller::userSelectsColor(Vec3Df programColor) {
+    Vec3Df bg = 255*programColor;
+    QColor c = QColorDialog::getColor(QColor(bg[0], bg[1], bg[2]), window);
+    if (!c.isValid()) {
+        return Vec3Df(-1, -1, -1);
+    }
+    return Vec3Df(c.red()/255.f, c.green()/255.f, c.blue()/255.f);
+}
+
+
 void Controller::windowSetBGColor () {
-    Vec3Df bg = 255*rayTracer->getBackgroundColor();
-    QColor c = QColorDialog::getColor (QColor (bg[0], bg[1], bg[2]), window);
-    if (c.isValid () == true) {
+    Vec3Df c = userSelectsColor(rayTracer->getBackgroundColor());
+    if (c[0] != -1) {
         ensureThreadStopped();
-        rayTracer->setBackgroundColor(Vec3Df (c.red ()/255.f, c.green ()/255.f, c.blue ()/255.f));
+        rayTracer->setBackgroundColor(c);
         renderThread->hasToRedraw();
         rayTracer->notifyAll();
     }
@@ -436,15 +445,19 @@ void Controller::windowSelectTexture(int t) {
 }
 
 void Controller::windowSetTextureColor() {
-    ensureThreadStopped();
     int t = windowModel->getSelectedTextureIndex();
     if (t == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
     }
-    scene->getTextures()[t]->setRepresentativeColor(window->getTextureColor());
-    renderThread->hasToRedraw();
-    scene->notifyAll();
+    Texture *texture = scene->getTextures()[t];
+    Vec3Df c = userSelectsColor(texture->getRepresentativeColor());
+    if (c[0] != -1) {
+        ensureThreadStopped();
+        texture->setRepresentativeColor(c);
+        renderThread->hasToRedraw();
+        scene->notifyAll();
+    }
 }
 
 void Controller::windowSelectObject(int o) {
@@ -568,15 +581,19 @@ void Controller::windowSetLightPos() {
 }
 
 void Controller::windowSetLightColor() {
-    ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
     if (l == -1) {
         cerr << __FUNCTION__ << " called even though a light hasn't been selected!\n";
         return;
     }
-    scene->getLights()[l]->setColor(window->getLightColor());
-    renderThread->hasToRedraw();
-    scene->notifyAll();
+    Light *light = scene->getLights()[l];
+    Vec3Df c = userSelectsColor(light->getColor());
+    if (c[0] != -1) {
+        ensureThreadStopped();
+        light->setColor(c);
+        renderThread->hasToRedraw();
+        scene->notifyAll();
+    }
 }
 
 void Controller::windowSetRealTime(bool r) {
