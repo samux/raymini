@@ -17,15 +17,25 @@
 
 class Mesh {
 public:
-    inline Mesh () {}
-    inline Mesh (const std::vector<Vertex> & v)
-        : vertices (v) {}
+    inline Mesh (): uScale(1), vScale(1) {}
+    inline Mesh (const std::vector<Vertex> & v):
+        vertices(v),
+        uScale(1),
+        vScale(1)
+    {}
     inline Mesh (const std::vector<Vertex> & v,
-                 const std::vector<Triangle> & t)
-        : vertices (v), triangles (t)  {}
-    inline Mesh (const Mesh & mesh)
-        : vertices (mesh.vertices),
-          triangles (mesh.triangles) {}
+                 const std::vector<Triangle> & t):
+        vertices(v),
+        triangles(t),
+        uScale(1),
+        vScale(1)
+    {}
+    inline Mesh (const Mesh & mesh):
+        vertices(mesh.vertices),
+        triangles (mesh.triangles),
+        uScale(mesh.uScale),
+        vScale(mesh.vScale)
+    {}
 
     inline virtual ~Mesh () {}
     std::vector<Vertex> & getVertices () { return vertices; }
@@ -68,9 +78,27 @@ public:
     /** Give two triangles the whole texture mapped */
     void setSquareTextureMapping(unsigned t0=0, unsigned t1=1);
 
+    // Texture mapping coordinates
+    inline float getU(unsigned int t, unsigned int i) const {return triangles[t].getU(i);}
+    inline float getV(unsigned int t, unsigned int i) const {return triangles[t].getV(i);}
+    inline void setU(unsigned int t, unsigned int i, float u) {triangles[t].setU(i, u);}
+    inline void setV(unsigned int t, unsigned int i, float v) {triangles[t].setV(i, v);}
+    inline void setUV(unsigned int t, unsigned int i, float u, float v) {triangles[t].setUV(i, u, v);}
+
+    /*
+     * uScale and vScale can be used to refine a texture, eg a texture will be used two times
+     * in width if uScale == 2.0
+     * Equals 1.0 by default
+     */
+    inline void setUVScales(float u, float v) {uScale = u; vScale = v;}
+    inline float getUScale() const {return uScale;}
+    inline float getVScale() const {return vScale;}
+
 private:
     std::vector<Vertex> vertices;
     std::vector<Triangle> triangles;
+
+    float uScale, vScale;
 };
 
 #endif // MESH_H

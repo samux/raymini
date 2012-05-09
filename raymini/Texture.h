@@ -49,17 +49,19 @@ public:
      * Return mapped color
      * Be sure to configure u,v for each vertex of the mesh
      * Assume that u and v are in [0,1]
-     */
-    virtual Vec3Df getColor(float u, float v) const = 0;
-
-    /*
+     *
      * uScale and vScale can be used to refine a texture, eg a texture will be used two times
      * in width if uScale == 2.0
-     * Equals 1.0 by default
      *
-     * Handled by getColor(Ray *), don't have to handle in getColor(float, float)
+     * You will have to use adaptUV to set u and v accordingly to the scales
      */
-    float uScale, vScale;
+    virtual Vec3Df getColor(float u, float v, float uScale=1, float vScale=1) const = 0;
+
+protected:
+    /**
+     * Transform u and v according to scales
+     */
+    static void adaptUV(float &u, float &v, float uScale, float vScale);
 };
 
 /** Load image from file */
@@ -69,7 +71,7 @@ public:
     ~ImageTexture();
 
     /** @override */
-    virtual Vec3Df getColor(float u, float v) const;
+    virtual Vec3Df getColor(float u, float v, float uScale=1, float vScale=1) const;
 
 protected:
     QImage *image;
@@ -85,7 +87,7 @@ public:
     virtual ~BasicTexture();
 
     /** @override */
-    virtual Vec3Df getColor(float u, float v) const;
+    virtual Vec3Df getColor(float u, float v, float uScale=1, float vScale=1) const;
 };
 
 /** Unique color texture */

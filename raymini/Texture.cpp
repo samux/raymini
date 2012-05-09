@@ -2,8 +2,10 @@
 
 #include <iostream>
 #include <fstream>
-
 #include <QColor>
+
+#include "Mesh.h"
+#include "Object.h"
 
 using namespace std;
 
@@ -29,9 +31,7 @@ string Texture::getName() const {
 /********** MAPPED TEXTURE **********/
 
 MappedTexture::MappedTexture(string name):
-    Texture(name),
-    uScale(1),
-    vScale(1)
+    Texture(name)
 {}
 MappedTexture::~MappedTexture() {}
 
@@ -63,15 +63,19 @@ Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
     float interU = uC + uCA * interCA + uCB * interCB;
     float interV = vC + vCA * interCA + vCB * interCB;
 
-    interU -= (int)(interU*uScale)/uScale;
-    interU *= uScale;
-
-    interV -= (int)(interV*vScale)/vScale;
-    interV *= vScale;
+    const Mesh &mesh = intersectingRay->getIntersectedObject()->getMesh();
 
     // Call abstract method
-    Vec3Df color = getColor(interU, interV);
+    Vec3Df color = getColor(interU, interV, mesh.getUScale(), mesh.getVScale());
     return color;
+}
+
+void MappedTexture::adaptUV(float &u, float &v, float uScale, float vScale) {
+    u -= (int)(u*uScale)/uScale;
+    u *= uScale;
+
+    v -= (int)(v*vScale)/vScale;
+    v *= vScale;
 }
 
 /********** IMAGE TEXTURE ***********/
@@ -92,8 +96,8 @@ ImageTexture::~ImageTexture()
     delete image;
 }
 
-Vec3Df ImageTexture::getColor(float x, float y) const{
-    
+Vec3Df ImageTexture::getColor(float x, float y, float uScale, float vScale) const{
+    adaptUV(x, y, uScale, vScale);
 
     unsigned int width = image->width();
     unsigned int height = image->height();
@@ -118,7 +122,9 @@ BasicTexture::BasicTexture(string name):
 
 BasicTexture::~BasicTexture() {}
 
-Vec3Df BasicTexture::getColor(float x, float y) const {
+Vec3Df BasicTexture::getColor(float x, float y, float uScale, float vScale) const {
+    adaptUV(x, y, uScale, vScale);
+
     bool isXEven = x*2.0<1.0;
     bool isYEven = y*2.0<1.0;
 

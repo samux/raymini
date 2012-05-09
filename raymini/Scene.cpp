@@ -39,9 +39,6 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     controller(c)
 {
     auto basicTexture = new BasicTexture();
-    // 20 squares per dimension
-    basicTexture->uScale = 10;
-    basicTexture->vScale = 10;
     textures.push_back(basicTexture);
     auto redTexture = new ColorTexture({1, 0, 0}, "Red");
     textures.push_back(redTexture);
@@ -54,9 +51,6 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     auto blackTexture = new ColorTexture({0, 0, 0}, "Black");
     textures.push_back(blackTexture);
     auto groundTexture = new ImageTexture("textures/grass.jpg", "Ground Texture");
-    // Repeat texture 10 times per dimension
-    groundTexture->uScale = 10;
-    groundTexture->vScale = 10;
     textures.push_back(groundTexture);
     auto rhinoTexture = new NoiseTexture(
             {.6f, .6f, .7f},
@@ -232,6 +226,8 @@ void Scene::buildMultiMeshs() {
     Mesh groundMesh;
     groundMesh.loadOFF("models/ground.off");
     groundMesh.setSquareTextureMapping();
+    // Use texture 5 times in each dimension
+    groundMesh.setUVScales(5, 5);
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
 
     Mesh wallMesh;
@@ -267,6 +263,8 @@ void Scene::buildOutdor() {
     groundMesh.setSquareTextureMapping();
     groundMesh.scale(5);
     groundMesh.setSquareTextureMapping();
+    // Use texture 10 times in each dimension
+    groundMesh.setUVScales(10, 10);
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
 
     Mesh wallMesh;
