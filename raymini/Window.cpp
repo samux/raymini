@@ -238,8 +238,9 @@ void Window::updateLights(const Observable *observable) {
 
     int lightIndex = windowModel->getSelectedLightIndex();
     bool isLightSelected = lightIndex != -1;
-    if (observable == windowModel &&
-            windowModel->isChanged(WindowModel::SELECTED_LIGHT_CHANGED)) {
+    bool selectedLightChanged = observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_LIGHT_CHANGED);
+    if (selectedLightChanged) {
         lightsList->setCurrentIndex(lightIndex+1);
         lightEnableCheckBox->setVisible(isLightSelected);
         bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
@@ -251,12 +252,10 @@ void Window::updateLights(const Observable *observable) {
         lightIntensitySpinBox->setVisible(isLightEnabled);
     }
 
-    if ((observable != scene) ||
-            (!scene->isChanged(Scene::LIGHT_CHANGED))) {
-        return;
-    }
+    bool sceneUpdated = (observable != scene) ||
+            (!scene->isChanged(Scene::LIGHT_CHANGED));
 
-    if (isLightSelected) {
+    if (isLightSelected && (selectedLightChanged || sceneUpdated)) {
         const Light * l = scene->getLights()[lightIndex];
         bool isLightEnabled = l->isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
@@ -322,8 +321,9 @@ void Window::updateObjects(const Observable *observable) {
     int index = windowModel->getSelectedObjectIndex();
     objectsList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
-    if (observable == windowModel &&
-            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED)) {
+    bool selectedObjectChanged = observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED);
+    if (selectedObjectChanged) {
         objectEnableCheckBox->setVisible(isSelected);
         objectMobileLabel->setVisible(isSelected);
         for (unsigned int i=0; i<3; i++) {
@@ -337,9 +337,9 @@ void Window::updateObjects(const Observable *observable) {
             objectMaterialsList->setCurrentIndex(materialIndex);
         }
     }
-    if (isSelected &&
-            observable == scene &&
-            scene->isChanged(Scene::OBJECT_CHANGED)) {
+    bool sceneChanged = observable == scene &&
+            scene->isChanged(Scene::OBJECT_CHANGED);
+    if (isSelected && (selectedObjectChanged || sceneChanged)) {
         const Object *object = scene->getObjects()[index];
         bool isEnabled = object->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
@@ -362,8 +362,9 @@ void Window::updateMaterials(const Observable *observable) {
 
     int index = windowModel->getSelectedMaterialIndex();
     bool isSelected = index != -1;
-    if (observable == windowModel &&
-            windowModel->isChanged(WindowModel::SELECTED_MATERIAL_CHANGED)) {
+    bool selectedMaterialChanged = observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_MATERIAL_CHANGED);
+    if (selectedMaterialChanged) {
         materialsList->setCurrentIndex(index+1);
         materialDiffuseSpinBox->setVisible(isSelected);
         materialSpecularSpinBox->setVisible(isSelected);
@@ -376,9 +377,10 @@ void Window::updateMaterials(const Observable *observable) {
         }
     }
 
-    if (isSelected &&
-            observable == scene &&
-            scene->isChanged(Scene::MATERIAL_CHANGED)) {
+    bool sceneChanged = observable == scene &&
+            scene->isChanged(Scene::MATERIAL_CHANGED);
+
+    if (isSelected && (sceneChanged || selectedMaterialChanged)) {
         const Material *material = scene->getMaterials()[index];
         materialDiffuseSpinBox->disconnect();
         materialDiffuseSpinBox->setValue(material->getDiffuse());
@@ -400,16 +402,17 @@ void Window::updateTextures(const Observable *observable) {
 
     int index = windowModel->getSelectedTextureIndex();
     bool isSelected = index != -1;
-    if (observable == windowModel &&
-            windowModel->isChanged(WindowModel::SELECTED_TEXTURE_CHANGED)) {
+    bool selectedTextureChanged = observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_TEXTURE_CHANGED);
+    if (selectedTextureChanged) {
         texturesList->setCurrentIndex(index+1);
         textureColorButton->setVisible(isSelected);
     }
 
     const Scene *scene = controller->getScene();
-    if (isSelected &&
-            observable == scene &&
-            scene->isChanged(Scene::TEXTURE_CHANGED)) {
+    bool sceneChanged = observable == scene &&
+            scene->isChanged(Scene::TEXTURE_CHANGED);
+    if (isSelected && (sceneChanged || selectedTextureChanged)) {
         const Texture *texture = scene->getTextures()[index];
         textureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
     }
