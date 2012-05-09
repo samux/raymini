@@ -829,10 +829,9 @@ void Window::initControlWidget() {
     }
     objectsLayout->addLayout(objectPosLayout);
 
-    objectMobileLabel = new QLabel("Movement: (nulify all to immobilise)", objectsGroupBox);
-    objectsLayout->addWidget(objectMobileLabel);
-
     QHBoxLayout *objectMobileLayout = new QHBoxLayout;
+    objectMobileLabel = new QLabel("Movement:", objectsGroupBox);
+    objectMobileLayout->addWidget(objectMobileLabel);
     QString objectMobileNames[3] = {"X: ", "Y: ", "Z: "};
     for (unsigned int i=0; i<3; i++) {
         objectMobileSpinBoxes[i] = new QDoubleSpinBox(objectsGroupBox);
