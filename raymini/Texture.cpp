@@ -30,8 +30,8 @@ string Texture::getName() const {
 
 MappedTexture::MappedTexture(string name):
     Texture(name),
-    uMax(1),
-    vMax(1)
+    uScale(1),
+    vScale(1)
 {}
 MappedTexture::~MappedTexture() {}
 
@@ -63,11 +63,11 @@ Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
     float interU = uC + uCA * interCA + uCB * interCB;
     float interV = vC + vCA * interCA + vCB * interCB;
 
-    interU -= (int)(interU/uMax)*uMax;
-    interU /= uMax;
+    interU -= (int)(interU*uScale)/uScale;
+    interU *= uScale;
 
-    interV -= (int)(interV/vMax)*vMax;
-    interV /= vMax;
+    interV -= (int)(interV*vScale)/vScale;
+    interV *= vScale;
 
     // Call abstract method
     Vec3Df color = getColor(interU, interV);

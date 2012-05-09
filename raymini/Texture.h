@@ -53,13 +53,13 @@ public:
     virtual Vec3Df getColor(float u, float v) const = 0;
 
     /*
-     * uMax and vMax can be used to refine a texture, eg a texture will be used two times
-     * in width if uMax == 0.5
+     * uScale and vScale can be used to refine a texture, eg a texture will be used two times
+     * in width if uScale == 2.0
      * Equals 1.0 by default
      *
      * Handled by getColor(Ray *), don't have to handle in getColor(float, float)
      */
-    float uMax, vMax;
+    float uScale, vScale;
 };
 
 /** Load image from file */
