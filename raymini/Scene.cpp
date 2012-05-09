@@ -39,6 +39,9 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     controller(c)
 {
     auto basicTexture = new BasicTexture();
+    // 20 squares per dimension
+    basicTexture->uMax = 0.1;
+    basicTexture->vMax = 0.1;
     textures.push_back(basicTexture);
     auto redTexture = new ColorTexture({1, 0, 0}, "Red");
     textures.push_back(redTexture);
@@ -50,12 +53,10 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     textures.push_back(whiteTexture);
     auto blackTexture = new ColorTexture({0, 0, 0}, "Black");
     textures.push_back(blackTexture);
-    auto groundTexture = new NoiseTexture(
-            {0.2, 0.6, 0.2},
-            [](const Vertex & v) -> float {
-                    return Perlin(0.5f, 4, 10)(v.getPos());
-                },
-            "Ground Texture");
+    auto groundTexture = new ImageTexture("textures/grass.jpg", "Ground Texture");
+    // Repeat texture 10 times per dimension
+    groundTexture->uMax = 0.1;
+    groundTexture->vMax = 0.1;
     textures.push_back(groundTexture);
     auto rhinoTexture = new NoiseTexture(
             {.6f, .6f, .7f},

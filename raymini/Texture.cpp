@@ -29,7 +29,9 @@ string Texture::getName() const {
 /********** MAPPED TEXTURE **********/
 
 MappedTexture::MappedTexture(string name):
-    Texture(name)
+    Texture(name),
+    uMax(1),
+    vMax(1)
 {}
 MappedTexture::~MappedTexture() {}
 
@@ -61,6 +63,12 @@ Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
     float interU = uC + uCA * interCA + uCB * interCB;
     float interV = vC + vCA * interCA + vCB * interCB;
 
+    interU -= (int)(interU/uMax)*uMax;
+    interU /= uMax;
+
+    interV -= (int)(interV/vMax)*vMax;
+    interV /= vMax;
+
     // Call abstract method
     Vec3Df color = getColor(interU, interV);
     return color;
@@ -85,6 +93,8 @@ ImageTexture::~ImageTexture()
 }
 
 Vec3Df ImageTexture::getColor(float x, float y) const{
+    
+
     unsigned int width = image->width();
     unsigned int height = image->height();
     unsigned int u = x * width;
@@ -108,10 +118,9 @@ BasicTexture::BasicTexture(string name):
 
 BasicTexture::~BasicTexture() {}
 
-#define SQUARE_WIDTH 20
 Vec3Df BasicTexture::getColor(float x, float y) const {
-    bool isXEven = (int)(x*100/SQUARE_WIDTH)%2 == 0;
-    bool isYEven = (int)(y*100/SQUARE_WIDTH)%2 == 0;
+    bool isXEven = x*2.0<1.0;
+    bool isYEven = y*2.0<1.0;
 
     if (isXEven==isYEven) {
         return Vec3Df(1, 0, 0);

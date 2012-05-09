@@ -48,8 +48,18 @@ public:
      * To be implemented
      * Return mapped color
      * Be sure to configure u,v for each vertex of the mesh
+     * Assume that u and v are in [0,1]
      */
     virtual Vec3Df getColor(float u, float v) const = 0;
+
+    /*
+     * uMax and vMax can be used to refine a texture, eg a texture will be used two times
+     * in width if uMax == 0.5
+     * Equals 1.0 by default
+     *
+     * Handled by getColor(Ray *), don't have to handle in getColor(float, float)
+     */
+    float uMax, vMax;
 };
 
 /** Load image from file */
@@ -65,7 +75,10 @@ protected:
     QImage *image;
 };
 
-/** Basic debug texture, no memory space needed */
+/**
+ * Basic debug texture, no memory space needed
+ * Red qnd blue squares
+ */
 class BasicTexture: public MappedTexture {
 public:
     BasicTexture(std::string name="Basic Texture");
