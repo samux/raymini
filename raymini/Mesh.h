@@ -15,6 +15,8 @@
 #include "Triangle.h"
 #include "Edge.h"
 
+class Material;
+
 class Mesh {
 public:
     inline Mesh (): uScale(1), vScale(1) {}
@@ -63,6 +65,12 @@ public:
     /** Scale object */
     void scale(const float &s);
 
+    /** Return a triangle */
+    void returnTriangle(unsigned int t);
+
+    /** Return all triangles */
+    void returnAllTriangles();
+
     class Exception {
     private:
         std::string msg;
@@ -76,7 +84,12 @@ public:
     void setDefaultTextureMapping(bool useNormals=true);
 
     /** Give two triangles the whole texture mapped */
-    void setSquareTextureMapping(unsigned t0=0, unsigned t1=1);
+    void setSquareTextureMapping(unsigned t0=0,
+                                 unsigned t1=1,
+                                 float uMin=0,
+                                 float uMax=1,
+                                 float vMin=0,
+                                 float vMax=1);
 
     // Texture mapping coordinates
     inline float getU(unsigned int t, unsigned int i) const {return triangles[t].getU(i);}
@@ -84,6 +97,54 @@ public:
     inline void setU(unsigned int t, unsigned int i, float u) {triangles[t].setU(i, u);}
     inline void setV(unsigned int t, unsigned int i, float v) {triangles[t].setV(i, v);}
     inline void setUV(unsigned int t, unsigned int i, float u, float v) {triangles[t].setUV(i, u, v);}
+
+    /**
+     * Return a cube with those attributes:
+     *
+     * - centered in 0,0,0
+     *
+     * - size: 1x1x1
+     *
+     * - vertices repartition:
+     *   
+     *   0-3
+     *   |\|
+     * 0-1-2-3-0
+     * |\|\|\|\|
+     * 4-5-6-7-4
+     *   |\|
+     *   4-7
+     *
+     * - triangles repartition:
+     *
+     *       -------
+     *       |08\09|
+     * -------------------------
+     * |00\01|02\03|04\05|06\07|
+     * -------------------------
+     *       |10\11|
+     *       -------
+     */
+    static Mesh loadCube();
+
+    /**
+     * Set texture mapping for a cube
+     *
+     * Texture/sides mapping:
+     *
+     *   ---
+     *   |4|
+     * ---------
+     * |0|1|2|3|
+     * ---------
+     *   |5|
+     *   ---
+     *
+     *   Gapped pixels are the count of pixels to gap,
+     *   usefull when using a low-res image like a JPG,
+     *   which has glitches at texture side/black side junction
+     */
+    void setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels=0, unsigned heightGappedPixels=0);
 
     /*
      * uScale and vScale can be used to refine a texture, eg a texture will be used two times

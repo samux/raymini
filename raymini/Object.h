@@ -15,8 +15,8 @@
 #include "KDtree.h"
 #include "Brdf.h"
 #include "Light.h"
+#include "Material.h"
 
-class Material;
 class Ray;
 
 class Object {
@@ -79,9 +79,19 @@ private:
     std::string name;
 };
 
-// Some Emacs-Hints -- please don't remove:
-//
-//  Local Variables:
-//  mode:C++
-//  tab-width:4
-//  End:
+/**
+ * Skybox object 
+ */
+class SkyBox: public Object {
+
+public:
+    virtual ~SkyBox() {};
+
+    static constexpr const char *textureFileName = "textures/skybox.jpg";
+
+    static SkyBox *generateSkyBox(const SkyBoxMaterial *, std::string name="SkyBox");
+
+private:
+    SkyBox(const Mesh &m, const SkyBoxMaterial *mat, std::string name):
+        Object(m, mat, name) {}
+};

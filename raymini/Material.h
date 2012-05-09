@@ -16,7 +16,6 @@
 #include "Light.h"
 #include "Ray.h"
 #include "Texture.h"
-#include "SkyBox.h"
 
 // This model assumes a white specular color (1.0, 1.0, 1.0)
 

@@ -12,7 +12,6 @@
 #include "Scene.h"
 
 #include "Noise.h"
-#include "SkyBox.h"
 
 using namespace std;
 
@@ -255,8 +254,8 @@ void Scene::buildMultiMeshs() {
     rhinoMesh.loadOFF("models/rhino.off");
     objects.push_back(new Object(rhinoMesh, rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
 
-    objects.push_back(SkyBox::generateSkyBox(skyBoxMaterial));
-
+    Object *skybox = SkyBox::generateSkyBox(skyBoxMaterial);
+    objects.push_back(skybox);
 
     lights.push_back(new Light({2.f, -3.f, 5.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, 1.f));
@@ -282,7 +281,8 @@ void Scene::buildOutdor() {
     rhinoMesh.loadOFF("models/rhino.off");
     objects.push_back(new Object(rhinoMesh, rhinoMat, "Rhino", {1.f, 0.f, 0.4f}));
 
-    objects.push_back(SkyBox::generateSkyBox(skyBoxMaterial));
+    Object *skybox = SkyBox::generateSkyBox(skyBoxMaterial);
+    objects.push_back(skybox);
 
     lights.push_back(new Light({9.f, 9.f, 9.f}, 5.f, {1.f, 1.f, 1.f},
                                {1.f, 1.f, .4f}, 1.f));

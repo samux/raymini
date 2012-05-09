@@ -73,6 +73,8 @@ public:
     /** @override */
     virtual Vec3Df getColor(float u, float v, float uScale=1, float vScale=1) const;
 
+    const QImage *getImage() const {return image;}
+
 protected:
     QImage *image;
 };

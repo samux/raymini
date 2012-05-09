@@ -7,7 +7,6 @@
 #include "Material.h"
 #include "RayTracer.h"
 #include "Controller.h"
-#include "SkyBox.h"
 
 using namespace std;
 

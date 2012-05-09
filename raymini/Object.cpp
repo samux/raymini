@@ -23,3 +23,12 @@ BoundingBox Object::computeBoundingBox(const Mesh & mesh) {
     }
     return bbox;
 }
+
+SkyBox *SkyBox::generateSkyBox(const SkyBoxMaterial *m, string name) {
+    Mesh mesh = Mesh::loadCube();
+    mesh.returnAllTriangles();
+    mesh.scale(20);
+    mesh.setCubeTextureMapping(m, 2, 2);
+    SkyBox *skybox = new SkyBox(mesh, m, name);
+    return skybox;
+}

@@ -6,6 +6,8 @@
 // ---------------------------------------------------------
 
 #include "Mesh.h"
+#include "Texture.h"
+#include "Material.h"
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -246,7 +248,29 @@ void Mesh::setDefaultTextureMapping(bool useNormals) {
     }
 }
 
-void Mesh::setSquareTextureMapping(unsigned indexTriangle0, unsigned indexTriangle1) {
+void Mesh::returnTriangle(unsigned int t) {
+    Triangle &triangle = triangles[t];
+    unsigned int temp = triangle.getVertex(0);
+    float tempU = triangle.getU(0);
+    float tempV = triangle.getV(0);
+    triangle.setVertex(0, triangle.getVertex(1));
+    triangle.setUV(0, triangle.getU(1), triangle.getV(1));
+    triangle.setVertex(1, temp);
+    triangle.setUV(1, tempU, tempV);
+}
+
+void Mesh::returnAllTriangles() {
+    for (unsigned i=0; i<triangles.size(); i++) {
+        returnTriangle(i);
+    }
+}
+
+void Mesh::setSquareTextureMapping(unsigned indexTriangle0,
+                                   unsigned indexTriangle1,
+                                   float uMin,
+                                   float uMax,
+                                   float vMin,
+                                   float vMax) {
     Triangle &triangle0 = triangles[indexTriangle0];
     Triangle &triangle1 = triangles[indexTriangle1];
     // Be able to detect equals triangles
@@ -267,10 +291,82 @@ void Mesh::setSquareTextureMapping(unsigned indexTriangle0, unsigned indexTriang
         cerr<<__FUNCTION__<<": the two triangles are not a square !"<<endl;
         return;
     }
-    triangle0.setUV(commonIndexes0[0], 0, 0);
-    triangle1.setUV(commonIndexes1[0], 0, 0);
-    triangle0.setUV(commonIndexes0[1], 1, 1);
-    triangle1.setUV(commonIndexes1[1], 1, 1);
-    triangle0.setUV(3-commonIndexes0[0]-commonIndexes0[1], 0, 1);
-    triangle1.setUV(3-commonIndexes1[0]-commonIndexes1[1], 1, 0);
+    triangle0.setUV(commonIndexes0[0], uMin, vMin);
+    triangle1.setUV(commonIndexes1[0], uMin, vMin);
+    triangle0.setUV(commonIndexes0[1], uMax, vMax);
+    triangle1.setUV(commonIndexes1[1], uMax, vMax);
+    triangle0.setUV(3-commonIndexes0[0]-commonIndexes0[1], uMin, vMax);
+    triangle1.setUV(3-commonIndexes1[0]-commonIndexes1[1], uMax, vMin);
+}
+
+Mesh Mesh::loadCube() {
+    Mesh cube;
+    cube.vertices.resize(8);
+    cube.triangles.resize(12);
+
+    for (unsigned int i=0; i<8; i++) {
+        float x = (i%4)<2?-0.5:0.5;
+        float y = ((i+1)%4)<2?0.5:-0.5;
+        float z = i<4?0.5:-0.5;
+        cube.vertices[i] = Vertex(Vec3Df(x, y, z));
+    }
+
+    // Top
+    cube.triangles[8] = Triangle(0, 1, 2);
+    cube.triangles[9] = Triangle(0, 2, 3);
+
+    // Bottom
+    cube.triangles[10] = Triangle(5, 4, 7);
+    cube.triangles[11] = Triangle(5, 7, 6);
+
+    // Sides
+    for (unsigned i=0; i<4; i++) {
+        cube.triangles[2*i] = Triangle(i, i+4, ((i+1)%4)+4);
+        cube.triangles[2*i+1] = Triangle(i, ((i+1)%4)+4, (i+1)%4);
+    }
+
+    return cube;
+}
+
+void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels, unsigned heightGappedPixels) {
+    // Box size in texture space
+    float boxWidth = 0.25;
+    float boxHeight = 1.0/3.0;
+
+    // Pixel size in both dimensions
+    // to avoid JPG glitches
+    float pixelHeight = 0;
+    float pixelWidth = 0;
+    const ImageTexture *texture = dynamic_cast<const ImageTexture*>(mat->getTexture());
+    if (texture) {
+        pixelHeight = 1.0/(float)texture->getImage()->height();
+        pixelWidth = 1.0/(float)texture->getImage()->width();
+    }
+
+    // Sides
+    for (unsigned int side=0; side<4; side++) {
+        setSquareTextureMapping(
+                2*side,
+                2*side+1,
+                (float)side*boxWidth,
+                (float)(side+1)*boxWidth,
+                boxHeight+heightGappedPixels*pixelHeight,
+                2.0*boxHeight-heightGappedPixels*pixelHeight);
+    }
+    // TOP (side 4)
+    setSquareTextureMapping(
+            8,
+            9,
+            boxWidth+widthGappedPixels*pixelWidth,
+            2.0*boxWidth-widthGappedPixels*pixelWidth,
+            0,
+            boxHeight);
+    // BOTTOM (side 5)
+    setSquareTextureMapping(
+            10,
+            11,
+            boxWidth+widthGappedPixels*pixelWidth,
+            2.0*boxWidth-widthGappedPixels*pixelWidth,
+            2.0*boxHeight,
+            3.0*boxHeight);
 }
