@@ -3,7 +3,7 @@
 
 using namespace std;
 
-KDtree::KDtree(const Object &o):o(o),
+KDtree::KDtree(Object &o):o(o),
                                 left(nullptr), right(nullptr),
                                 splitAxis(Axis::NONE),
                                 bBox(o.getBoundingBox()) {

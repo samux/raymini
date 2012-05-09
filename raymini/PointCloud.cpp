@@ -34,10 +34,10 @@ void PointCloud::generatePoints() {
         // For each pixel
         for (const Vec3Df &direction : directions) {
             Ray bestRay;
-            Object *object;
 
             // We add the surfel
-            if (rayTracer->intersect(direction, position, bestRay, object)) {
+            if (rayTracer->intersect(direction, position, bestRay)) {
+                Object *object = bestRay.getIntersectedObject();
                 const Material & mat = object->getMaterial();
                 Vertex intersection = bestRay.getIntersection();
                 Vec3Df intPos = intersection.getPos();

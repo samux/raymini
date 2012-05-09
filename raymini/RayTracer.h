@@ -24,7 +24,6 @@
 #include "RenderThread.h"
 
 class Color;
-class Object;
 class Vertex;
 class Controller;
 
@@ -92,8 +91,7 @@ public:
 
     bool intersect(const Vec3Df & dir,
                    const Vec3Df & camPos,
-                   Ray & bestRay,
-                   Object* & intersectedObject) const;
+                   Ray & bestRay) const;
 
     Vec3Df getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing = true) const;
     float getAmbientOcclusion(Vertex pos) const;

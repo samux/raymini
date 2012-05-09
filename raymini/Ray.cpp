@@ -66,7 +66,7 @@ bool Ray::intersect (const BoundingBox & bbox, Vec3Df & intersectionPoint) const
 }
 
 
-bool Ray::intersect(const Triangle &t, const Vertex & v1, const Vertex & v2, const Vertex & v3, const Object *o) {
+bool Ray::intersect(const Triangle &t, const Vertex & v1, const Vertex & v2, const Vertex & v3, Object *o) {
     Vec3Df vecU = v1.getPos() - v3.getPos();
     Vec3Df vecV = v2.getPos() - v3.getPos();
     Vec3Df nn = Vec3Df::crossProduct(vecU, vecV);

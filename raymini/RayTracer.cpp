@@ -152,8 +152,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
 
 bool RayTracer::intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
-                          Ray & bestRay,
-                          Object* & intersectedObject) const {
+                          Ray & bestRay) const {
     Scene * scene = controller->getScene();
     bestRay = Ray();
 
@@ -166,13 +165,12 @@ bool RayTracer::intersect(const Vec3Df & dir,
 
         if (o->getKDtree().intersect(ray) &&
             ray.getIntersectionDistance() < bestRay.getIntersectionDistance()) {
-            intersectedObject = o;
             bestRay = ray;
         }
     }
 
     if(bestRay.intersect()) {
-        bestRay.translate(intersectedObject->getTrans());
+        bestRay.translate(bestRay.getIntersectedObject()->getTrans());
     }
 
     return bestRay.intersect();
@@ -187,15 +185,13 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathT
 
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & bestRay, unsigned depth, Brdf::Type type) const {
 
-    Object *intersectedObject;
 
-
-    if(!intersect(dir, camPos, bestRay, intersectedObject)) {
+    if(!intersect(dir, camPos, bestRay)) {
         return backgroundColor;
     } 
 
     // hit something
-    const Material & mat = intersectedObject->getMaterial();
+    const Material & mat = bestRay.getIntersectedObject()->getMaterial();
     const vector<Light> & lights = getLights(bestRay.getIntersection());
 
     Color color = mat.genColor(camPos, &bestRay, lights, type);
@@ -250,9 +246,8 @@ float RayTracer::getAmbientOcclusion(Vertex intersection) const {
     for (Vec3Df & direction : directions) {
         const Vec3Df & pos = intersection.getPos();
 
-        Object *intersectedObject;
         Ray bestRay;
-        if (intersect(direction, pos, bestRay, intersectedObject)) {
+        if (intersect(direction, pos, bestRay)) {
             if (bestRay.getIntersectionDistance() < radiusAmbientOcclusion) {
                 occlusion++;
             }

@@ -11,7 +11,7 @@ enum Axis {X = 0, Y = 1, Z = 2, NONE = -1};
 
 class KDtree {
 protected:
-    const Object &o;
+    Object &o;
     std::vector<unsigned> triangles;// sth only if leaf;
     KDtree *left, *right;
     Axis splitAxis;
@@ -20,7 +20,7 @@ public:
     static const unsigned MIN_TRIANGLES = 20;
     const BoundingBox bBox;
 
-    KDtree(const Object &o);
+    KDtree(Object &o);
 
     ~KDtree() {
         delete left;
@@ -58,7 +58,7 @@ public:
     bool intersect(Ray &ray) const;
 
 private:
-    KDtree(const Object &o, const std::vector<unsigned> &triangles,
+    KDtree(Object &o, const std::vector<unsigned> &triangles,
            const BoundingBox &boundingBox):
         o(o), triangles(triangles),
         left(nullptr), right(nullptr),
