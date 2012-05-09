@@ -121,6 +121,9 @@ void Window::updateFromScene() {
 
     // Motion blur
     updateMotionBlur();
+
+    // Mapping
+    updateMapping();
 }
 
 void Window::updateFromRayTracer() {
@@ -216,6 +219,9 @@ void Window::updateFromWindowModel() {
 
     // Preview
     updatePreview();
+
+    // Mapping
+    updateMapping();
 }
 
 void Window::updatePreview() {
@@ -450,6 +456,30 @@ void Window::updateMotionBlur() {
         mBlurNbImagesSpinBox->disconnect();
         mBlurNbImagesSpinBox->setValue(rayTracer->nbPictures);
         connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+    }
+}
+
+void Window::updateMapping() {
+    Scene *scene = controller->getScene();
+    WindowModel *windowModel = controller->getWindowModel();
+
+    int index = windowModel->getSelectedObjectIndex();
+    mappingObjectsList->setCurrentIndex(index+1);
+    bool isSelected = index != -1;
+
+    mappingUScale->setVisible(isSelected);
+    mappingVScale->setVisible(isSelected);
+    mappingSphericalPushButton->setVisible(isSelected);
+    mappingSquarePushButton->setVisible(isSelected);
+
+    if (isSelected) {
+        const Mesh &mesh = scene->getObjects()[index]->getMesh();
+        mappingUScale->disconnect();
+        mappingUScale->setValue(mesh.getUScale());
+        connect(mappingUScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetUScale(double)));
+        mappingVScale->disconnect();
+        mappingVScale->setValue(mesh.getVScale());
+        connect(mappingVScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetVScale(double)));
     }
 }
 
@@ -731,6 +761,45 @@ void Window::initControlWidget () {
     objectsLayout->addLayout(objectMaterialsLayout);
 
     sceneTabs->addTab(objectsGroupBox, "Objects");
+
+
+    //  SceneGroup: Mapping
+    QWidget *mappingGroupBox = new QWidget(sceneTabs);
+    QVBoxLayout *mappingLayout = new QVBoxLayout(mappingGroupBox);
+
+    mappingObjectsList = new QComboBox(mappingGroupBox);
+    mappingObjectsList->addItem("No object selected");
+    for (const Object * o : scene->getObjects()) {
+        QString name = QString::fromStdString(o->getName());
+        mappingObjectsList->addItem(name);
+    }
+    connect(mappingObjectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
+    mappingLayout->addWidget(mappingObjectsList);
+
+    QHBoxLayout *mappingScaleLayout = new QHBoxLayout;
+    mappingUScale = new QDoubleSpinBox(mappingGroupBox);
+    mappingUScale->setMinimum(0.01);
+    mappingUScale->setMaximum(10000);
+    mappingUScale->setSingleStep(1);
+    connect(mappingUScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetUScale(double)));
+    mappingScaleLayout->addWidget(mappingUScale);
+    mappingVScale = new QDoubleSpinBox(mappingGroupBox);
+    mappingVScale->setMinimum(0.01);
+    mappingVScale->setMaximum(10000);
+    mappingVScale->setSingleStep(1);
+    connect(mappingVScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetVScale(double)));
+    mappingScaleLayout->addWidget(mappingVScale);
+    mappingLayout->addLayout(mappingScaleLayout);
+
+    mappingSphericalPushButton = new QPushButton("Sperical mapping", mappingGroupBox);
+    connect(mappingSphericalPushButton, SIGNAL(clicked()), controller, SLOT(windowSetSphericalMapping()));
+    mappingLayout->addWidget(mappingSphericalPushButton);
+
+    mappingSquarePushButton = new QPushButton("Square mapping", mappingGroupBox);
+    connect(mappingSquarePushButton, SIGNAL(clicked()), controller, SLOT(windowSetSquareMapping()));
+    mappingLayout->addWidget(mappingSquarePushButton);
+
+    sceneTabs->addTab(mappingGroupBox, "Texture mapping");
 
 
     //  SceneGroup: Materials

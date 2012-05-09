@@ -58,6 +58,7 @@ private :
     void updateObjects();
     void updateMaterials();
     void updateTextures();
+    void updateMapping();
     // Updated by both WindowModel and RayTracer
     void updateFocus();
     void updateRealTime();
@@ -117,6 +118,12 @@ private :
     QDoubleSpinBox *objectMobileSpinBoxes[3];
     QLabel *objectMaterialLabel;
     QComboBox *objectMaterialsList;
+
+    QComboBox *mappingObjectsList;
+    QDoubleSpinBox *mappingUScale;
+    QDoubleSpinBox *mappingVScale;
+    QPushButton *mappingSphericalPushButton;
+    QPushButton *mappingSquarePushButton;
 
     QComboBox *materialsList;
     QDoubleSpinBox *materialDiffuseSpinBox;

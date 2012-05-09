@@ -90,6 +90,8 @@ public:
      * in width if uScale == 2.0
      * Equals 1.0 by default
      */
+    inline void setUScale(float u) {uScale = u;}
+    inline void setVScale(float v) {vScale = v;}
     inline void setUVScales(float u, float v) {uScale = u; vScale = v;}
     inline float getUScale() const {return uScale;}
     inline float getVScale() const {return vScale;}

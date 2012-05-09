@@ -649,6 +649,54 @@ void Controller::windowSetDragEnabled(bool e) {
     windowModel->notifyAll();
 }
 
+void Controller::windowSetUScale(double u) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->getMesh().setUScale(u);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetVScale(double v) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->getMesh().setVScale(v);
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetSquareMapping() {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->getMesh().setSquareTextureMapping();
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
+void Controller::windowSetSphericalMapping() {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->getMesh().setDefaultTextureMapping();
+    renderThread->hasToRedraw();
+    scene->notifyAll();
+}
+
 void Controller::viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float r) {
     windowModel->setDraggedObject(o);
     windowModel->setInitialDraggedObjectPosition(i);

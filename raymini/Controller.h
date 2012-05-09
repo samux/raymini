@@ -90,6 +90,10 @@ public slots :
     void windowSetQualityDivider(int);
     void windowUpdatePBGI();
     void windowSetDragEnabled(bool);
+    void windowSetUScale(double);
+    void windowSetVScale(double);
+    void windowSetSquareMapping();
+    void windowSetSphericalMapping();
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
