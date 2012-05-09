@@ -19,39 +19,49 @@ Controller::~Controller()
 
 void Controller::initAll(int argc, char **argv) {
     scene = new Scene(this, argc, argv);
+    models.push_back(scene);
     rayTracer = new RayTracer(this);
+    models.push_back(rayTracer);
     windowModel = new WindowModel(this);
+    models.push_back(windowModel);
     renderThread = new RenderThread(this);
+    models.push_back(renderThread);
 
     // do this after Scene and RayTracer
     pbgi = new PBGI(this);
+    models.push_back(pbgi);
 
     window = new Window(this);
     window->setWindowTitle("RayMini: A minimal raytracer.");
     connect(raymini, SIGNAL(lastWindowClosed()), this, SLOT(quitProgram()));
+    views.push_back(window);
 
     viewer = new GLViewer(this);
     window->setCentralWidget(viewer);
+    views.push_back(viewer);
 
-    scene->addObserver(window);
-    scene->addObserver(viewer);
-    rayTracer->addObserver(window);
-    rayTracer->addObserver(viewer);
-    windowModel->addObserver(window);
-    windowModel->addObserver(viewer);
-    renderThread->addObserver(window);
+    for (Observable *m: models) {
+        for (Observer *v: views) {
+            m->addObserver(v);
+        }
+    }
 
     window->show();
 
     // First notification
-    scene->notifyAll();
-    rayTracer->notifyAll();
-    windowModel->notifyAll();
+    notifyAll();
+}
+
+void Controller::notifyAll() {
+    for (Observable *m : models) {
+        m->notifyAll();
+    }
 }
 
 void Controller::ensureThreadStopped() {
     if (renderThread->isRendering()) {
         renderThread->stopRendering();
+        renderThread->wait();
     }
 }
 
@@ -79,31 +89,39 @@ void Controller::windowSetShadowMode(int i) {
         break;
     }
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetShadowNbRays (int i) {
     ensureThreadStopped();
     rayTracer->setShadowNbImpulse(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
-void Controller::windowSetRayTracerMode (bool b) {
+void Controller::windowSetRayTracerMode(bool b) {
     ensureThreadStopped();
-    rayTracer->mode = (b) ? RayTracer::Mode::PBGI_MODE : RayTracer::PATH_TRACING_MODE;
+    rayTracer->setMode(b ? RayTracer::Mode::PBGI_MODE : RayTracer::PATH_TRACING_MODE);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::threadRenderRayImage() {
     // To avoid dark bands
     if (!renderThread->isEmergencyStop()) {
-        viewerSetRayImage(renderThread->getLastRendered());
-        viewerSetDisplayMode(WindowModel::RayDisplayMode);
+        windowModel->setRayImage(renderThread->getLastRendered());
+        windowModel->setDisplayMode(WindowModel::RayDisplayMode);
     }
-    windowModel->handleRealTime();
-    renderThread->notifyAll();
+    bool isRendering = renderThread->isRendering();
+    bool realTime = windowModel->isRealTime();
+    if (realTime && !isRendering) {
+        windowRenderRayImage();
+    }
+    if (!realTime) {
+        setRayTracerQuality(RayTracer::Quality::OPTIMAL);
+    }
+    renderThread->setChanged(RenderThread::RENDER_CHANGED);
+    notifyAll();
 }
 
 void Controller::threadSetElapsed(int e)  {
@@ -111,30 +129,32 @@ void Controller::threadSetElapsed(int e)  {
 }
 
 void Controller::threadSetBestRenderingQuality() {
-    rayTracer->quality = RayTracer::Quality::OPTIMAL;
-    rayTracer->qualityDivider = 1;
+    rayTracer->setQuality(RayTracer::Quality::OPTIMAL);
+    rayTracer->setQualityDivider(1);
 }
 
 void Controller::threadSetDurtiestRenderingQuality() {
-    rayTracer->quality = rayTracer->durtiestQuality;
-    rayTracer->qualityDivider = rayTracer->durtiestQualityDivider;
+    rayTracer->setQuality(rayTracer->getDurtiestQuality());
+    rayTracer->setQualityDivider(rayTracer->getDurtiestQualityDivider());
 }
 
 bool Controller::threadImproveRenderingQuality() {
-    if (rayTracer->quality == RayTracer::Quality::OPTIMAL) {
+    if (rayTracer->getQuality() == RayTracer::Quality::OPTIMAL) {
         return true;
     }
-    if (rayTracer->quality == RayTracer::Quality::BASIC) {
-        rayTracer->quality = RayTracer::Quality::OPTIMAL;
-        rayTracer->qualityDivider = 1;
+    if (rayTracer->getQuality() == RayTracer::Quality::BASIC) {
+        rayTracer->setQuality(RayTracer::Quality::OPTIMAL);
+        rayTracer->setQualityDivider(1);
     }
     // Logarithmic progression
-    else if (rayTracer->quality == RayTracer::Quality::ONE_OVER_X) {
-        rayTracer->qualityDivider /= 2;
-        if (rayTracer->qualityDivider <= 1) {
-            rayTracer->qualityDivider = 1;
-            rayTracer->quality = RayTracer::Quality::BASIC;
+    else if (rayTracer->getQuality() == RayTracer::Quality::ONE_OVER_X) {
+        int divider = rayTracer->getQualityDivider();
+        divider /= 2;
+        if (divider <= 1) {
+            divider = 1;
+            rayTracer->setQuality(RayTracer::Quality::BASIC);
         }
+        rayTracer->setQualityDivider(divider);
     }
     return false;
 }
@@ -143,15 +163,15 @@ void Controller::windowStopRendering() {
     ensureThreadStopped();
     windowSetRealTime(false);
     renderThread->hasToRedraw();
-    renderThread->notifyAll();
+    notifyAll();
 }
 
 void Controller::renderProgressed(float percent) {
     renderThread->setPercent(percent);
-    renderThread->notifyAll();
+    notifyAll();
 }
 
-void Controller::windowRenderRayImage () {
+void Controller::windowRenderRayImage() {
     ensureThreadStopped();
     Vec3Df camPos, viewDirection, upVector, rightVector;
     float fieldOfView, aspectRatio, screenWidth, screenHeight;
@@ -176,13 +196,13 @@ void Controller::windowSetBGColor () {
         ensureThreadStopped();
         rayTracer->setBackgroundColor(c);
         renderThread->hasToRedraw();
-        rayTracer->notifyAll();
+        notifyAll();
     }
 }
 
 void Controller::windowShowRayImage () {
-    viewerSetDisplayMode(WindowModel::RayDisplayMode);
-    windowModel->notifyAll();
+    windowModel->setDisplayMode(WindowModel::RayDisplayMode);
+    notifyAll();
 }
 
 void Controller::windowExportGLImage () {
@@ -230,150 +250,158 @@ void Controller::windowChangeAntiAliasingType(int index) {
             type = AntiAliasing::STOCHASTIC;
             break;
         }
-    rayTracer->typeAntiAliasing = type;
+    rayTracer->setTypeAntiAliasing(type);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetNbRayAntiAliasing(int i) {
     ensureThreadStopped();
-    rayTracer->nbRayAntiAliasing = i;
+    rayTracer->setNbRayAntiAliasing(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowChangeAmbientOcclusionNbRays(int index) {
     ensureThreadStopped();
-    rayTracer->nbRayAmbientOcclusion = index;
+    rayTracer->setNbRayAmbientOcclusion(index);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionMaxAngle(int i) {
     ensureThreadStopped();
-    rayTracer->maxAngleAmbientOcclusion = (float)i*2.0*M_PI/360.0;
+    rayTracer->setMaxAngleAmbientOcclusion((float)i*2.0*M_PI/360.0);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionRadius(double f) {
     ensureThreadStopped();
-    rayTracer->radiusAmbientOcclusion = f;
+    rayTracer->setRadiusAmbientOcclusion(f);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionIntensity(int i) {
     ensureThreadStopped();
-    rayTracer->intensityAmbientOcclusion = float(i)/100;
+    rayTracer->setIntensityAmbientOcclusion(float(i)/100);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetAmbientOcclusionNbRays(int i) {
     ensureThreadStopped();
-    rayTracer->nbRayAmbientOcclusion = i;
+    rayTracer->setNbRayAmbientOcclusion(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetOnlyAO(bool b) {
     ensureThreadStopped();
-    rayTracer->onlyAmbientOcclusion = b;
+    rayTracer->setOnlyAmbientOcclusion(b);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetFocusType(int type) {
     ensureThreadStopped();
-    rayTracer->typeFocus = static_cast<Focus::Type>(type);
+    rayTracer->setTypeFocus(static_cast<Focus::Type>(type));
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetFocusNbRays(int n) {
     ensureThreadStopped();
-    rayTracer->nbRayFocus = n;
+    rayTracer->setNbRayFocus(n);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetFocusAperture(double a) {
     ensureThreadStopped();
-    rayTracer->apertureFocus = a;
+    rayTracer->setApertureFocus(a);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetFocalFixing(bool isFocusMode) {
-    if (rayTracer->typeFocus == Focus::NONE) {
+    if (rayTracer->getTypeFocus() == Focus::NONE) {
         cerr <<__FUNCTION__<< ": There is no point to change WindowModel focus mode !"<<endl;
         return;
     }
     windowModel->setFocusMode(!isFocusMode);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetFocusPoint(Vertex point) {
     ensureThreadStopped();
-    if (rayTracer->typeFocus == Focus::NONE || !windowModel->isFocusMode()) {
+    if (rayTracer->getTypeFocus() == Focus::NONE || !windowModel->isFocusMode()) {
         cerr <<__FUNCTION__<< ": There is no point to define a focal !"<<endl;
         return;
     }
     windowModel->setFocusPoint(point);
     renderThread->hasToRedraw();
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetShowSurfel(bool s) {
     windowModel->setShowSurfels(s);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetShowKDTree(bool s) {
     windowModel->setShowKDTree(s);
-    windowModel->notifyAll();
+    notifyAll();
+}
+
+void Controller::viewerMovesMouse() {
+    if (rayTracer->getQuality() != rayTracer->getDurtiestQuality() ||
+            (rayTracer->getQuality() == RayTracer::Quality::ONE_OVER_X &&
+             rayTracer->getQualityDivider() != rayTracer->getDurtiestQualityDivider())) {
+        ensureThreadStopped();
+    }
 }
 
 void Controller::windowSetDepthPathTracing(int i) {
     ensureThreadStopped();
-    rayTracer->depthPathTracing = i;
-    rayTracer->typeAntiAliasing = AntiAliasing::UNIFORM;
+    rayTracer->setDepthPathTracing(i);
+    rayTracer->setTypeAntiAliasing(AntiAliasing::UNIFORM);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetNbRayPathTracing(int i) {
     ensureThreadStopped();
-    rayTracer->nbRayPathTracing = i;
+    rayTracer->setNbRayPathTracing(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetIntensityPathTracing(double i) {
     ensureThreadStopped();
-    rayTracer->intensityPathTracing = i;
+    rayTracer->setIntensityPathTracing(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetNbImagesSpinBox(int i) {
     ensureThreadStopped();
-    rayTracer->nbPictures = i;
+    rayTracer->setNbPictures(i);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetOnlyPT(bool b) {
     ensureThreadStopped();
-    rayTracer->onlyPathTracing = b;
+    rayTracer->setOnlyPathTracing(b);
     renderThread->hasToRedraw();
-    rayTracer->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSelectMaterial(int m) {
     windowModel->setSelectedMaterialIndex(m-1);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetMaterialDiffuse(double d) {
@@ -384,8 +412,9 @@ void Controller::windowSetMaterialDiffuse(double d) {
         return;
     }
     scene->getMaterials()[m]->setDiffuse(d);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetMaterialSpecular(double s) {
@@ -396,8 +425,9 @@ void Controller::windowSetMaterialSpecular(double s) {
         return;
     }
     scene->getMaterials()[m]->setSpecular(s);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetMaterialGlossyRatio(double g) {
@@ -408,8 +438,9 @@ void Controller::windowSetMaterialGlossyRatio(double g) {
         return;
     }
     scene->getMaterials()[m]->setGlossyRatio(g);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetMaterialTexture(int index) {
@@ -420,13 +451,14 @@ void Controller::windowSetMaterialTexture(int index) {
         return;
     }
     scene->getMaterials()[o]->setTexture(scene->getTextures()[index]);
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSelectTexture(int t) {
     windowModel->setSelectedTextureIndex(t-1);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetTextureColor() {
@@ -440,14 +472,15 @@ void Controller::windowSetTextureColor() {
     if (c[0] != -1) {
         ensureThreadStopped();
         texture->setRepresentativeColor(c);
+        scene->setChanged(Scene::TEXTURE_CHANGED);
         renderThread->hasToRedraw();
-        scene->notifyAll();
+        notifyAll();
     }
 }
 
 void Controller::windowSelectObject(int o) {
     windowModel->setSelectedObjectIndex(o-1);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowEnableObject(bool enabled) {
@@ -458,12 +491,13 @@ void Controller::windowEnableObject(bool enabled) {
         return;
     }
     if (!windowModel->isRealTime()) {
-        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+        windowModel->setDisplayMode(WindowModel::OpenGLDisplayMode);
     }
     scene->getObjects()[o]->setEnabled(enabled);
+    scene->setChanged(Scene::OBJECT_CHANGED);
     scene->updateBoundingBox();
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetObjectPos() {
@@ -474,9 +508,10 @@ void Controller::windowSetObjectPos() {
         return;
     }
     scene->getObjects()[o]->setTrans(window->getObjectPos());
+    scene->setChanged(Scene::OBJECT_CHANGED);
     scene->updateBoundingBox();
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetObjectMobile() {
@@ -487,8 +522,9 @@ void Controller::windowSetObjectMobile() {
         return;
     }
     scene->getObjects()[o]->setMobile(window->getObjectMobile());
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetObjectMaterial(int index) {
@@ -499,13 +535,14 @@ void Controller::windowSetObjectMaterial(int index) {
         return;
     }
     scene->getObjects()[o]->setMaterial(scene->getMaterials()[index]);
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSelectLight(int l) {
     windowModel->setSelectedLightIndex(l-1);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowEnableLight(bool enabled) {
@@ -516,11 +553,12 @@ void Controller::windowEnableLight(bool enabled) {
         return;
     }
     if (!windowModel->isRealTime()) {
-        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+        windowModel->setDisplayMode(WindowModel::OpenGLDisplayMode);
     }
     scene->getLights()[l]->setEnabled(enabled);
+    scene->setChanged(Scene::LIGHT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetLightRadius(double r) {
@@ -531,11 +569,12 @@ void Controller::windowSetLightRadius(double r) {
         return;
     }
     if (!windowModel->isRealTime()) {
-        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+        windowModel->setDisplayMode(WindowModel::OpenGLDisplayMode);
     }
     scene->getLights()[l]->setRadius(r);
+    scene->setChanged(Scene::LIGHT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetLightIntensity(double i) {
@@ -546,11 +585,12 @@ void Controller::windowSetLightIntensity(double i) {
         return;
     }
     if (!windowModel->isRealTime()) {
-        viewerSetDisplayMode(WindowModel::OpenGLDisplayMode);
+        windowModel->setDisplayMode(WindowModel::OpenGLDisplayMode);
     }
     scene->getLights()[l]->setIntensity(i);
+    scene->setChanged(Scene::LIGHT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetLightPos() {
@@ -561,8 +601,9 @@ void Controller::windowSetLightPos() {
         return;
     }
     scene->getLights()[l]->setPos(window->getLightPos());
+    scene->setChanged(Scene::LIGHT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetLightColor() {
@@ -576,8 +617,9 @@ void Controller::windowSetLightColor() {
     if (c[0] != -1) {
         ensureThreadStopped();
         light->setColor(c);
+        scene->setChanged(Scene::LIGHT_CHANGED);
         renderThread->hasToRedraw();
-        scene->notifyAll();
+        notifyAll();
     }
 }
 
@@ -589,64 +631,60 @@ void Controller::windowSetRealTime(bool r) {
     }
     else {
         ensureThreadStopped();
-        windowSetDragEnabled(false);
+        windowModel->setDragEnabled(false);
     }
 
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetDurtiestQuality(int quality) {
-    rayTracer->durtiestQuality = static_cast<RayTracer::Quality>(quality);
-    rayTracer->notifyAll();
+    rayTracer->setDurtiestQuality(static_cast<RayTracer::Quality>(quality));
+    notifyAll();
 }
 
 void Controller::windowSetQualityDivider(int divider) {
-    rayTracer->durtiestQualityDivider = divider;
-    rayTracer->notifyAll();
+    rayTracer->setDurtiestQualityDivider(divider);
+    notifyAll();
 }
 
 void Controller::windowUpdatePBGI() {
     pbgi->update();
-    windowModel->notifyAll();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetWireframe(bool b) {
     windowModel->setWireframe(b);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetRenderingMode(WindowModel::RenderingMode m) {
     windowModel->setRenderingMode(m);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetRenderingMode(int m) {
     windowModel->setRenderingMode(static_cast<WindowModel::RenderingMode>(m));
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetDisplayMode(WindowModel::DisplayMode m) {
     windowModel->setDisplayMode(m);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetDisplayMode(int m) {
     windowModel->setDisplayMode(static_cast<WindowModel::DisplayMode>(m));
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerSetRayImage(const QImage & image) {
     windowModel->setRayImage(image);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetDragEnabled(bool e) {
     windowModel->setDragEnabled(e);
-    if (!e) {
-        windowModel->setDraggedObject(nullptr);
-    }
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetUScale(double u) {
@@ -657,8 +695,9 @@ void Controller::windowSetUScale(double u) {
         return;
     }
     scene->getObjects()[o]->getMesh().setUScale(u);
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetVScale(double v) {
@@ -669,8 +708,9 @@ void Controller::windowSetVScale(double v) {
         return;
     }
     scene->getObjects()[o]->getMesh().setVScale(v);
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetSquareMapping() {
@@ -681,8 +721,9 @@ void Controller::windowSetSquareMapping() {
         return;
     }
     scene->getObjects()[o]->getMesh().setSquareTextureMapping();
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::windowSetSphericalMapping() {
@@ -693,17 +734,15 @@ void Controller::windowSetSphericalMapping() {
         return;
     }
     scene->getObjects()[o]->getMesh().setDefaultTextureMapping();
+    scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
-    scene->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float r) {
-    windowModel->setDraggedObject(o);
+    windowModel->setDraggedObject(o, i, p, r);
     windowModel->setSelectedObject(o);
-    windowModel->setInitialDraggedObjectPosition(i);
-    windowModel->setStartedDraggingPoint(p);
-    windowModel->setMovingRatio(r);
-    windowModel->notifyAll();
+    notifyAll();
 }
 
 void Controller::viewerMovesWhileDragging(QPoint p) {
@@ -720,10 +759,24 @@ void Controller::viewerMovesWhileDragging(QPoint p) {
     float yMove = (float)(lastPos.y()-p.y())/(float)screenHeight/ratio;
     Object *o = windowModel->getDraggedObject();
     o->setTrans(oPos+rightVector*xMove+upVector*yMove);
-    scene->notifyAll();
+    scene->setChanged(Scene::OBJECT_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
 }
 
 void Controller::viewerStopsDragging() {
-    windowModel->setDraggedObject(nullptr);
-    windowModel->notifyAll();
+    windowModel->stopDragging();
+    notifyAll();
+}
+
+void Controller::setRayTracerQuality(RayTracer::Quality quality) {
+    rayTracer->setQuality(quality);
+}
+
+void Controller::setSceneMove(int nbPictures) {
+    scene->move(nbPictures);
+}
+
+void Controller::setSceneReset() {
+    scene->reset();
 }

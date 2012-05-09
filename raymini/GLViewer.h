@@ -35,7 +35,7 @@ public:
         std::string message;
     };
 
-    virtual void update(Observable *);
+    virtual void update(const Observable *);
     static void draw_octree(const Octree * t);
     static void drawCube(const Vec3Df min, const Vec3Df max);
 
@@ -57,11 +57,12 @@ protected :
 private:
     Controller *controller;
 
-    void updateLights();
-    void updateWireframe();
-    void updateBackground();
-    void updateFocus();
-    void updateBoundingBox();
+    void updateLights(const Observable *);
+    void updateWireframe(const Observable *);
+    void updateBackground(const Observable *);
+    void updateFocus(const Observable *);
+    void updateBoundingBox(const Observable *);
+    void updateView(const Observable *);
 
     /** Ray trace from the camera to update local focus point */
     void changeFocusPoint();

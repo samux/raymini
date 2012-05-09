@@ -10,6 +10,8 @@ class Observer;
 
 class Observable {
 public:
+    Observable();
+
     /** Add an observer to the list */
     void addObserver(Observer *observer);
 
@@ -19,7 +21,24 @@ public:
     /** Notify any observer in observers */
     void notifyAll();
 
-private:
+    /**
+     * Set changed for an offset
+     * Each flag is a bit of the unsigned long flag
+     */
+    void setChanged(unsigned long offset);
+
+    /**
+     * Return true if flag is at 1 for this offset
+     */
+    bool isChanged(unsigned long offset) const;
+
+protected:
     /** List of observers */
     std::vector<Observer*> observers;
+
+    /** State flag */
+    unsigned long flag;
+
+    /** Clear all changed flag */
+    void clearChanged();
 };

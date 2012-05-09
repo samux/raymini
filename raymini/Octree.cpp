@@ -9,8 +9,7 @@
 using namespace std;
 
 Octree::Octree(Controller * c, const PointCloud & cloud) : c(c), cloud(cloud) {
-    Scene * sc = c->getScene();
-    bBox = sc->getBoundingBox();
+    bBox = c->getScene()->getBoundingBox();
 
     surfels.resize(cloud.getSurfels().size());
     for(int i = 0; i < 8; i++)

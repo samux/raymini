@@ -26,11 +26,12 @@ public:
     inline Window *getWindow() {return window;}
     inline GLViewer *getViewer() {return viewer;}
 
-    inline Scene *getScene() {return scene;}
-    inline RayTracer *getRayTracer() {return rayTracer;}
-    inline PBGI *getPBGI() {return pbgi;}
-    inline WindowModel *getWindowModel() {return windowModel;}
-    inline RenderThread *getRenderThread() {return renderThread;}
+    // Const to ensure that views use controller to modify models
+    inline const Scene *getScene() {return scene;}
+    inline const RayTracer *getRayTracer() {return rayTracer;}
+    inline const PBGI *getPBGI() {return pbgi;}
+    inline const WindowModel *getWindowModel() {return windowModel;}
+    inline const RenderThread *getRenderThread() {return renderThread;}
 
     /** To use with caution */
     inline void forceThreadUpdate() {
@@ -40,7 +41,7 @@ public:
     }
 
 public slots :
-    void windowRenderRayImage();
+    void windowRenderRayImage(); // Won't notify
     void windowStopRendering();
     void windowSetRayTracerMode(bool);
     void windowSetShadowMode(int);
@@ -104,23 +105,34 @@ public slots :
     void viewerSetFocusPoint(Vertex point);
     void viewerSetShowSurfel(bool);
     void viewerSetShowKDTree(bool);
+    void viewerMovesMouse();
 
     void threadRenderRayImage();
+    // Won't notify ****
     void threadSetElapsed(int);
+    // *****************
 
     void renderProgressed(float);
 
     void quitProgram();
 
 public:
+    // Won't notify ****
     void threadSetBestRenderingQuality();
     void threadSetDurtiestRenderingQuality();
-    // Return true iff quality was already optimal
+    /** Return true iff quality was already optimal */
     bool threadImproveRenderingQuality();
+    // *****************
 
     void viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float ratio);
     void viewerMovesWhileDragging(QPoint);
     void viewerStopsDragging();
+
+    // Won't notify ****
+    void setRayTracerQuality(RayTracer::Quality quality);
+    void setSceneMove(int nbPictures);
+    void setSceneReset();
+    // *****************
 
     /**
      * Ask for a color and return a [0,1] color, or -1 on each field in not valid
@@ -129,14 +141,19 @@ public:
     Vec3Df userSelectsColor(Vec3Df programColor);
 
 private:
+    /** All models notify if necessary */
+    void notifyAll();
+
     /** Stop thread if running */
     void ensureThreadStopped();
 
     // Views
+    std::vector<Observer*> views;
     Window *window;
     GLViewer *viewer;
 
     // Models
+    std::vector<Observable*> models;
     Scene *scene;
     RayTracer *rayTracer;
     WindowModel *windowModel;

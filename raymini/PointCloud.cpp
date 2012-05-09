@@ -21,13 +21,13 @@ PointCloud::~PointCloud() {
 }
 
 void PointCloud::generatePoints() {
-    Scene * scene = c->getScene();
+    const Scene * scene = c->getScene();
     const RayTracer *rayTracer = c->getRayTracer();
 
     surfels.clear();
 
     // For each light
-    for (Light * light : scene->getLights()) {
+    for (const Light * light : scene->getLights()) {
         Vertex v(light->getPos(), light->getNormal());
         vector<Vec3Df> directions = v.getDirectionsOnCube(resolution);
         Vec3Df position = light->getPos();

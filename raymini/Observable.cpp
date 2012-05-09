@@ -4,6 +4,11 @@
 
 using namespace std;
 
+Observable::Observable():
+    // Put flag to 0xffff...
+    flag((unsigned long)(-1))
+{}
+
 void Observable::addObserver(Observer *observer) {
     for (Observer *o : observers) {
         if (observer == o) {
@@ -25,7 +30,22 @@ void Observable::removeObserver(Observer *observer) {
 }
 
 void Observable::notifyAll() {
-    for (Observer *observer: observers) {
-        observer->update(this);
+    if (flag) {
+        for (Observer *observer: observers) {
+            observer->update(this);
+        }
     }
+    clearChanged();
+}
+
+void Observable::clearChanged() {
+    flag = 0;
+}
+
+void Observable::setChanged(unsigned long o) {
+    flag |= o;
+}
+
+bool Observable::isChanged(unsigned long o) const {
+    return flag & o;
 }

@@ -47,7 +47,7 @@ std::vector<Vec3Df> Shadow::generateImpulsion(const Light & light) const{
 }
 
 float Shadow::operator()(const Vec3Df & pos, const Light & light) const {
-    bool noSoft = rt->quality != RayTracer::Quality::OPTIMAL;
+    bool noSoft = rt->getQuality() != RayTracer::Quality::OPTIMAL;
     if(mode == HARD || ((mode==SOFT) && noSoft))
         return float(hard(pos, light.getPos()));
     else if(mode == SOFT) {

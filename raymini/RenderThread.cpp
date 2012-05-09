@@ -28,6 +28,7 @@ void RenderThread::run() {
                 aspectRatio,
                 screenWidth,
                 screenHeight);
+        setChanged(RENDER_CHANGED);
         controller->threadSetElapsed(time.elapsed());
         optimalDone = controller->threadImproveRenderingQuality();
     }
@@ -65,12 +66,12 @@ void RenderThread::startRendering(const Vec3Df & camPos,
     start();
 }
 
-bool RenderThread::isRendering() {
+bool RenderThread::isRendering() const {
     bool result = isRunning();
     if (result) {
-        reallyWorkingMutex.lock();
+        //reallyWorkingMutex.lock();
         result = reallyWorking;
-        reallyWorkingMutex.unlock();
+        //reallyWorkingMutex.unlock();
     }
     return result;
 }
@@ -79,7 +80,14 @@ bool RenderThread::hasRendered() {
     return isFinished();
 }
 
+void RenderThread::setPercent(float p)
+{
+    percent = p;
+    setChanged(RENDER_CHANGED);
+}
+
 void RenderThread::stopRendering() {
+    setChanged(RENDER_CHANGED);
     // Don't use mutexes to be immediate
     emergencyStop = true;
     haveToRedraw = true;
@@ -90,11 +98,11 @@ const QImage &RenderThread::getLastRendered() {
     return resultImage;
 }
 
-bool RenderThread::isEmergencyStop() {
+bool RenderThread::isEmergencyStop() const {
     bool result;
-    emergencyStopMutex.lock();
+    //emergencyStopMutex.lock();
     result = emergencyStop;
-    emergencyStopMutex.unlock();
+    //emergencyStopMutex.unlock();
 
     return result;
 }
@@ -103,4 +111,5 @@ void RenderThread::hasToRedraw() {
     hasToRedrawMutex.lock();
     haveToRedraw = true;
     hasToRedrawMutex.unlock();
+    setChanged(RENDER_CHANGED);
 }

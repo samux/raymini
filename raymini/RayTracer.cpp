@@ -37,9 +37,9 @@ RayTracer::RayTracer(Controller *c):
     quality(OPTIMAL),
     durtiestQualityDivider(5),
     durtiestQuality(ONE_OVER_X),
-    controller(c),
     backgroundColor(Vec3Df(.1f, .1f, .3f)),
-    shadow(this)
+    shadow(this),
+    controller(c)
 {}
 
 QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
@@ -49,10 +49,10 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                                      float fieldOfView,
                                      float aspectRatio,
                                      unsigned int screenWidth,
-                                     unsigned int screenHeight) {
-    Scene *scene = controller->getScene();
+                                     unsigned int screenHeight) const {
+    const Scene *scene = controller->getScene();
     vector<Color> buffer;
-    qualityDivider = quality==ONE_OVER_X?qualityDivider:1;
+    int qualityDivider = quality==ONE_OVER_X?this->qualityDivider:1;
     // To avoid black pixels on the top of the screen
     unsigned int computedScreenWidth = ceil((float)screenWidth/(float)qualityDivider);
     unsigned int computedScreenHeight = ceil((float)screenHeight/(float)qualityDivider);
@@ -93,7 +93,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                                                                 i, j);
             }
         }
-        scene->move(nbPictures);
+        controller->setSceneMove(nbPictures);
     }
 
     QImage image (QSize (screenWidth, screenHeight), QImage::Format_RGB888);
@@ -106,7 +106,7 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
         }
     }
 
-    scene->reset();
+    controller->setSceneReset();
 
     return image;
 }
@@ -120,7 +120,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
                                const vector<pair<float, float>> &offsets,
                                const vector<pair<float, float>> &offsets_focus,
                                float focalDistance,
-                               unsigned i, unsigned j) {
+                               unsigned i, unsigned j) const {
     Color c;
 
     // For each ray in each pixel
@@ -153,7 +153,7 @@ Vec3Df RayTracer::computePixel(const Vec3Df & camPos,
 bool RayTracer::intersect(const Vec3Df & dir,
                           const Vec3Df & camPos,
                           Ray & bestRay) const {
-    Scene * scene = controller->getScene();
+    const Scene * scene = controller->getScene();
     bestRay = Ray();
 
 

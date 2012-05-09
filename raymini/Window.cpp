@@ -87,104 +87,122 @@ Vec3Df Window::getLightPos() const {
     return newPos;
 }
 
-void Window::update(Observable *observable) {
-    if (observable == controller->getScene()) {
-        updateFromScene();
-    }
-    else if (observable == controller->getRayTracer()) {
-        updateFromRayTracer();
-    }
-    else if (observable == controller->getWindowModel()) {
-        updateFromWindowModel();
-    }
-    else if (observable == controller->getRenderThread()) {
-        updateProgressBar();
-        updateStatus();
-    }
-    else {
-        cerr << "Window::update(Observable*) has been called from an unknown source!" << endl;
+void Window::update(const Observable *observable) {
+    updateLights(observable);
+    updateObjects(observable);
+    updateMaterials(observable);
+    updateTextures(observable);
+    updateMapping(observable);
+    updateFocus(observable);
+    updateRealTime(observable);
+    updateProgressBar(observable);
+    updateStatus(observable);
+    updatePreview(observable);
+    updateMotionBlur(observable);
+    updateShadows(observable);
+    updateAntiAliasing(observable);
+    updatePathTracing(observable);
+    updateBackgroundColor(observable);
+}
+
+void Window::updateShadows(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable == rayTracer && rayTracer->isChanged(RayTracer::SHADOW_CHANGED)) {
+        shadowTypeList->setCurrentIndex(rayTracer->getShadowMode());
+        shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
+        shadowSpinBox->disconnect();
+        shadowSpinBox->setValue(rayTracer->getShadowNbImpulse());
+        connect(shadowSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetShadowNbRays(int)));
     }
 }
 
-void Window::updateFromScene() {
-    // Lights
-    updateLights();
-
-    // Objects
-    updateObjects();
-
-    // Materials
-    updateMaterials();
-
-    // Textures
-    updateTextures();
-
-    // Motion blur
-    updateMotionBlur();
-
-    // Mapping
-    updateMapping();
+void Window::updateAntiAliasing(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable != rayTracer) {
+        return;
+    }
+    bool updateNbRayVisible = rayTracer->isChanged(RayTracer::DEPTH_PT_CHANGED) ||
+        rayTracer->isChanged(RayTracer::TYPE_AA_CHANGED);
+    if (updateNbRayVisible) {
+        bool isPT = rayTracer->getDepthPathTracing() != 0;
+        AANbRaySpinBox->setVisible(
+                (!isPT) &&
+                rayTracer->getTypeAntiAliasing() != AntiAliasing::NONE);
+    }
+    if (rayTracer->isChanged(RayTracer::NB_RAYS_AA_CHANGED)) {
+        AANbRaySpinBox->disconnect();
+        AANbRaySpinBox->setValue(rayTracer->getNbRayAntiAliasing());
+        connect(AANbRaySpinBox, SIGNAL(valueChanged(int)),
+                controller, SLOT(windowSetNbRayAntiAliasing(int)));
+    }
 }
 
-void Window::updateFromRayTracer() {
-    RayTracer *rayTracer = controller->getRayTracer();
+void Window::updateAmbientOcclusion(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable != rayTracer) {
+        return;
+    }
+    bool isAOchanged = rayTracer->isChanged(RayTracer::NB_RAYS_AO_CHANGED);
+    if (isAOchanged) {
+        bool isAO = rayTracer->getNbRayAmbientOcclusion() != 0;
+        AONbRaysSpinBox->disconnect();
+        AONbRaysSpinBox->setValue(rayTracer->getNbRayAmbientOcclusion());
+        connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)),
+                controller, SLOT(windowSetAmbientOcclusionNbRays(int)));
+        AORadiusSpinBox->setVisible(isAO);
+        AOMaxAngleSpinBox->setVisible(isAO);
+    }
+    if (rayTracer->isChanged(RayTracer::RADIUS_AO_CHANGED)) {
+        AORadiusSpinBox->disconnect();
+        AORadiusSpinBox->setValue(rayTracer->getRadiusAmbientOcclusion());
+        connect(AORadiusSpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetAmbientOcclusionRadius(double)));
+    }
+    if (rayTracer->isChanged(RayTracer::MAX_ANGLE_AO_CHANGED)) {
+        AOMaxAngleSpinBox->disconnect();
+        int AOAngle = rayTracer->getMaxAngleAmbientOcclusion()*360.0/(2.0*M_PI)+0.5;
+        AOMaxAngleSpinBox->setValue(AOAngle);
+        connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
+    }
+}
 
-    // Shadows
-    shadowTypeList->setCurrentIndex(rayTracer->getShadowMode());
-    shadowSpinBox->setVisible(rayTracer->getShadowMode() == Shadow::SOFT);
-    shadowSpinBox->disconnect();
-    shadowSpinBox->setValue(rayTracer->getShadowNbImpulse());
-    connect(shadowSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetShadowNbRays(int)));
-
-    // Anti aliasing
-    bool isPT = rayTracer->depthPathTracing != 0;
-    AANbRaySpinBox->setVisible((!isPT) && rayTracer->typeAntiAliasing != AntiAliasing::NONE);
-    AANbRaySpinBox->disconnect();
-    AANbRaySpinBox->setValue(rayTracer->nbRayAntiAliasing);
-    connect(AANbRaySpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetNbRayAntiAliasing(int)));
-
-    // Ambient occlusion
-    bool isAO = rayTracer->nbRayAmbientOcclusion != 0;
-    AONbRaysSpinBox->disconnect();
-    AONbRaysSpinBox->setValue(rayTracer->nbRayAmbientOcclusion);
-    connect(AONbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionNbRays(int)));
-    AORadiusSpinBox->setVisible(isAO);
-    AOMaxAngleSpinBox->setVisible(isAO);
-    AORadiusSpinBox->disconnect();
-    AORadiusSpinBox->setValue(rayTracer->radiusAmbientOcclusion);
-    connect(AORadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetAmbientOcclusionRadius(double)));
-    AOMaxAngleSpinBox->disconnect();
-    int AOAngle = rayTracer->maxAngleAmbientOcclusion*360.0/(2.0*M_PI)+0.5;
-    AOMaxAngleSpinBox->setValue(AOAngle);
-    connect(AOMaxAngleSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetAmbientOcclusionMaxAngle(int)));
-
-    // Focus
-    updateFocus();
-
-    // Path tracing
-    PTDepthSpinBox->disconnect();
-    PTDepthSpinBox->setValue(rayTracer->depthPathTracing);
-    connect (PTDepthSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetDepthPathTracing (int)));
-    PTNbRaySpinBox->setVisible(isPT);
-    PTOnlyCheckBox->setVisible(isPT);
-    PBGICheckBox->setVisible(!isPT);
-    if (isPT) {
+void Window::updatePathTracing(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable != rayTracer) {
+        return;
+    }
+    if (rayTracer->isChanged(RayTracer::DEPTH_PT_CHANGED)) {
+        bool isPT = rayTracer->getDepthPathTracing() != 0;
+        PTDepthSpinBox->disconnect();
+        PTDepthSpinBox->setValue(rayTracer->getDepthPathTracing());
+        connect(PTDepthSpinBox, SIGNAL(valueChanged(int)),
+                controller, SLOT(windowSetDepthPathTracing(int)));
+        PTNbRaySpinBox->setVisible(isPT);
+        PTOnlyCheckBox->setVisible(isPT);
+        PBGICheckBox->setVisible(!isPT);
+    }
+    if (rayTracer->isChanged(RayTracer::NB_RAYS_PT_CHANGED)) {
         PTNbRaySpinBox->disconnect();
-        PTNbRaySpinBox->setValue(rayTracer->nbRayPathTracing);
-        connect(PTNbRaySpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbRayPathTracing (int)));
-        PTIntensitySpinBox->disconnect();
-        PTIntensitySpinBox->setValue(rayTracer->intensityPathTracing);
-        connect(PTIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetIntensityPathTracing(double)));
+        PTNbRaySpinBox->setValue(rayTracer->getNbRayPathTracing());
+        connect(PTNbRaySpinBox, SIGNAL(valueChanged(int)),
+                controller, SLOT(windowSetNbRayPathTracing(int)));
     }
+    if (rayTracer->isChanged(RayTracer::INTENSITY_AO_CHANGED)) {
+        PTIntensitySpinBox->disconnect();
+        PTIntensitySpinBox->setValue(rayTracer->getIntensityPathTracing());
+        connect(PTIntensitySpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetIntensityPathTracing(double)));
+    }
+}
 
-    // Real time
-    updateRealTime();
-
-    // Motion blur
-    updateMotionBlur();
-
-    // Background color
-    bgColorButton->setIcon(createIconFromColor(rayTracer->getBackgroundColor()));
+void Window::updateBackgroundColor(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable != rayTracer) {
+        return;
+    }
+    if (rayTracer->isChanged(RayTracer::BACKGROUND_CHANGED)) {
+        bgColorButton->setIcon(createIconFromColor(rayTracer->getBackgroundColor()));
+    }
 }
 
 QIcon Window::createIconFromColor(Vec3Df color) {
@@ -195,62 +213,52 @@ QIcon Window::createIconFromColor(Vec3Df color) {
     return QIcon(image);
 }
 
-void Window::updateFromWindowModel() {
-    // Lights
-    updateLights();
-
-    // Focus
-    updateFocus();
-
-    // Objects
-    updateObjects();
-
-    // Materials
-    updateMaterials();
-
-    // Textures
-    updateTextures();
-
-    // Real time
-    updateRealTime();
-
-    // Status
-    updateStatus();
-
-    // Preview
-    updatePreview();
-
-    // Mapping
-    updateMapping();
+void Window::updatePreview(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (observable != windowModel) {
+        return;
+    }
+    if (windowModel->isChanged(WindowModel::WIREFRAME_CHANGED)) {
+        wireframeCheckBox->setChecked(windowModel->isWireframe());
+    }
+    if (windowModel->isChanged(WindowModel::RENDERING_MODE_CHANGED)) {
+        modeList->setCurrentIndex(windowModel->getRenderingMode());
+    }
+    if (windowModel->isChanged(WindowModel::SHOW_SURFELS_CHANGED)) {
+        surfelsCheckBox->setChecked(windowModel->isShowSurfel());
+    }
+    if (windowModel->isChanged(WindowModel::SHOW_KDTREE_CHANGED)) {
+        kdtreeCheckBox->setChecked(windowModel->isShowKDTree());
+    }
 }
 
-void Window::updatePreview() {
-    WindowModel *windowModel = controller->getWindowModel();
-    wireframeCheckBox->setChecked(windowModel->isWireframe());
-    modeList->setCurrentIndex(windowModel->getRenderingMode());
-    surfelsCheckBox->setChecked(windowModel->isShowSurfel());
-    kdtreeCheckBox->setChecked(windowModel->isShowKDTree());
-}
-
-void Window::updateLights() {
-    Scene *scene = controller->getScene();
-    WindowModel *windowModel = controller->getWindowModel();
+void Window::updateLights(const Observable *observable) {
+    const Scene *scene = controller->getScene();
+    const WindowModel *windowModel = controller->getWindowModel();
 
     int lightIndex = windowModel->getSelectedLightIndex();
-    lightsList->setCurrentIndex(lightIndex+1);
     bool isLightSelected = lightIndex != -1;
-    bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
-    lightEnableCheckBox->setVisible(isLightSelected);
-    for (int i=0; i<3; i++) {
-        lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_LIGHT_CHANGED)) {
+        lightsList->setCurrentIndex(lightIndex+1);
+        lightEnableCheckBox->setVisible(isLightSelected);
+        bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
+        for (int i=0; i<3; i++) {
+            lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+        }
+        lightColorButton->setVisible(isLightEnabled);
+        lightRadiusSpinBox->setVisible(isLightEnabled);
+        lightIntensitySpinBox->setVisible(isLightEnabled);
     }
-    lightColorButton->setVisible(isLightEnabled);
-    lightRadiusSpinBox->setVisible(isLightEnabled);
-    lightIntensitySpinBox->setVisible(isLightEnabled);
+
+    if ((observable != scene) ||
+            (!scene->isChanged(Scene::LIGHT_CHANGED))) {
+        return;
+    }
 
     if (isLightSelected) {
-        Light * l = scene->getLights()[lightIndex];
-        isLightEnabled = l->isEnabled();
+        const Light * l = scene->getLights()[lightIndex];
+        bool isLightEnabled = l->isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
         Vec3Df color = l->getColor();
         Vec3Df pos = l->getPos();
@@ -259,159 +267,236 @@ void Window::updateLights() {
         for (int i=0; i<3; i++) {
             lightPosSpinBoxes[i]->disconnect();
             lightPosSpinBoxes[i]->setValue(pos[i]);
-            connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightPos()));
+            connect(lightPosSpinBoxes[i], SIGNAL(valueChanged(double)),
+                    controller, SLOT(windowSetLightPos()));
         }
         lightColorButton->setIcon(createIconFromColor(color));
         lightIntensitySpinBox->disconnect();
         lightIntensitySpinBox->setValue(intensity);
-        connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightIntensity(double)));
+        connect(lightIntensitySpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetLightIntensity(double)));
         lightRadiusSpinBox->disconnect();
         lightRadiusSpinBox->setValue(radius);
-        connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetLightRadius(double)));
+        connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetLightRadius(double)));
     }
 }
 
-void Window::updateFocus() {
-    WindowModel *windowModel = controller->getWindowModel();
-    RayTracer *rayTracer = controller->getRayTracer();
-    Focus::Type type = rayTracer->typeFocus;
-    focusTypeComboBox->setCurrentIndex(type);
-    bool isFocus = type != Focus::NONE;
-    changeFocusFixingCheckBox->setVisible(isFocus);
-    focusNbRaysSpinBox->setVisible(isFocus);
-    focusApertureSpinBox->setVisible(isFocus);
-    bool isFocusMode = windowModel->isFocusMode();
-    changeFocusFixingCheckBox->setChecked(!isFocusMode);
-    focusNbRaysSpinBox->disconnect();
-    focusNbRaysSpinBox->setValue(rayTracer->nbRayFocus);
-    connect(focusNbRaysSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetFocusNbRays(int)));
-    focusApertureSpinBox->disconnect();
-    focusApertureSpinBox->setValue(rayTracer->apertureFocus);
-    connect(focusApertureSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetFocusAperture(double)));
+void Window::updateFocus(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::FOCUS_MODE_CHANGED)) {
+        bool isFocusMode = windowModel->isFocusMode();
+        changeFocusFixingCheckBox->setChecked(!isFocusMode);
+    }
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable != rayTracer) {
+        return;
+    }
+    if (rayTracer->isChanged(RayTracer::TYPE_FOCUS_CHANGED)) {
+        Focus::Type type = rayTracer->getTypeFocus();
+        focusTypeComboBox->setCurrentIndex(type);
+        bool isFocus = type != Focus::NONE;
+        changeFocusFixingCheckBox->setVisible(isFocus);
+        focusNbRaysSpinBox->setVisible(isFocus);
+        focusApertureSpinBox->setVisible(isFocus);
+    }
+    if (rayTracer->isChanged(RayTracer::NB_RAYS_FOCUS_CHANGED)) {
+        focusNbRaysSpinBox->disconnect();
+        focusNbRaysSpinBox->setValue(rayTracer->getNbRayFocus());
+        connect(focusNbRaysSpinBox, SIGNAL(valueChanged(int)),
+                controller, SLOT(windowSetFocusNbRays(int)));
+    }
+    if (rayTracer->isChanged(RayTracer::APERTURE_FOCUS_CHANGED)) {
+        focusApertureSpinBox->disconnect();
+        focusApertureSpinBox->setValue(rayTracer->getApertureFocus());
+        connect(focusApertureSpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetFocusAperture(double)));
+    }
 }
 
-void Window::updateObjects() {
-    Scene *scene = controller->getScene();
-    WindowModel *windowModel = controller->getWindowModel();
+void Window::updateObjects(const Observable *observable) {
+    const Scene *scene = controller->getScene();
+    const WindowModel *windowModel = controller->getWindowModel();
 
     int index = windowModel->getSelectedObjectIndex();
     objectsList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
-    objectEnableCheckBox->setVisible(isSelected);
-    objectMobileLabel->setVisible(isSelected);
-    for (unsigned int i=0; i<3; i++) {
-        objectPosSpinBoxes[i]->setVisible(isSelected);
-        objectMobileSpinBoxes[i]->setVisible(isSelected);
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED)) {
+        objectEnableCheckBox->setVisible(isSelected);
+        objectMobileLabel->setVisible(isSelected);
+        for (unsigned int i=0; i<3; i++) {
+            objectPosSpinBoxes[i]->setVisible(isSelected);
+            objectMobileSpinBoxes[i]->setVisible(isSelected);
+        }
+        objectMaterialLabel->setVisible(isSelected);
+        objectMaterialsList->setVisible(isSelected);
+        int materialIndex = scene->getObjectMaterialIndex(index);
+        if (materialIndex != -1) {
+            objectMaterialsList->setCurrentIndex(materialIndex);
+        }
     }
-    objectMaterialLabel->setVisible(isSelected);
-    objectMaterialsList->setVisible(isSelected);
-    if (isSelected) {
+    if (isSelected &&
+            observable == scene &&
+            scene->isChanged(Scene::OBJECT_CHANGED)) {
         const Object *object = scene->getObjects()[index];
         bool isEnabled = object->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
         for (unsigned int i=0; i<3; i++) {
             objectPosSpinBoxes[i]->disconnect();
             objectPosSpinBoxes[i]->setValue(object->getTrans()[i]);
-            connect(objectPosSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectPos()));
+            connect(objectPosSpinBoxes[i], SIGNAL(valueChanged(double)),
+                    controller, SLOT(windowSetObjectPos()));
             objectMobileSpinBoxes[i]->disconnect();
             objectMobileSpinBoxes[i]->setValue(object->getMobile()[i]);
-            connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)), controller, SLOT(windowSetObjectMobile()));
+            connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)),
+                    controller, SLOT(windowSetObjectMobile()));
         }
-        objectMaterialsList->setCurrentIndex(scene->getObjectMaterialIndex(index));
     }
 }
 
-void Window::updateMaterials() {
-    Scene *scene = controller->getScene();
-    WindowModel *windowModel = controller->getWindowModel();
+void Window::updateMaterials(const Observable *observable) {
+    const Scene *scene = controller->getScene();
+    const WindowModel *windowModel = controller->getWindowModel();
 
     int index = windowModel->getSelectedMaterialIndex();
-    materialsList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
-    materialDiffuseSpinBox->setVisible(isSelected);
-    materialSpecularSpinBox->setVisible(isSelected);
-    materialGlossyRatio->setVisible(isSelected);
-    materialTextureLabel->setVisible(isSelected);
-    materialTexturesList->setVisible(isSelected);
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_MATERIAL_CHANGED)) {
+        materialsList->setCurrentIndex(index+1);
+        materialDiffuseSpinBox->setVisible(isSelected);
+        materialSpecularSpinBox->setVisible(isSelected);
+        materialGlossyRatio->setVisible(isSelected);
+        materialTextureLabel->setVisible(isSelected);
+        materialTexturesList->setVisible(isSelected);
+        int textureIndex = scene->getMaterialTextureIndex(index);
+        if (textureIndex != -1) {
+            materialTexturesList->setCurrentIndex(textureIndex);
+        }
+    }
 
-    if (isSelected) {
+    if (isSelected &&
+            observable == scene &&
+            scene->isChanged(Scene::MATERIAL_CHANGED)) {
         const Material *material = scene->getMaterials()[index];
         materialDiffuseSpinBox->disconnect();
         materialDiffuseSpinBox->setValue(material->getDiffuse());
-        connect(materialDiffuseSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialDiffuse(double)));
+        connect(materialDiffuseSpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetMaterialDiffuse(double)));
         materialSpecularSpinBox->disconnect();
         materialSpecularSpinBox->setValue(material->getSpecular());
-        connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialSpecular(double)));
+        connect(materialSpecularSpinBox, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetMaterialSpecular(double)));
         materialGlossyRatio->disconnect();
         materialGlossyRatio->setValue(material->getGlossyRatio());
-        connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
-        materialTexturesList->setCurrentIndex(scene->getMaterialTextureIndex(index));
+        connect(materialGlossyRatio, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetMaterialGlossyRatio(double)));
     }
 }
 
-void Window::updateTextures() {
-    Scene *scene = controller->getScene();
-    WindowModel *windowModel = controller->getWindowModel();
+void Window::updateTextures(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
 
     int index = windowModel->getSelectedTextureIndex();
-    texturesList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
-    textureColorButton->setVisible(isSelected);
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_TEXTURE_CHANGED)) {
+        texturesList->setCurrentIndex(index+1);
+        textureColorButton->setVisible(isSelected);
+    }
 
-    if (isSelected) {
+    const Scene *scene = controller->getScene();
+    if (isSelected &&
+            observable == scene &&
+            scene->isChanged(Scene::TEXTURE_CHANGED)) {
         const Texture *texture = scene->getTextures()[index];
         textureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
     }
 }
 
-void Window::updateProgressBar() {
-    RenderThread *renderThread = controller->getRenderThread();
-    WindowModel *windowModel = controller->getWindowModel();
+void Window::updateProgressBar(const Observable *observable) {
+    const RenderThread *renderThread = controller->getRenderThread();
+    const WindowModel *windowModel = controller->getWindowModel();
+    bool renderThreadUpdated =
+        observable == renderThread &&
+        renderThread->isChanged(RenderThread::RENDER_CHANGED);
+    bool windowModelUpdated =
+        observable == windowModel &&
+        windowModel->isChanged(WindowModel::REAL_TIME_CHANGED);
     bool isRendering = renderThread->isRendering();
-    bool isRealTime = windowModel->isRealTime();
-    stopRenderButton->setVisible(isRendering||isRealTime);
-    renderButton->setVisible(!isRendering && !isRealTime);
-    if (isRendering) {
-        float percent = renderThread->getPercent();
-        renderProgressBar->setValue(percent);
+    if (renderThreadUpdated || windowModelUpdated) {
+        bool isRealTime = windowModel->isRealTime();
+        stopRenderButton->setVisible(isRendering||isRealTime);
+        renderButton->setVisible(!isRendering && !isRealTime);
     }
-    else {
-        renderProgressBar->setValue(100);
-    }
-}
-
-void Window::updateRealTime() {
-    WindowModel *windowModel = controller->getWindowModel();
-    bool isRealTime = windowModel->isRealTime();
-    realTimeCheckBox->setChecked(isRealTime);
-    dragCheckBox->setVisible(isRealTime);
-    durtiestQualityComboBox->setVisible(isRealTime);
-    durtiestQualityLabel->setVisible(isRealTime);
-    if (isRealTime) {
-        dragCheckBox->setChecked(windowModel->isDragEnabled());
-        RayTracer *rayTracer = controller->getRayTracer();
-        int quality = rayTracer->durtiestQuality;
-        durtiestQualityComboBox->setCurrentIndex(quality);
-        qualityDividerSpinBox->setVisible(quality == RayTracer::Quality::ONE_OVER_X);
-        qualityDividerSpinBox->disconnect();
-        qualityDividerSpinBox->setValue(rayTracer->durtiestQualityDivider);
-        connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)), controller, SLOT(windowSetQualityDivider(int)));
-    }
-    else {
-        qualityDividerSpinBox->setVisible(false);
+    if (renderThreadUpdated) {
+        if (isRendering) {
+            float percent = renderThread->getPercent();
+            renderProgressBar->setValue(percent);
+        }
+        else {
+            renderProgressBar->setValue(100);
+        }
     }
 }
 
-void Window::updateStatus() {
-    WindowModel *windowModel = controller->getWindowModel();
-    RayTracer *rayTracer = controller->getRayTracer();
-    RenderThread *renderThread = controller->getRenderThread();
+void Window::updateRealTime(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (observable == windowModel) {
+        if (windowModel->isChanged(WindowModel::REAL_TIME_CHANGED)) {
+            bool isRealTime = windowModel->isRealTime();
+            realTimeCheckBox->setChecked(isRealTime);
+            dragCheckBox->setVisible(isRealTime);
+            durtiestQualityComboBox->setVisible(isRealTime);
+            durtiestQualityLabel->setVisible(isRealTime);
+        }
+        if (windowModel->isChanged(WindowModel::DRAG_ENABLED_CHANGED)) {
+            dragCheckBox->setChecked(windowModel->isDragEnabled());
+        }
+    }
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable == rayTracer) {
+        if (rayTracer->isChanged(RayTracer::DURTIEST_QUALITY_CHANGED)) {
+            int quality = rayTracer->getDurtiestQuality();
+            durtiestQualityComboBox->setCurrentIndex(quality);
+            qualityDividerSpinBox->setVisible(quality == RayTracer::Quality::ONE_OVER_X);
+        }
+        if (rayTracer->isChanged(RayTracer::DURTIEST_QUALITY_DIVIDER_CHANGED)) {
+            qualityDividerSpinBox->disconnect();
+            qualityDividerSpinBox->setValue(rayTracer->getDurtiestQualityDivider());
+            connect(qualityDividerSpinBox, SIGNAL(valueChanged(int)),
+                    controller, SLOT(windowSetQualityDivider(int)));
+        }
+    }
+}
+
+void Window::updateStatus(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    bool windowModelUpdated =
+        windowModel == observable &&
+        windowModel->isChanged(WindowModel::ELAPSED_TIME_CHANGED);
+
+    const RayTracer *rayTracer = controller->getRayTracer();
+    bool rayTracerUpdated =
+        rayTracer == observable &&
+        rayTracer->isChanged(RayTracer::QUALITY_CHANGED | RayTracer::QUALITY_DIVIDER_CHANGED);
+
+    const RenderThread *renderThread = controller->getRenderThread();
+    bool renderThreadUpdated =
+        observable == renderThread &&
+        renderThread->isChanged(RenderThread::RENDER_CHANGED);
+
+    if (!windowModelUpdated && !rayTracerUpdated && !renderThreadUpdated) {
+        return;
+    }
+
     int elapsed = windowModel->getElapsedTime();
     qglviewer::Camera * cam = controller->getViewer()->camera ();
     unsigned int screenWidth = cam->screenWidth ();
     unsigned int screenHeight = cam->screenHeight ();
-    RayTracer::Quality quality = rayTracer->quality;
-    int divider = rayTracer->qualityDivider;
+    RayTracer::Quality quality = rayTracer->getQuality();
+    int divider = rayTracer->getQualityDivider();
     if (elapsed != 0) {
         int FPS = 1000/elapsed;
         QString message = 
@@ -432,59 +517,70 @@ void Window::updateStatus() {
     }
 }
 
-void Window::updateMotionBlur() {
-    Scene *scene = controller->getScene();
-    RayTracer *rayTracer = controller->getRayTracer();
-
-    bool isMobile = scene->hasMobile();
-    int widgetIndex = -1;
-    for (int i=0; i<rayTabs->count(); i++) {
-        if (rayTabs->widget(i) == mBlurGroupBox) {
-            widgetIndex = i;
-            break;
+void Window::updateMotionBlur(const Observable *observable) {
+    const Scene *scene = controller->getScene();
+    if (observable == scene &&
+            scene->isChanged(Scene::OBJECT_CHANGED)) {
+        bool isMobile = scene->hasMobile();
+        int widgetIndex = -1;
+        for (int i=0; i<rayTabs->count(); i++) {
+            if (rayTabs->widget(i) == mBlurGroupBox) {
+                widgetIndex = i;
+                break;
+            }
         }
+        //rayTabs->setTabEnabled(widgetIndex, isMobile);
+        if (isMobile && widgetIndex == -1) {
+            rayTabs->addTab(mBlurGroupBox, "Motion Blur");
+        }
+        if (!isMobile && widgetIndex != -1) {
+            rayTabs->removeTab(widgetIndex);
+        }
+        mBlurNbImagesSpinBox->setVisible(isMobile);
     }
-    //rayTabs->setTabEnabled(widgetIndex, isMobile);
-    if (isMobile && widgetIndex == -1) {
-        rayTabs->addTab(mBlurGroupBox, "Motion Blur");
-    }
-    if (!isMobile && widgetIndex != -1) {
-        rayTabs->removeTab(widgetIndex);
-    }
-    mBlurNbImagesSpinBox->setVisible(isMobile);
-    if (isMobile) {
+
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable == rayTracer &&
+            rayTracer->isChanged(RayTracer::NB_PICTURES_CHANGED)) {
         mBlurNbImagesSpinBox->disconnect();
-        mBlurNbImagesSpinBox->setValue(rayTracer->nbPictures);
-        connect (mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)), controller, SLOT (windowSetNbImagesSpinBox (int)));
+        mBlurNbImagesSpinBox->setValue(rayTracer->getNbPictures());
+        connect(mBlurNbImagesSpinBox, SIGNAL (valueChanged(int)),
+                controller, SLOT (windowSetNbImagesSpinBox (int)));
     }
 }
 
-void Window::updateMapping() {
-    Scene *scene = controller->getScene();
-    WindowModel *windowModel = controller->getWindowModel();
-
+void Window::updateMapping(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
     int index = windowModel->getSelectedObjectIndex();
-    mappingObjectsList->setCurrentIndex(index+1);
     bool isSelected = index != -1;
 
-    mappingUScale->setVisible(isSelected);
-    mappingVScale->setVisible(isSelected);
-    mappingSphericalPushButton->setVisible(isSelected);
-    mappingSquarePushButton->setVisible(isSelected);
+    if (observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED)) {
+        mappingObjectsList->setCurrentIndex(index+1);
+        mappingUScale->setVisible(isSelected);
+        mappingVScale->setVisible(isSelected);
+        mappingSphericalPushButton->setVisible(isSelected);
+        mappingSquarePushButton->setVisible(isSelected);
+    }
 
-    if (isSelected) {
+    const Scene *scene = controller->getScene();
+    if (isSelected &&
+            observable == scene &&
+            scene->isChanged(Scene::OBJECT_CHANGED)) {
         const Mesh &mesh = scene->getObjects()[index]->getMesh();
         mappingUScale->disconnect();
         mappingUScale->setValue(mesh.getUScale());
-        connect(mappingUScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetUScale(double)));
+        connect(mappingUScale, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetUScale(double)));
         mappingVScale->disconnect();
         mappingVScale->setValue(mesh.getVScale());
-        connect(mappingVScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetVScale(double)));
+        connect(mappingVScale, SIGNAL(valueChanged(double)),
+                controller, SLOT(windowSetVScale(double)));
     }
 }
 
-void Window::initControlWidget () {
-    Scene *scene = controller->getScene();
+void Window::initControlWidget() {
+    const Scene *scene = controller->getScene();
 
     // Control widget
     controlWidget = new QGroupBox ();

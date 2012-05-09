@@ -33,7 +33,7 @@ public:
 
     static void showStatusMessage (const QString & msg);
 
-    virtual void update(Observable *);
+    virtual void update(const Observable *);
 
     Vec3Df getLightPos() const;
 
@@ -49,26 +49,22 @@ private :
     void initControlWidget ();
 
     // Update functions
-    void updateFromScene();
-    void updateFromRayTracer();
-    void updateFromWindowModel();
-
-    // Updated by both WindowModel and Scene
-    void updateLights();
-    void updateObjects();
-    void updateMaterials();
-    void updateTextures();
-    void updateMapping();
-    // Updated by both WindowModel and RayTracer
-    void updateFocus();
-    void updateRealTime();
-    // Updated by RenderThread and WindowModel
-    void updateProgressBar();
-    void updateStatus();
-    // Updated by WindowModel
-    void updatePreview();
-    // Updated by Scene and RayTracer
-    void updateMotionBlur();
+    void updateLights(const Observable *);
+    void updateObjects(const Observable *);
+    void updateMaterials(const Observable *);
+    void updateTextures(const Observable *);
+    void updateMapping(const Observable *);
+    void updateFocus(const Observable *);
+    void updateRealTime(const Observable *);
+    void updateProgressBar(const Observable *);
+    void updateStatus(const Observable *);
+    void updatePreview(const Observable *);
+    void updateMotionBlur(const Observable *);
+    void updateShadows(const Observable *);
+    void updateAntiAliasing(const Observable *);
+    void updateAmbientOcclusion(const Observable *);
+    void updatePathTracing(const Observable *);
+    void updateBackgroundColor(const Observable *);
 
     QActionGroup * actionGroup;
     QGroupBox * controlWidget;

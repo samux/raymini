@@ -24,29 +24,19 @@ WindowModel::~WindowModel() {
 }
 
 void WindowModel::setFocusMode(bool f) {
-    focusMode = (f && controller->getRayTracer()->typeFocus != Focus::NONE);
-}
-
-void WindowModel::handleRealTime() {
-    RenderThread *renderThread = controller->getRenderThread();
-    RayTracer *rayTracer = controller->getRayTracer();
-    bool isRendering = renderThread->isRendering();
-    if (realTime && !isRendering) {
-        controller->windowRenderRayImage();
-    }
-    if (!realTime) {
-        rayTracer->quality = RayTracer::Quality::OPTIMAL;
-    }
+    focusMode = (f && controller->getRayTracer()->getTypeFocus() != Focus::NONE);
+    setChanged(FOCUS_MODE_CHANGED);
 }
 
 void WindowModel::setSelectedObject(Object *o) {
     unsigned int index = 0;
-    Scene *scene = controller->getScene();
+    const Scene *scene = controller->getScene();
 
     for (Object *object : scene->getObjects()) {
         if (object == o) {
             selectedObjectIndex = index;
-            break;
+            setChanged(SELECTED_OBJECT_CHANGED);
+            return;
         }
         index++;
     }

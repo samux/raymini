@@ -16,6 +16,7 @@
 #include "Light.h"
 #include "KDtree.h"
 #include "Object.h"
+#include "PBGI.h"
 
 using namespace std;
 
@@ -77,7 +78,7 @@ void GLViewer::getCameraInformation(float &fov, float &aspectRatio, float &width
 }
 
 void GLViewer::mousePressEvent(QMouseEvent * event) {
-    WindowModel *windowModel = controller->getWindowModel();
+    const WindowModel *windowModel = controller->getWindowModel();
     if (windowModel->isDragEnabled()) {
         float fov, ar;
         float screenWidth;
@@ -114,9 +115,9 @@ void GLViewer::mousePressEvent(QMouseEvent * event) {
 }
 
 void GLViewer::mouseReleaseEvent (QMouseEvent *event) {
-    RayTracer *rayTracer = controller->getRayTracer();
-    WindowModel *windowModel = controller->getWindowModel();
-    if (rayTracer->typeFocus != Focus::NONE && windowModel->isFocusMode()) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (rayTracer->getTypeFocus() != Focus::NONE && windowModel->isFocusMode()) {
         controller->viewerSetFocusPoint(currentFocusPoint);
     }
     controller->viewerStopsDragging();
@@ -124,12 +125,12 @@ void GLViewer::mouseReleaseEvent (QMouseEvent *event) {
 }
 
 void GLViewer::mouseMoveEvent(QMouseEvent *event) {
-    WindowModel *windowModel = controller->getWindowModel();
-    if (windowModel->getDraggedObject()) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel->isDragging()) {
         controller->viewerMovesWhileDragging(event->globalPos());
-        controller->getRenderThread()->hasToRedraw();
     } else {
         QGLViewer::mouseMoveEvent(event);
+        controller->viewerMovesMouse();
     }
 }
 
@@ -144,85 +145,138 @@ void GLViewer::wheelEvent (QWheelEvent * e) {
     QGLViewer::wheelEvent (e);
 }
 
-void GLViewer::updateLights() {
-    Scene * scene = controller->getScene();
-    for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
-        const Light * light = scene->getLights() [i];
-        GLuint glID = OpenGLLightID[i];
-        if (!light->isEnabled()) {
-            glDisable(glID);
+void GLViewer::updateLights(const Observable *observable) {
+    const Scene * scene = controller->getScene();
+    if (observable == scene &&
+            scene->isChanged(Scene::LIGHT_CHANGED)) {
+        for (unsigned int i = 0; i < scene->getLights ().size () && i < 8; i++) {
+            const Light * light = scene->getLights() [i];
+            GLuint glID = OpenGLLightID[i];
+            if (!light->isEnabled()) {
+                glDisable(glID);
+            }
+            else {
+                glEnable (glID);
+                const Vec3Df & p = light->getPos ();
+                float intensity = light->getIntensity ();
+                const Vec3Df & c = intensity * light->getColor ();
+                GLfloat glPos[4] = {p[0], p[1], p[2], 1};
+                GLfloat glColor[4] = {c[0], c[1], c[2], 0};
+                glLightfv (glID, GL_POSITION, glPos);
+                glLightfv (glID, GL_DIFFUSE, glColor);
+            }
+        }
+    }
+}
+
+void GLViewer::updateWireframe(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (observable == windowModel &&
+            (windowModel->isChanged(WindowModel::WIREFRAME_CHANGED) ||
+             windowModel->isChanged(WindowModel::DISPLAY_MODE_CHANGED))) {
+        if (windowModel->getDisplayMode() != WindowModel::RayDisplayMode) {
+            if (windowModel->isWireframe()) {
+                glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else {
+                glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+            }
+        }
+    }
+}
+
+void GLViewer::updateBackground(const Observable *observable) {
+    const RayTracer *rayTracer = controller->getRayTracer();
+    if (observable == rayTracer &&
+            rayTracer->isChanged(RayTracer::BACKGROUND_CHANGED)) {
+        Vec3Df bgc = 255.0*rayTracer->getBackgroundColor();
+        QColor c(bgc[0], bgc[1], bgc[2]);
+        setBackgroundColor(c);
+    }
+}
+
+void GLViewer::updateFocus(const Observable *observable) {
+    const WindowModel *windowModel = controller->getWindowModel();
+    if (windowModel == observable &&
+            windowModel->isChanged(WindowModel::FOCUS_MODE_CHANGED)) {
+        if (windowModel->isFocusMode()) {
+            startAnimation();
         }
         else {
-            glEnable (glID);
-            const Vec3Df & p = light->getPos ();
-            float intensity = light->getIntensity ();
-            const Vec3Df & c = intensity * light->getColor ();
-            GLfloat glPos[4] = {p[0], p[1], p[2], 1};
-            GLfloat glColor[4] = {c[0], c[1], c[2], 0};
-            glLightfv (glID, GL_POSITION, glPos);
-            glLightfv (glID, GL_DIFFUSE, glColor);
+            stopAnimation();
         }
     }
 }
 
-void GLViewer::updateWireframe() {
-    WindowModel *windowModel = controller->getWindowModel();
-    if (windowModel->getDisplayMode() != WindowModel::RayDisplayMode) {
-        if (windowModel->isWireframe()) {
-            glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-        }
-        else {
-            glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-        }
+void GLViewer::updateView(const Observable *observable) {
+    bool haveToRedraw = false;
+
+    if (!haveToRedraw &&
+            observable == controller->getRayTracer() &&
+            (observable->isChanged(RayTracer::BACKGROUND_CHANGED))) {
+        haveToRedraw = true;
+    }
+
+    if (!haveToRedraw &&
+            observable == controller->getScene() &&
+            (observable->isChanged(Scene::OBJECT_CHANGED) ||
+             observable->isChanged(Scene::LIGHT_CHANGED) ||
+             observable->isChanged(Scene::MATERIAL_CHANGED) ||
+             observable->isChanged(Scene::TEXTURE_CHANGED))) {
+        haveToRedraw = true;
+    }
+
+    if (!haveToRedraw &&
+            observable == controller->getWindowModel() &&
+            (observable->isChanged(WindowModel::SELECTED_LIGHT_CHANGED) ||
+             observable->isChanged(WindowModel::WIREFRAME_CHANGED) ||
+             observable->isChanged(WindowModel::SHOW_SURFELS_CHANGED) ||
+             observable->isChanged(WindowModel::SHOW_KDTREE_CHANGED) ||
+             observable->isChanged(WindowModel::RENDERING_MODE_CHANGED) ||
+             observable->isChanged(WindowModel::DISPLAY_MODE_CHANGED) ||
+             observable->isChanged(WindowModel::RAY_IMAGE_CHANGED) ||
+             observable->isChanged(WindowModel::FOCUS_POINT_CHANGED) ||
+             observable->isChanged(WindowModel::FOCUS_MODE_CHANGED))) {
+        haveToRedraw = true;
+    }
+
+    if (!haveToRedraw &&
+            observable == controller->getPBGI() &&
+            (observable->isChanged(PBGI::PBGI_CHANGED))) {
+        haveToRedraw = true;
+    }
+
+    if (haveToRedraw) {
+        updateGL();
     }
 }
 
-void GLViewer::updateBackground() {
-    RayTracer *rayTracer = controller->getRayTracer();
-    Vec3Df bgc = 255.0*rayTracer->getBackgroundColor();
-    QColor c(bgc[0], bgc[1], bgc[2]);
-    setBackgroundColor(c);
+void GLViewer::update(const Observable *o) {
+    updateLights(o);
+    updateBoundingBox(o);
+    updateWireframe(o);
+    updateFocus(o);
+    updateBackground(o);
+    updateView(o);
 }
 
-void GLViewer::updateFocus() {
-    WindowModel *windowModel = controller->getWindowModel();
-    if (windowModel->isFocusMode()) {
-        startAnimation();
+void GLViewer::updateBoundingBox(const Observable *observable) {
+    const Scene *scene = controller->getScene();
+    if (observable == scene &&
+            scene->isChanged(Scene::BOUNDING_BOX_CHANGED)) {
+        const BoundingBox & sceneBBox = scene->getBoundingBox();
+        Vec3Df c = sceneBBox.getCenter ();
+        float r = sceneBBox.getRadius ();
+        setSceneCenter(qglviewer::Vec (c[0], c[1], c[2]));
+        setSceneRadius(r);
     }
-    else {
-        stopAnimation();
-    }
-}
-
-void GLViewer::update(Observable *o) {
-    if (o == controller->getScene()) {
-        updateLights();
-        updateBoundingBox();
-    }
-    else if (o == controller->getWindowModel()) {
-        updateWireframe();
-        updateFocus();
-    }
-    else if (o == controller->getRayTracer()) {
-        updateBackground();
-    }
-    updateGL();
-}
-
-void GLViewer::updateBoundingBox() {
-    Scene *scene = controller->getScene();
-    const BoundingBox & sceneBBox = scene->getBoundingBox();
-    Vec3Df c = sceneBBox.getCenter ();
-    float r = sceneBBox.getRadius ();
-    setSceneCenter(qglviewer::Vec (c[0], c[1], c[2]));
-    setSceneRadius(r);
 }
 
 void GLViewer::changeFocusPoint() {
-    WindowModel *windowModel = controller->getWindowModel();
+    const WindowModel *windowModel = controller->getWindowModel();
     bool focusMode = windowModel->isFocusMode();
     if (focusMode) {
-        RayTracer * rayTracer = controller->getRayTracer();
+        const RayTracer * rayTracer = controller->getRayTracer();
         qglviewer::Camera * cam = camera ();
         qglviewer::Vec p = cam->position ();
         qglviewer::Vec d = cam->viewDirection ();
@@ -294,8 +348,8 @@ void GLViewer::init() {
     // Set a FPS to 2
     setAnimationPeriod(msBetweenAnimation);
 
-    glLoadIdentity ();
-    updateBoundingBox();
+    glLoadIdentity();
+    updateBoundingBox(controller->getScene());
     showEntireScene();
 }
 
@@ -310,10 +364,10 @@ bool drawNode(const KDtree *t) {
     return true;
 }
 
-void GLViewer::draw () {
-    WindowModel *windowModel = controller->getWindowModel();
-    Scene * scene = controller->getScene();
-    RayTracer * rayTracer = controller->getRayTracer();
+void GLViewer::draw() {
+    const WindowModel *windowModel = controller->getWindowModel();
+    const Scene * scene = controller->getScene();
+    const RayTracer * rayTracer = controller->getRayTracer();
 
     // Display the rendered image
     const QImage &rayImage = windowModel->getRayImage();
@@ -327,7 +381,7 @@ void GLViewer::draw () {
     }
 
     // Draw the focus
-    if (rayTracer->typeFocus != Focus::NONE) {
+    if (rayTracer->getTypeFocus() != Focus::NONE) {
         Vec3Df focusColor;
         bool isFocusMode = windowModel->isFocusMode();
         if (isFocusMode) {

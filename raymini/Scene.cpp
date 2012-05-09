@@ -109,8 +109,12 @@ Scene::Scene(Controller *c, int argc, char **argv) :
         buildMesh(meshPath, white);
     else printUsage(argv[0]);
 
-    updateBoundingBox ();
-    }
+    updateBoundingBox();
+    setChanged(OBJECT_CHANGED);
+    setChanged(LIGHT_CHANGED);
+    setChanged(MATERIAL_CHANGED);
+    setChanged(TEXTURE_CHANGED);
+}
 
 Scene::~Scene () {
     for(auto o : objects) {
@@ -140,6 +144,7 @@ void Scene::updateBoundingBox () {
             }
         }
     }
+    setChanged(BOUNDING_BOX_CHANGED);
 }
 
 void Scene::buildRoom(Material *sphereMat) {
@@ -406,6 +411,9 @@ void Scene::buildMirrorGlass() {
 }
 
 unsigned int Scene::getObjectMaterialIndex(unsigned int objectIndex) const {
+    if (objectIndex >= objects.size()) {
+        return -1;
+    }
     const Object *object = objects[objectIndex];
     unsigned int result = 0;
     for (const Material *material : materials) {
@@ -418,6 +426,9 @@ unsigned int Scene::getObjectMaterialIndex(unsigned int objectIndex) const {
 }
 
 unsigned int Scene::getMaterialTextureIndex(unsigned int materialIndex) const {
+    if (materialIndex >= materials.size()) {
+        return -1;
+    }
     const Material *material = materials[materialIndex];
     unsigned int result = 0;
     for (const Texture *texture : textures) {

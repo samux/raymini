@@ -4,11 +4,14 @@
 #include "Ray.h"
 #include "Object.h"
 #include "Light.h"
+#include "Observable.h"
 
 class Controller;
 
-class PBGI {
+class PBGI: public Observable {
 public:
+    static const unsigned long PBGI_CHANGED = 1<<0;
+
     PBGI(Controller * c, unsigned int res = 6) : c(c), res(res){
         cloud = new PointCloud(c);
         cloud->generatePoints();
@@ -34,6 +37,7 @@ public:
         cloud = new PointCloud(c);
         cloud->generatePoints();
         octree = new Octree(c, *cloud);
+        setChanged(PBGI_CHANGED);
     }
 
 private:

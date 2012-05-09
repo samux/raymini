@@ -13,7 +13,10 @@ class Controller;
 /** A thread computing ray traced image */
 class RenderThread: public QThread, public Observable {
 public:
+    static const unsigned long RENDER_CHANGED = 1<<0;
+
     RenderThread(Controller *);
+    /** Change RENDER_CHANGED */
     void startRendering(const Vec3Df & camPos,
                    const Vec3Df & viewDirection,
                    const Vec3Df & upVector,
@@ -23,14 +26,16 @@ public:
                    unsigned int screenWidth,
                    unsigned int screenHeight);
 
-    bool isRendering();
+    bool isRendering() const;
     bool hasRendered();
+    /** Might change RENDER_CHANGED */
     void stopRendering();
     const QImage &getLastRendered();
     inline float getPercent() const {return percent;}
-    inline void setPercent(float p) {percent = p;}
+    /** Change RENDER_CHANGED */
+    void setPercent(float p);
 
-    bool isEmergencyStop();
+    bool isEmergencyStop() const;
 
     /** Notify thread that it has to render again */
     void hasToRedraw();

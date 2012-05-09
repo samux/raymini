@@ -23,18 +23,31 @@ class Controller;
 
 class Scene: public Observable {
 public:
+    // Flag offsets
+    static const unsigned long OBJECT_CHANGED       = 1<<0;
+    static const unsigned long LIGHT_CHANGED        = 1<<1;
+    static const unsigned long MATERIAL_CHANGED     = 1<<2;
+    static const unsigned long TEXTURE_CHANGED      = 1<<3;
+    static const unsigned long BOUNDING_BOX_CHANGED = 1<<4;
+
+    /** You might have to set OBJECT_CHANGED */
     inline std::vector<Object *> & getObjects () { return objects; }
     inline const std::vector<Object *> & getObjects () const { return objects; }
 
+    /** You might have to set LIGHT_CHANGED */
     inline std::vector<Light *> & getLights () { return lights; }
     inline const std::vector<Light *> & getLights () const { return lights; }
 
+    /** You might have to set MATERIAL_CHANGED */
     inline std::vector<Material *> &getMaterials() {return materials;}
+    inline const std::vector<Material *> &getMaterials() const {return materials;}
 
+    /** You might have to set TEXTURE_CHANGED */
     inline const std::vector<Texture *> &getTextures() const {return textures;}
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
-    void updateBoundingBox ();
+    /** Set BOUNDING_BOX_CHANGED */
+    void updateBoundingBox();
 
     bool hasMobile() const {
         for (auto o : objects)
