@@ -699,6 +699,7 @@ void Controller::windowSetSphericalMapping() {
 
 void Controller::viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float r) {
     windowModel->setDraggedObject(o);
+    windowModel->setSelectedObject(o);
     windowModel->setInitialDraggedObjectPosition(i);
     windowModel->setStartedDraggingPoint(p);
     windowModel->setMovingRatio(r);

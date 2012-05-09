@@ -38,3 +38,16 @@ void WindowModel::handleRealTime() {
         rayTracer->quality = RayTracer::Quality::OPTIMAL;
     }
 }
+
+void WindowModel::setSelectedObject(Object *o) {
+    unsigned int index = 0;
+    Scene *scene = controller->getScene();
+
+    for (Object *object : scene->getObjects()) {
+        if (object == o) {
+            selectedObjectIndex = index;
+            break;
+        }
+        index++;
+    }
+}

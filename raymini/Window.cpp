@@ -767,6 +767,11 @@ void Window::initControlWidget () {
     QWidget *mappingGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *mappingLayout = new QVBoxLayout(mappingGroupBox);
 
+    QHBoxLayout *mappingObjectLayout = new QHBoxLayout;
+
+    QLabel *mappingLabel = new QLabel("Select an object:", mappingGroupBox);
+    mappingObjectLayout->addWidget(mappingLabel);
+
     mappingObjectsList = new QComboBox(mappingGroupBox);
     mappingObjectsList->addItem("No object selected");
     for (const Object * o : scene->getObjects()) {
@@ -774,21 +779,26 @@ void Window::initControlWidget () {
         mappingObjectsList->addItem(name);
     }
     connect(mappingObjectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
-    mappingLayout->addWidget(mappingObjectsList);
+    mappingObjectLayout->addWidget(mappingObjectsList);
+
+    mappingLayout->addLayout(mappingObjectLayout);
 
     QHBoxLayout *mappingScaleLayout = new QHBoxLayout;
+
     mappingUScale = new QDoubleSpinBox(mappingGroupBox);
     mappingUScale->setMinimum(0.01);
     mappingUScale->setMaximum(10000);
     mappingUScale->setSingleStep(1);
     connect(mappingUScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetUScale(double)));
     mappingScaleLayout->addWidget(mappingUScale);
+
     mappingVScale = new QDoubleSpinBox(mappingGroupBox);
     mappingVScale->setMinimum(0.01);
     mappingVScale->setMaximum(10000);
     mappingVScale->setSingleStep(1);
     connect(mappingVScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetVScale(double)));
     mappingScaleLayout->addWidget(mappingVScale);
+
     mappingLayout->addLayout(mappingScaleLayout);
 
     mappingSphericalPushButton = new QPushButton("Sperical mapping", mappingGroupBox);

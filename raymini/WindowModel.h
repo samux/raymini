@@ -25,6 +25,7 @@ public:
 
     inline int getSelectedObjectIndex() const {return selectedObjectIndex;}
     inline void setSelectedObjectIndex(int index) {selectedObjectIndex = index;}
+    void setSelectedObject(Object *o);
 
     inline int getSelectedMaterialIndex() const {return selectedMaterialIndex;}
     inline void setSelectedMaterialIndex(int index) {selectedMaterialIndex = index;}
