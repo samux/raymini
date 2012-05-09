@@ -87,6 +87,7 @@ private:
     Material *glossyMat, *groundMat, *rhinoMat;
     SkyBoxMaterial *skyBoxMaterial;
     Mirror *mirrorMat;
+    Glass *glassMat;
     std::vector<Material *> materials;
 
     Controller *controller;

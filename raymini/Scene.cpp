@@ -99,7 +99,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     materials.push_back(rhinoMat);
     mirrorMat = new Mirror(c, "Mirror", basicTexture, swarmNormal);
     materials.push_back(mirrorMat);
-    Glass *glassMat = new Glass(c, "Glass", 1.1f, whiteTexture, swarmNormal);
+    glassMat = new Glass(c, "Glass", 1.1f, whiteTexture, swarmNormal);
     materials.push_back(glassMat);
     skyBoxMaterial = new SkyBoxMaterial(controller, "Sky Box", skyBoxTexture, basicNormal);
     materials.push_back(skyBoxMaterial);
@@ -312,7 +312,6 @@ void Scene::buildOutdor() {
 void Scene::buildPool() {
     auto pool = new Material(controller, "Pool", 1.f, 0.f, poolTexture, basicNormal);
 
-    // TODO: real pool balls ?
     const vector<Vec3Df> color = {
         {1.f, 1.f, .0f},
         {1.f, .0f, .5f}, {.3f, .3f, .8f},
@@ -334,13 +333,12 @@ void Scene::buildPool() {
     objects.push_back(new Object(groundMesh, pool, "Pool"));
     materials.push_back(pool);
 
-    // Feeling lazy...
-    int ballNumber = 0;
     for(int i = 0 ; i < 5 ; i++)
         for(int j = 0 ; j <= i ; j++) {
+            unsigned ballId = (i*(i+1))/2+j;
             stringstream numberConvert;
-            numberConvert<<ballNumber;
-            Vec3Df c = color[(i*(i+1))/2+j];
+            numberConvert<<ballId;
+            Vec3Df c = color[ballId];
             auto ballTexture = new SingleColorTexture(c, "Ball #"+numberConvert.str());
             colorTextures.push_back(ballTexture);
             auto ball = new Material(controller, "Ball #"+numberConvert.str(),
@@ -348,7 +346,6 @@ void Scene::buildPool() {
                                      basicNormal, .1f, 50);
             materials.push_back(ball);
             objects.push_back(new Object(sphereMesh, ball, "Ball #"+numberConvert.str(), {-i*delta, (2*j-i)*height, height}));
-            ballNumber++;
         }
 
     lights.push_back(new Light({5.f, 5.f, 20.f}, 0.01, {0.f, 0.f, 1.f},
