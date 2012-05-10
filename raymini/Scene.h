@@ -89,6 +89,7 @@ private:
     void buildMultiMeshs();
     void buildPool();
     void buildOutdor();
+    void buildSphere();
     void buildMirrorGlass();
     void buildMesh(const std::string & path, Material *mat);
     std::vector<Object *> objects;

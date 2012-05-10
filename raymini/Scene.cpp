@@ -29,6 +29,7 @@ void printUsage(char * name) {
          << "\toutdoor: rhino in front of a mirror + sky box" << endl
          << "\tpool : pool table" << endl
          << "\tmg : mirror and glass" << endl
+         << "\tsphere : 3 spheres and black ground (PT)" << endl
          << "\tmesh <mesh_path>" << endl
          << endl;
     exit(1);
@@ -104,6 +105,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     else if(!id.compare("outdoor")) buildOutdor();
     else if(!id.compare("pool")) buildPool();
     else if(!id.compare("mg")) buildMirrorGlass();
+    else if(!id.compare("sphere")) buildSphere();
     else if(!id.compare("mesh"))
         buildMesh(meshPath, white);
     else printUsage(argv[0]);
@@ -331,6 +333,35 @@ void Scene::buildPool() {
 
     lights.push_back(new Light({5.f, 5.f, 20.f}, 0.01, {0.f, 0.f, 1.f},
                                {1.f, 1.f, 1.f}, .7f));
+}
+
+void Scene::buildSphere() {
+    Mesh groundMesh;
+    groundMesh.loadOFF("models/ground.off");
+    groundMesh.setSquareTextureMapping();
+    groundMesh.scale(2.0);
+
+    objects.push_back(new Object(groundMesh, black, "Ground"));
+
+    float rayon = 0.5;
+
+    Mesh sphereMesh;
+    sphereMesh.loadOFF("models/sphere.off");
+    sphereMesh.scale(rayon);
+    auto sphere1 = new Object(sphereMesh, red, "Sphere1", {0, 0, rayon});
+    objects.push_back(sphere1);
+
+    auto sphere2 = new Object(sphereMesh, green, "Sphere2", {2*rayon, 0, rayon});
+    objects.push_back(sphere2);
+
+    auto sphere3 = new Object(sphereMesh, blue, "Sphere3", {-2*rayon, 0, rayon});
+    objects.push_back(sphere3);
+
+    lights.push_back(new Light({0.f, -1.f, 0.3f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, 1.0f));
+
+    lights.push_back(new Light({0.f, 0.f, 10.f}, 0.01, {0.f, 0.f, 1.f},
+                               {1.f, 1.f, 1.f}, 1.0f));
 }
 
 void Scene::buildMirrorGlass() {
