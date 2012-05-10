@@ -557,8 +557,10 @@ void Window::updateMapping(const Observable *observable) {
     int index = windowModel->getSelectedObjectIndex();
     bool isSelected = index != -1;
 
-    if (observable == windowModel &&
-            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED)) {
+    bool selectedObjectChanged = observable == windowModel &&
+            windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED);
+
+    if (selectedObjectChanged) {
         mappingObjectsList->setCurrentIndex(index+1);
         mappingUScale->setVisible(isSelected);
         mappingVScale->setVisible(isSelected);
@@ -567,9 +569,9 @@ void Window::updateMapping(const Observable *observable) {
     }
 
     const Scene *scene = controller->getScene();
-    if (isSelected &&
-            observable == scene &&
-            scene->isChanged(Scene::OBJECT_CHANGED)) {
+    bool sceneChanged = observable == scene &&
+            scene->isChanged(Scene::OBJECT_CHANGED);
+    if (isSelected && (selectedObjectChanged || sceneChanged)) {
         const Mesh &mesh = scene->getObjects()[index]->getMesh();
         mappingUScale->disconnect();
         mappingUScale->setValue(mesh.getUScale());
@@ -887,6 +889,7 @@ void Window::initControlWidget() {
     mappingUScale->setMinimum(0.01);
     mappingUScale->setMaximum(10000);
     mappingUScale->setSingleStep(1);
+    mappingUScale->setPrefix("U scale:");
     connect(mappingUScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetUScale(double)));
     mappingScaleLayout->addWidget(mappingUScale);
 
@@ -894,6 +897,7 @@ void Window::initControlWidget() {
     mappingVScale->setMinimum(0.01);
     mappingVScale->setMaximum(10000);
     mappingVScale->setSingleStep(1);
+    mappingVScale->setPrefix("U scale:");
     connect(mappingVScale, SIGNAL(valueChanged(double)), controller, SLOT(windowSetVScale(double)));
     mappingScaleLayout->addWidget(mappingVScale);
 
@@ -978,7 +982,7 @@ void Window::initControlWidget() {
             controller, SLOT(windowSelectTexture(int)));
     colorTexturesLayout->addWidget(colorTexturesList);
 
-    colorTextureColorButton = new QPushButton(colorTexturesGroupBox);
+    colorTextureColorButton = new QPushButton("Base color", colorTexturesGroupBox);
     connect(colorTextureColorButton, SIGNAL(clicked()),
             controller, SLOT(windowSetColorTextureColor()));
     colorTexturesLayout->addWidget(colorTextureColorButton);
