@@ -77,6 +77,9 @@ public:
         coeff(coeff),
         alpha(alpha) {}
 
+    inline float getAlpha() const {return alpha;}
+    inline void setAlpha(float a) {alpha = a;}
+
     virtual ~Glass() {}
 
     virtual Vec3Df genColor (const Vec3Df & camPos,

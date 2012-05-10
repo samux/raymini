@@ -127,6 +127,7 @@ private :
     QDoubleSpinBox *materialGlossyRatio;
     QLabel *materialColorTextureLabel;
     QComboBox *materialColorTexturesList;
+    QDoubleSpinBox *glassAlphaSpinBox;
 
     QComboBox *colorTexturesList;
     QPushButton *colorTextureColorButton;

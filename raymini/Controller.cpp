@@ -447,10 +447,28 @@ void Controller::windowSetMaterialColorTexture(int index) {
     ensureThreadStopped();
     int o = windowModel->getSelectedMaterialIndex();
     if (o == -1) {
-        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
         return;
     }
     scene->getMaterials()[o]->setColorTexture(scene->getColorTextures()[index]);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowSetMaterialGlassAlpha(double a) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedMaterialIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    Glass *glass = dynamic_cast<Glass*>(scene->getMaterials()[o]);
+    if (!glass) {
+        cerr << __FUNCTION__ << " called even though selected material isn't a Glass!\n";
+        return;
+    }
+    glass->setAlpha(a);;
     scene->setChanged(Scene::MATERIAL_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();

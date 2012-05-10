@@ -364,17 +364,12 @@ void Window::updateMaterials(const Observable *observable) {
     bool isSelected = index != -1;
     bool selectedMaterialChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_MATERIAL_CHANGED);
-    if (selectedMaterialChanged) {
-        materialsList->setCurrentIndex(index+1);
-        materialDiffuseSpinBox->setVisible(isSelected);
-        materialSpecularSpinBox->setVisible(isSelected);
-        materialGlossyRatio->setVisible(isSelected);
-        materialColorTextureLabel->setVisible(isSelected);
-        materialColorTexturesList->setVisible(isSelected);
-        int textureIndex = scene->getMaterialColorTextureIndex(index);
-        if (textureIndex != -1) {
-            materialColorTexturesList->setCurrentIndex(textureIndex);
-        }
+    bool isMaterialGlass = false;
+    bool isMaterialSkyBox = false;
+    if (isSelected) {
+        const Material *material = scene->getMaterials()[index];
+        isMaterialGlass = dynamic_cast<const Glass*>(material);
+        isMaterialSkyBox = dynamic_cast<const SkyBoxMaterial*>(material);
     }
 
     bool sceneChanged = observable == scene &&
@@ -394,6 +389,28 @@ void Window::updateMaterials(const Observable *observable) {
         materialGlossyRatio->setValue(material->getGlossyRatio());
         connect(materialGlossyRatio, SIGNAL(valueChanged(double)),
                 controller, SLOT(windowSetMaterialGlossyRatio(double)));
+        if (isMaterialGlass) {
+            const Glass *glass = dynamic_cast<const Glass*>(material);
+            glassAlphaSpinBox->disconnect();
+            glassAlphaSpinBox->setValue(glass->getAlpha());
+            connect(glassAlphaSpinBox, SIGNAL(valueChanged(double)),
+                    controller, SLOT(windowSetMaterialGlassAlpha(double)));
+        }
+    }
+
+    if (selectedMaterialChanged) {
+        materialsList->setCurrentIndex(index+1);
+        bool dsgVisible = isSelected && !isMaterialSkyBox;
+        materialDiffuseSpinBox->setVisible(dsgVisible);
+        materialSpecularSpinBox->setVisible(dsgVisible);
+        materialGlossyRatio->setVisible(dsgVisible);
+        materialColorTextureLabel->setVisible(isSelected);
+        materialColorTexturesList->setVisible(isSelected);
+        int textureIndex = scene->getMaterialColorTextureIndex(index);
+        if (textureIndex != -1) {
+            materialColorTexturesList->setCurrentIndex(textureIndex);
+        }
+        glassAlphaSpinBox->setVisible(isMaterialGlass);
     }
 }
 
@@ -965,6 +982,14 @@ void Window::initControlWidget() {
     materialColorTexturesLayout->addWidget(materialColorTexturesList);
 
     materialsLayout->addLayout(materialColorTexturesLayout);
+
+    glassAlphaSpinBox = new QDoubleSpinBox(materialsGroupBox);
+    glassAlphaSpinBox->setMinimum(0);
+    glassAlphaSpinBox->setMaximum(1);
+    glassAlphaSpinBox->setPrefix("Alpha: ");
+    connect(glassAlphaSpinBox, SIGNAL(valueChanged(double)),
+            controller, SLOT(windowSetMaterialGlassAlpha(double)));
+    materialsLayout->addWidget(glassAlphaSpinBox);
 
     sceneTabs->addTab(materialsGroupBox, "Materials");
 
