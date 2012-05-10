@@ -38,58 +38,70 @@ void printUsage(char * name) {
 Scene::Scene(Controller *c, int argc, char **argv) :
     controller(c)
 {
-    auto basicTexture = new BasicTexture();
-    textures.push_back(basicTexture);
-    auto redTexture = new ColorTexture({1, 0, 0}, "Red");
-    textures.push_back(redTexture);
-    auto greenTexture = new ColorTexture({0, 1, 0}, "Green");
-    textures.push_back(greenTexture);
-    auto blueTexture = new ColorTexture({0, 0, 1}, "Blue");
-    textures.push_back(blueTexture);
-    whiteTexture = new ColorTexture({1, 1, 1}, "White");
-    textures.push_back(whiteTexture);
-    auto blackTexture = new ColorTexture({0, 0, 0}, "Black");
-    textures.push_back(blackTexture);
-    auto groundTexture = new ImageTexture("textures/grass.jpg", "Ground Texture");
-    textures.push_back(groundTexture);
-    auto rhinoTexture = new NoiseTexture(
+    basicNormal = new MeshNormalTexture();
+    normalTextures.push_back(basicNormal);
+    swarmNormal = new ImageNormalTexture("normals/swarm.jpg", "Scales");
+    normalTextures.push_back(swarmNormal);
+    crossNormal = new ImageNormalTexture("normals/cross.jpg", "Cross");
+    normalTextures.push_back(crossNormal);
+    perlinNormal = new NoiseNormalTexture(
+            [](const Vertex & v) -> float {
+                return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
+            },
+            {.6f, .6f, .7f},
+            "Perlin Normal");
+    auto basicTexture = new DebugColorTexture();
+    colorTextures.push_back(basicTexture);
+    auto redTexture = new SingleColorTexture({1, 0, 0}, "Red");
+    colorTextures.push_back(redTexture);
+    auto greenTexture = new SingleColorTexture({0, 1, 0}, "Green");
+    colorTextures.push_back(greenTexture);
+    auto blueTexture = new SingleColorTexture({0, 0, 1}, "Blue");
+    colorTextures.push_back(blueTexture);
+    whiteTexture = new SingleColorTexture({1, 1, 1}, "White");
+    colorTextures.push_back(whiteTexture);
+    auto blackTexture = new SingleColorTexture({0, 0, 0}, "Black");
+    colorTextures.push_back(blackTexture);
+    auto groundTexture = new ImageColorTexture("textures/grass.jpg", "Grass Texture");
+    colorTextures.push_back(groundTexture);
+    auto rhinoTexture = new NoiseColorTexture(
             {.6f, .6f, .7f},
             [](const Vertex & v) -> float {
                     return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
                     },
             "Rhino Texture");
-    textures.push_back(rhinoTexture);
-    auto skyBoxTexture = new ImageTexture(SkyBox::textureFileName, "Sky Box");
-    textures.push_back(skyBoxTexture);
-    poolTexture = new NoiseTexture(
+    colorTextures.push_back(rhinoTexture);
+    auto skyBoxTexture = new ImageColorTexture(SkyBox::textureFileName, "Sky Box");
+    colorTextures.push_back(skyBoxTexture);
+    poolTexture = new NoiseColorTexture(
             {0.f, .3f, .1f},
             [](const Vertex & v) -> float {
                 return min(1.f, 0.4f+Perlin(0.5f, 4, 10)(v.getPos()));
             },
             "Pool");
-    textures.push_back(poolTexture);
+    colorTextures.push_back(poolTexture);
 
-    red = new Material(c, "Red", 1, 0.5, redTexture);
+    red = new Material(c, "Red", 1, 0.5, redTexture, crossNormal);
     materials.push_back(red);
-    green = new Material(c, "Green", 1, 0.5, greenTexture);
+    green = new Material(c, "Green", 1, 0.5, greenTexture, perlinNormal);
     materials.push_back(green);
-    blue = new Material(c, "Blue", 1, 0.5, blueTexture);
+    blue = new Material(c, "Blue", 1, 0.5, blueTexture, swarmNormal);
     materials.push_back(blue);
-    white = new Material(c, "White", 1, 0.5, whiteTexture);
+    white = new Material(c, "White", 1, 0.5, whiteTexture, swarmNormal);
     materials.push_back(white);
-    black = new Material(c, "Black", 1, 0.5, blackTexture);
+    black = new Material(c, "Black", 1, 0.5, blackTexture, basicNormal);
     materials.push_back(black);
-    glossyMat = new Material(c, "Glossy", 1.f, 1.f, redTexture, .1f);
+    glossyMat = new Material(c, "Glossy", 1.f, 1.f, redTexture, basicNormal, .1f);
     materials.push_back(glossyMat);
-    groundMat = new Material(c, "Ground", 1.f, 0.f, groundTexture);
+    groundMat = new Material(c, "Ground", 1.f, 0.f, groundTexture, basicNormal);
     materials.push_back(groundMat);
-    rhinoMat = new Material(c, "Rhino", 1.f, 0.2f, rhinoTexture);
+    rhinoMat = new Material(c, "Rhino", 1.f, 0.2f, rhinoTexture, basicNormal);
     materials.push_back(rhinoMat);
-    mirrorMat = new Mirror(c, "Mirror", basicTexture);
+    mirrorMat = new Mirror(c, "Mirror", basicTexture, swarmNormal);
     materials.push_back(mirrorMat);
-    Glass *glassMat = new Glass(c, "Glass", 1.1f, whiteTexture);
+    Glass *glassMat = new Glass(c, "Glass", 1.1f, whiteTexture, swarmNormal);
     materials.push_back(glassMat);
-    skyBoxMaterial = new SkyBoxMaterial(controller, "Sky Box", skyBoxTexture);
+    skyBoxMaterial = new SkyBoxMaterial(controller, "Sky Box", skyBoxTexture, basicNormal);
     materials.push_back(skyBoxMaterial);
 
     string id(argc>1?argv[1]:"");
@@ -114,7 +126,8 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     setChanged(OBJECT_CHANGED);
     setChanged(LIGHT_CHANGED);
     setChanged(MATERIAL_CHANGED);
-    setChanged(TEXTURE_CHANGED);
+    setChanged(COLOR_TEXTURE_CHANGED);
+    setChanged(NORMAL_TEXTURE_CHANGED);
 }
 
 Scene::~Scene () {
@@ -130,7 +143,11 @@ Scene::~Scene () {
         delete m;
     }
 
-    for (auto t : textures) {
+    for (auto t : colorTextures) {
+        delete t;
+    }
+
+    for (auto t : normalTextures) {
         delete t;
     }
 }
@@ -197,9 +214,9 @@ void Scene::buildMesh(const std::string & path, Material *mat) {
 }
 
 void Scene::buildMultiLights() {
-    auto ramTexture = new ColorTexture(Vec3Df(1.f, .6f, .2f), "ML Ram");
-    textures.push_back(ramTexture);
-    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, ramTexture);
+    auto ramTexture = new SingleColorTexture(Vec3Df(1.f, .6f, .2f), "ML Ram");
+    colorTextures.push_back(ramTexture);
+    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, ramTexture, basicNormal);
     materials.push_back(ramMat);
 
     Mesh groundMesh;
@@ -220,13 +237,13 @@ void Scene::buildMultiLights() {
 }
 
 void Scene::buildMultiMeshs() {
-    auto ramTexture = new ColorTexture(Vec3Df(1.f, .6f, .2f), "ML Ram");
-    textures.push_back(ramTexture);
-    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, ramTexture);
+    auto ramTexture = new SingleColorTexture(Vec3Df(1.f, .6f, .2f), "ML Ram");
+    colorTextures.push_back(ramTexture);
+    auto ramMat = new Material(controller, "Ram", 1.f, 1.f, ramTexture, basicNormal);
     materials.push_back(ramMat);
-    auto gargTexture = new ColorTexture(Vec3Df(0.5f, 0.8f, 0.5f), "ML Gargoyle");
-    textures.push_back(gargTexture);
-    auto gargMat = new Material(controller, "Gargoyle", 0.7f, 0.4f, gargTexture);
+    auto gargTexture = new SingleColorTexture(Vec3Df(0.5f, 0.8f, 0.5f), "ML Gargoyle");
+    colorTextures.push_back(gargTexture);
+    auto gargMat = new Material(controller, "Gargoyle", 0.7f, 0.4f, gargTexture, basicNormal);
     materials.push_back(gargMat);
 
     Mesh groundMesh;
@@ -291,7 +308,7 @@ void Scene::buildOutdor() {
 }
 
 void Scene::buildPool() {
-    auto pool = new Material(controller, "Pool", 1.f, 0.f, poolTexture);
+    auto pool = new Material(controller, "Pool", 1.f, 0.f, poolTexture, basicNormal);
 
     // TODO: real pool balls ?
     const vector<Vec3Df> color = {
@@ -322,10 +339,11 @@ void Scene::buildPool() {
             stringstream numberConvert;
             numberConvert<<ballNumber;
             Vec3Df c = color[(i*(i+1))/2+j];
-            auto ballTexture = new ColorTexture(c, "Ball #"+numberConvert.str());
-            textures.push_back(ballTexture);
+            auto ballTexture = new SingleColorTexture(c, "Ball #"+numberConvert.str());
+            colorTextures.push_back(ballTexture);
             auto ball = new Material(controller, "Ball #"+numberConvert.str(),
-                                     1.f, 1.f, ballTexture, .1f, 50);
+                                     1.f, 1.f, ballTexture,
+                                     basicNormal, .1f, 50);
             materials.push_back(ball);
             objects.push_back(new Object(sphereMesh, ball, "Ball #"+numberConvert.str(), {-i*delta, (2*j-i)*height, height}));
             ballNumber++;
@@ -365,10 +383,10 @@ void Scene::buildSphere() {
 }
 
 void Scene::buildMirrorGlass() {
-    auto groundMat = new Material(controller, "Ground", 1.f, 1.f, whiteTexture, .1f, 30);
+    auto groundMat = new Material(controller, "MG Ground", 1.f, 1.f, whiteTexture, basicNormal, .1f, 30);
     materials.push_back(groundMat);
 
-    auto wallTexture = new NoiseTexture(
+    auto wallTexture = new NoiseColorTexture(
             {.3f, .6f, .6f},
             [](const Vertex & v) -> float {
                 float perturbation = 0.05; // <1
@@ -378,23 +396,35 @@ void Scene::buildMirrorGlass() {
                 return valeur;
             },
             "MG Wall");
-    textures.push_back(wallTexture);
+    colorTextures.push_back(wallTexture);
 
-    auto wallMat = new Material(controller, "Wall", 1.f, .5f, wallTexture);
+    auto wallNormal = new NoiseNormalTexture(
+            [](const Vertex & v) -> float {
+                float perturbation = 0.05; // <1
+                float f0 = 4;
+                float lines = 30;
+                double valeur = (1 - cos(lines * 2 * M_PI * ((v.getPos()[0]+v.getPos()[1]) / f0 + perturbation * Perlin(0.5f, 7, f0)(v.getPos())))) / 2;
+                return valeur;
+            },
+            {.3f, .6f, .6f},
+            "MG Wall");
+    normalTextures.push_back(wallNormal);
+
+    auto wallMat = new Material(controller, "MG Wall", 1.f, .5f, wallTexture, wallNormal);
     materials.push_back(wallMat);
 
-    auto ramTexture = new NoiseTexture(
+    auto ramTexture = new NoiseColorTexture(
             Vec3Df(.7f, .4f, .2f),
             [](const Vertex & v) -> float {
                 return min(1.f, .3f+Perlin(0.5f, 4, 15)(v.getPos()));
             },
             "MG Ram");
-    textures.push_back(ramTexture);
+    colorTextures.push_back(ramTexture);
 
-    auto ramMat = new Material(controller, "Ram", 1.f, 0.3f, ramTexture);
+    auto ramMat = new Material(controller, "Ram", 1.f, 0.3f, ramTexture, basicNormal);
     materials.push_back(ramMat);
 
-    auto glassMat = new Glass(controller, "Glass", 1.4f, whiteTexture);
+    auto glassMat = new Glass(controller, "Glass", 1.4f, whiteTexture, basicNormal);
     materials.push_back(glassMat);
 
     Mesh groundMesh;
@@ -456,14 +486,29 @@ unsigned int Scene::getObjectMaterialIndex(unsigned int objectIndex) const {
     return -1;
 }
 
-unsigned int Scene::getMaterialTextureIndex(unsigned int materialIndex) const {
+unsigned int Scene::getMaterialColorTextureIndex(unsigned int materialIndex) const {
     if (materialIndex >= materials.size()) {
         return -1;
     }
     const Material *material = materials[materialIndex];
     unsigned int result = 0;
-    for (const Texture *texture : textures) {
-        if (texture == material->getTexture()) {
+    for (const ColorTexture *texture : colorTextures) {
+        if (texture == material->getColorTexture()) {
+            return result;
+        }
+        result++;
+    }
+    return -1;
+}
+
+unsigned int Scene::getMaterialNormalTextureIndex(unsigned int materialIndex) const {
+    if (materialIndex >= materials.size()) {
+        return -1;
+    }
+    const Material *material = materials[materialIndex];
+    unsigned int result = 0;
+    for (const NormalTexture *texture : normalTextures) {
+        if (texture == material->getNormalTexture()) {
             return result;
         }
         result++;

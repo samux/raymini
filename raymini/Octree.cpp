@@ -59,6 +59,7 @@ void Octree::splitSurfels(const array<BoundingBox, 8> & bBoxes, array<vector<uns
 Surfel Octree::getMeanSurfel() const {
     Vec3Df p, n, color;
     float radius (0.0);
+    auto normalTexture = new MeshNormalTexture();
     if(isLeaf()) {
         for(unsigned index_surfel: surfels) {
             Surfel s = cloud.getSurfels() [index_surfel];
@@ -68,7 +69,7 @@ Surfel Octree::getMeanSurfel() const {
             color += s.getColor();
         }
         n.normalize();
-        return Surfel(p/surfels.size(), n, radius/surfels.size(), color/surfels.size(), new Material(c, "Surfel", 1.0f, 0.0f, new ColorTexture(color/255.0)));
+        return Surfel(p/surfels.size(), n, radius/surfels.size(), color/surfels.size(), new Material(c, "Surfel", 1.0f, 0.0f, new SingleColorTexture(color/255.0), normalTexture));
     }
     for(unsigned int i = 0; i < 8; i++) {
         Surfel s = sons[i]->getMeanSurfel();
@@ -78,7 +79,7 @@ Surfel Octree::getMeanSurfel() const {
         color += s.getColor();
     }
     n.normalize();
-    return Surfel(p/8.0, n, radius/8.0, color/8.0, new Material(c, "Surfel", 1.0f, 0.0f, new ColorTexture(color/255.0)));
+    return Surfel(p/8.0, n, radius/8.0, color/8.0, new Material(c, "Surfel", 1.0f, 0.0f, new SingleColorTexture(color/255.0), normalTexture));
 }
 
 bool Octree::sort_octree(pair<float, bool> p1, pair<float, bool> p2) {

@@ -32,6 +32,7 @@ HEADERS = Window.h \
           PointCloud.h \
           RenderThread.h \
           ProgressBar.h \
+          NamedClass.h \
           Brdf.h \
           PBGI.h \
           Octree.h

@@ -16,17 +16,23 @@
 #include "Brdf.h"
 #include "Light.h"
 #include "Material.h"
+#include "NamedClass.h"
 
 class Ray;
 
-class Object {
+class Object: public NamedClass {
 public:
-    inline Object (std::string name = "No name") : tree(nullptr), enabled(false), name(name) {}
+    inline Object(std::string name = "No name"):
+        NamedClass(name),
+        tree(nullptr),
+        enabled(false)
+        {}
 
-    Object (const Mesh & mesh, const Material * mat, std::string name="No name",
-            const Vec3Df &trans=Vec3Df(), const Vec3Df &mobile=Vec3Df()) :
+    Object(const Mesh & mesh, const Material * mat, std::string name="No name",
+           const Vec3Df &trans=Vec3Df(), const Vec3Df &mobile=Vec3Df()):
+        NamedClass(name),
         mesh (mesh), mat (mat), trans(trans), origTrans(trans),
-        tree(nullptr), mobile(mobile), enabled(true), name(name) {
+        tree(nullptr), mobile(mobile), enabled(true) {
         updateBoundingBox ();
         tree = new KDtree(*this);
     }
@@ -59,8 +65,6 @@ public:
     inline void setEnabled(bool e) { enabled = e; }
     inline bool isEnabled() const { return enabled; }
 
-    inline const std::string &getName() const {return name;}
-
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     void updateBoundingBox () { bbox = computeBoundingBox(mesh); }
     static BoundingBox computeBoundingBox(const Mesh & mesh);
@@ -76,7 +80,6 @@ private:
     KDtree *tree;
     Vec3Df mobile;
     bool enabled;
-    std::string name;
 };
 
 /**

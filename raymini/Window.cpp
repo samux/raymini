@@ -91,7 +91,7 @@ void Window::update(const Observable *observable) {
     updateLights(observable);
     updateObjects(observable);
     updateMaterials(observable);
-    updateTextures(observable);
+    updateColorTextures(observable);
     updateMapping(observable);
     updateFocus(observable);
     updateRealTime(observable);
@@ -369,11 +369,11 @@ void Window::updateMaterials(const Observable *observable) {
         materialDiffuseSpinBox->setVisible(isSelected);
         materialSpecularSpinBox->setVisible(isSelected);
         materialGlossyRatio->setVisible(isSelected);
-        materialTextureLabel->setVisible(isSelected);
-        materialTexturesList->setVisible(isSelected);
-        int textureIndex = scene->getMaterialTextureIndex(index);
+        materialColorTextureLabel->setVisible(isSelected);
+        materialColorTexturesList->setVisible(isSelected);
+        int textureIndex = scene->getMaterialColorTextureIndex(index);
         if (textureIndex != -1) {
-            materialTexturesList->setCurrentIndex(textureIndex);
+            materialColorTexturesList->setCurrentIndex(textureIndex);
         }
     }
 
@@ -397,7 +397,7 @@ void Window::updateMaterials(const Observable *observable) {
     }
 }
 
-void Window::updateTextures(const Observable *observable) {
+void Window::updateColorTextures(const Observable *observable) {
     const WindowModel *windowModel = controller->getWindowModel();
 
     int index = windowModel->getSelectedTextureIndex();
@@ -405,16 +405,16 @@ void Window::updateTextures(const Observable *observable) {
     bool selectedTextureChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_TEXTURE_CHANGED);
     if (selectedTextureChanged) {
-        texturesList->setCurrentIndex(index+1);
-        textureColorButton->setVisible(isSelected);
+        colorTexturesList->setCurrentIndex(index+1);
+        colorTextureColorButton->setVisible(isSelected);
     }
 
     const Scene *scene = controller->getScene();
     bool sceneChanged = observable == scene &&
-            scene->isChanged(Scene::TEXTURE_CHANGED);
+            scene->isChanged(Scene::COLOR_TEXTURE_CHANGED);
     if (isSelected && (sceneChanged || selectedTextureChanged)) {
-        const Texture *texture = scene->getTextures()[index];
-        textureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
+        const ColorTexture *texture = scene->getColorTextures()[index];
+        colorTextureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
     }
 }
 
@@ -943,43 +943,47 @@ void Window::initControlWidget() {
     materialGlossyRatio->setMaximum(1);
     materialGlossyRatio->setSingleStep(0.01);
     materialGlossyRatio->setPrefix("Glossy ratio: ");
-    connect(materialGlossyRatio, SIGNAL(valueChanged(double)), controller, SLOT(windowSetMaterialGlossyRatio(double)));
+    connect(materialGlossyRatio, SIGNAL(valueChanged(double)),
+            controller, SLOT(windowSetMaterialGlossyRatio(double)));
     materialsLayout->addWidget(materialGlossyRatio);
 
-    QHBoxLayout *materialTexturesLayout = new QHBoxLayout;
+    QHBoxLayout *materialColorTexturesLayout = new QHBoxLayout;
 
-    materialTextureLabel = new QLabel("Texture:", materialsGroupBox);
-    materialTexturesLayout->addWidget(materialTextureLabel);
+    materialColorTextureLabel = new QLabel("Texture:", materialsGroupBox);
+    materialColorTexturesLayout->addWidget(materialColorTextureLabel);
 
-    materialTexturesList = new QComboBox(materialsGroupBox);
-    for (const Texture * t : scene->getTextures()) {
-        materialTexturesList->addItem(t->getName().c_str());
+    materialColorTexturesList = new QComboBox(materialsGroupBox);
+    for (const ColorTexture * t : scene->getColorTextures()) {
+        materialColorTexturesList->addItem(t->getName().c_str());
     }
-    connect(materialTexturesList, SIGNAL(activated(int)), controller, SLOT(windowSetMaterialTexture(int)));
-    materialTexturesLayout->addWidget(materialTexturesList);
+    connect(materialColorTexturesList, SIGNAL(activated(int)),
+            controller, SLOT(windowSetMaterialColorTexture(int)));
+    materialColorTexturesLayout->addWidget(materialColorTexturesList);
 
-    materialsLayout->addLayout(materialTexturesLayout);
+    materialsLayout->addLayout(materialColorTexturesLayout);
 
     sceneTabs->addTab(materialsGroupBox, "Materials");
 
     // SceneGroup: Textures
 
-    QWidget *texturesGroupBox = new QWidget(sceneTabs);
-    QVBoxLayout *texturesLayout = new QVBoxLayout(texturesGroupBox);
+    QWidget *colorTexturesGroupBox = new QWidget(sceneTabs);
+    QVBoxLayout *colorTexturesLayout = new QVBoxLayout(colorTexturesGroupBox);
 
-    texturesList = new QComboBox(texturesGroupBox);
-    texturesList->addItem("No texture selected");
-    for (const Texture *t : scene->getTextures()) {
-        texturesList->addItem(t->getName().c_str());
+    colorTexturesList = new QComboBox(colorTexturesGroupBox);
+    colorTexturesList->addItem("No colorTexture selected");
+    for (const ColorTexture *t : scene->getColorTextures()) {
+        colorTexturesList->addItem(t->getName().c_str());
     }
-    connect(texturesList, SIGNAL(activated(int)), controller, SLOT(windowSelectTexture(int)));
-    texturesLayout->addWidget(texturesList);
+    connect(colorTexturesList, SIGNAL(activated(int)),
+            controller, SLOT(windowSelectTexture(int)));
+    colorTexturesLayout->addWidget(colorTexturesList);
 
-    textureColorButton = new QPushButton(texturesGroupBox);
-    connect(textureColorButton, SIGNAL(clicked()), controller, SLOT(windowSetTextureColor()));
-    texturesLayout->addWidget(textureColorButton);
+    colorTextureColorButton = new QPushButton(colorTexturesGroupBox);
+    connect(colorTextureColorButton, SIGNAL(clicked()),
+            controller, SLOT(windowSetColorTextureColor()));
+    colorTexturesLayout->addWidget(colorTextureColorButton);
 
-    sceneTabs->addTab(texturesGroupBox, "Textures");
+    sceneTabs->addTab(colorTexturesGroupBox, "Textures");
 
     //  SceneGroup: Lights
     QWidget *lightsGroupBox = new QWidget(sceneTabs);

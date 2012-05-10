@@ -337,7 +337,7 @@ void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels
     // to avoid JPG glitches
     float pixelHeight = 0;
     float pixelWidth = 0;
-    const ImageTexture *texture = dynamic_cast<const ImageTexture*>(mat->getTexture());
+    const ImageTexture *texture = dynamic_cast<const ImageColorTexture*>(mat->getColorTexture());
     if (texture) {
         pixelHeight = 1.0/(float)texture->getImage()->height();
         pixelWidth = 1.0/(float)texture->getImage()->width();

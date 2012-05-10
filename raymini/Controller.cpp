@@ -443,15 +443,15 @@ void Controller::windowSetMaterialGlossyRatio(double g) {
     notifyAll();
 }
 
-void Controller::windowSetMaterialTexture(int index) {
+void Controller::windowSetMaterialColorTexture(int index) {
     ensureThreadStopped();
     int o = windowModel->getSelectedMaterialIndex();
     if (o == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
     }
-    scene->getMaterials()[o]->setTexture(scene->getTextures()[index]);
-    scene->setChanged(Scene::OBJECT_CHANGED);
+    scene->getMaterials()[o]->setColorTexture(scene->getColorTextures()[index]);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();
 }
@@ -461,18 +461,18 @@ void Controller::windowSelectTexture(int t) {
     notifyAll();
 }
 
-void Controller::windowSetTextureColor() {
+void Controller::windowSetColorTextureColor() {
     int t = windowModel->getSelectedTextureIndex();
     if (t == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
     }
-    Texture *texture = scene->getTextures()[t];
+    ColorTexture *texture = scene->getColorTextures()[t];
     Vec3Df c = userSelectsColor(texture->getRepresentativeColor());
     if (c[0] != -1) {
         ensureThreadStopped();
         texture->setRepresentativeColor(c);
-        scene->setChanged(Scene::TEXTURE_CHANGED);
+        scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
         renderThread->hasToRedraw();
         notifyAll();
     }

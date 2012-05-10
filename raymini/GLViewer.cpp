@@ -222,7 +222,8 @@ void GLViewer::updateView(const Observable *observable) {
             (observable->isChanged(Scene::OBJECT_CHANGED) ||
              observable->isChanged(Scene::LIGHT_CHANGED) ||
              observable->isChanged(Scene::MATERIAL_CHANGED) ||
-             observable->isChanged(Scene::TEXTURE_CHANGED))) {
+             observable->isChanged(Scene::COLOR_TEXTURE_CHANGED) ||
+             observable->isChanged(Scene::NORMAL_TEXTURE_CHANGED))) {
         haveToRedraw = true;
     }
 
@@ -441,7 +442,7 @@ void GLViewer::draw() {
         glPushMatrix ();
         glTranslatef (trans[0], trans[1], trans[2]);
         const Material & mat = o->getMaterial ();
-        const Vec3Df & color = mat.getTexture()->getRepresentativeColor();
+        const Vec3Df & color = mat.getColorTexture()->getRepresentativeColor();
         float dif = mat.getDiffuse ();
         float spec = mat.getSpecular ();
         static GLfloat glMatDiff[4];

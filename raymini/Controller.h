@@ -83,9 +83,9 @@ public slots :
     void windowSetMaterialDiffuse(double);
     void windowSetMaterialSpecular(double);
     void windowSetMaterialGlossyRatio(double);
-    void windowSetMaterialTexture(int);
+    void windowSetMaterialColorTexture(int);
     void windowSelectTexture(int);
-    void windowSetTextureColor();
+    void windowSetColorTextureColor();
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
     void windowSetQualityDivider(int);

@@ -52,7 +52,7 @@ private :
     void updateLights(const Observable *);
     void updateObjects(const Observable *);
     void updateMaterials(const Observable *);
-    void updateTextures(const Observable *);
+    void updateColorTextures(const Observable *);
     void updateMapping(const Observable *);
     void updateFocus(const Observable *);
     void updateRealTime(const Observable *);
@@ -125,11 +125,11 @@ private :
     QDoubleSpinBox *materialDiffuseSpinBox;
     QDoubleSpinBox *materialSpecularSpinBox;
     QDoubleSpinBox *materialGlossyRatio;
-    QLabel *materialTextureLabel;
-    QComboBox *materialTexturesList;
+    QLabel *materialColorTextureLabel;
+    QComboBox *materialColorTexturesList;
 
-    QComboBox *texturesList;
-    QPushButton *textureColorButton;
+    QComboBox *colorTexturesList;
+    QPushButton *colorTextureColorButton;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

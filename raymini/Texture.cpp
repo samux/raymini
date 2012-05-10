@@ -9,37 +9,13 @@
 
 using namespace std;
 
-/********** TEXTURE *****************/
-
-Texture::Texture(string name):
-    name(name)
-{}
-Texture::~Texture() {}
-
-Vec3Df Texture::getRepresentativeColor() const {
-    return color;
-}
-
-void Texture::setRepresentativeColor(Vec3Df c) {
-    color = c;
-}
-
-string Texture::getName() const {
-    return name;
-}
-
 /********** MAPPED TEXTURE **********/
 
-MappedTexture::MappedTexture(string name):
-    Texture(name)
-{}
-MappedTexture::~MappedTexture() {}
-
-Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
+template <typename T>
+T MappedTexture<T>::getValue(Ray *intersectingRay) const {
     if (!intersectingRay->intersect()) {
         cerr<<__FUNCTION__<<": cannot get the texture color!"<<endl;
-        // Horrible pink for debug
-        return Vec3Df(1, 0, 1);
+        return T();
     }
 
     const Triangle *t = intersectingRay->getTriangle();
@@ -65,12 +41,14 @@ Vec3Df MappedTexture::getColor(Ray *intersectingRay) const {
 
     const Mesh &mesh = intersectingRay->getIntersectedObject()->getMesh();
 
+    adaptUV(interU, interV, mesh.getUScale(), mesh.getVScale());
+
     // Call abstract method
-    Vec3Df color = getColor(interU, interV, mesh.getUScale(), mesh.getVScale());
-    return color;
+    return getValue(interU, interV);
 }
 
-void MappedTexture::adaptUV(float &u, float &v, float uScale, float vScale) {
+template <typename T>
+void MappedTexture<T>::adaptUV(float &u, float &v, float uScale, float vScale) {
     u -= (int)(u*uScale)/uScale;
     u *= uScale;
 
@@ -80,11 +58,9 @@ void MappedTexture::adaptUV(float &u, float &v, float uScale, float vScale) {
 
 /********** IMAGE TEXTURE ***********/
 
-ImageTexture::ImageTexture(const char *fileName, string name):
-    MappedTexture(name),
+ImageTexture::ImageTexture(const char *fileName):
     image(nullptr)
 {
-    color = Vec3Df(1, 0, 1);
     image = new QImage(fileName);
     if (!image) {
         cerr<<__FUNCTION__<<": cannot read image "<<fileName<<endl;
@@ -93,75 +69,182 @@ ImageTexture::ImageTexture(const char *fileName, string name):
 
 ImageTexture::~ImageTexture()
 {
-    delete image;
+    if (image) {
+        delete image;
+    }
 }
 
-Vec3Df ImageTexture::getColor(float x, float y, float uScale, float vScale) const{
-    adaptUV(x, y, uScale, vScale);
+Vec3Df ImageTexture::getValue(Ray *intersectingRay) const {
+    return MappedTexture<Vec3Df>::getValue(intersectingRay);
+}
 
+Vec3Df ImageTexture::getValue(float x, float y) const{
     unsigned int width = image->width();
     unsigned int height = image->height();
+
     unsigned int u = x * width;
     if (u == width) {
         u = width - 1;
     }
+
     unsigned int v = y * height;
     if (v == height) {
         v = height - 1;
     }
+
     QColor pixel = QColor(image->pixel(u, v));
 
     return Vec3Df(pixel.red(), pixel.green(), pixel.blue())/255.0;
 }
 
-/*********** BASIC TEXTURE ***********/
+/******** COLOR TEXTURE *********/
 
-BasicTexture::BasicTexture(string name):
-    MappedTexture(name)
+ColorTexture::ColorTexture(Vec3Df color, string name):
+    NamedClass(name),
+    color(color)
 {}
 
-BasicTexture::~BasicTexture() {}
+ColorTexture::~ColorTexture() {}
 
-Vec3Df BasicTexture::getColor(float x, float y, float uScale, float vScale) const {
-    adaptUV(x, y, uScale, vScale);
+Vec3Df ColorTexture::getRepresentativeColor() const {
+    return color;
+}
+
+void ColorTexture::setRepresentativeColor(Vec3Df c) {
+    color = c;
+}
+
+/******* COLOR MAPPED TEXTURE ******/
+
+
+MappedColorTexture::MappedColorTexture(Vec3Df color, string name):
+    ColorTexture(color, name)
+{}
+
+MappedColorTexture::~MappedColorTexture() {}
+
+Vec3Df MappedColorTexture::getColor(Ray *intersectingRay) const {
+    return MappedTexture<Vec3Df>::getValue(intersectingRay);
+}
+
+/********* IMAGE COLOR TEXTURE *****/
+
+ImageColorTexture::ImageColorTexture(const char *fileName, string name):
+    ColorTexture(Vec3Df(1, 0, 1), name),
+    ImageTexture(fileName)
+{}
+
+ImageColorTexture::~ImageColorTexture() {}
+
+Vec3Df ImageColorTexture::getColor(Ray *ray) const {
+    return ImageTexture::getValue(ray);
+}
+
+/*********** DEBUG COLOR TEXTURE ***********/
+
+DebugColorTexture::DebugColorTexture(string name):
+    MappedColorTexture(Vec3Df(1, 0, 1), name)
+{}
+
+DebugColorTexture::~DebugColorTexture() {}
+
+Vec3Df DebugColorTexture::getValue(float x, float y) const {
 
     bool isXEven = x*2.0<1.0;
     bool isYEven = y*2.0<1.0;
 
     if (isXEven==isYEven) {
-        return Vec3Df(1, 0, 0);
+        return color;
     }
-    return Vec3Df(0, 0, 1);
+    return Vec3Df(1.0-color[0], 1.0-color[1], 1.0-color[2]);
 }
 
-/************ COLOR TEXTURE ***********/
+Vec3Df DebugColorTexture::getColor(float u, float v) const {
+    return getValue(u, v);
+}
 
-ColorTexture::ColorTexture(Vec3Df color, string name):
-    Texture(name)
+/************ SINGLE COLOR TEXTURE ***********/
+
+SingleColorTexture::SingleColorTexture(Vec3Df color, string name):
+    ColorTexture(color, name)
 {
-    this->color = color;
     if (name.empty()) {
-        name = "Color Texture "+color.toString();
+        name = "Single Color Texture "+color.toString();
     }
 }
 
-ColorTexture::~ColorTexture()
+SingleColorTexture::~SingleColorTexture()
 {}
 
-Vec3Df ColorTexture::getColor(Ray *) const {
+Vec3Df SingleColorTexture::getColor(Ray *) const {
     return color;
 }
 
-/******** NOISE TEXTURE **************/
+/******** NOISE COLOR TEXTURE **************/
 
-NoiseTexture::NoiseTexture(Vec3Df color, float (*noise)(const Vertex &), string name):
-    ColorTexture(color, name),
+NoiseColorTexture::NoiseColorTexture(Vec3Df color, float (*noise)(const Vertex &), string name):
+    SingleColorTexture(color, name),
     noise(noise)
 {}
 
-NoiseTexture::~NoiseTexture() {}
+NoiseColorTexture::~NoiseColorTexture() {}
 
-Vec3Df NoiseTexture::getColor(Ray *ray) const {
+Vec3Df NoiseColorTexture::getColor(Ray *ray) const {
     const Vertex &v = ray->getIntersection();
     return color*noise(v);
+}
+
+/************ NORMAL TEXTURE ***********/
+
+NormalTexture::NormalTexture(string name):
+    NamedClass(name)
+{}
+
+NormalTexture::~NormalTexture() {}
+
+/******** MESH NORMAL TEXTURE **********/
+
+MeshNormalTexture::MeshNormalTexture(std::string name):
+    NormalTexture(name)
+{}
+
+MeshNormalTexture::~MeshNormalTexture() {}
+
+Vec3Df MeshNormalTexture::getNormal(Ray *ray) const {
+    return ray->getIntersection().getNormal();
+}
+
+/********* IMAGE NORMAL TEXTURE **********/
+
+ImageNormalTexture::ImageNormalTexture(const char *fileName, string name):
+    NormalTexture(name),
+    ImageTexture(fileName)
+{}
+
+ImageNormalTexture::~ImageNormalTexture() {}
+
+Vec3Df ImageNormalTexture::getNormal(Ray *ray) const {
+    Vec3Df pointNormal = ray->getIntersection().getNormal();
+    Vec3Df color = ImageTexture::getValue(ray);
+    return pointNormal + 2.0*color - Vec3Df(1, 1, 1);
+}
+
+/******* NOISE NORMAL TEXTURE ************/
+
+NoiseNormalTexture::NoiseNormalTexture(
+        float (*noise)(const Vertex &),
+        Vec3Df offset,
+        std::string name):
+    NormalTexture(name),
+    noise(noise),
+    offset(offset)
+{}
+
+NoiseNormalTexture::~NoiseNormalTexture() {}
+
+Vec3Df NoiseNormalTexture::getNormal(Ray *r) const {
+    const Vertex &v = r->getIntersection();
+    Vec3Df normal = v.getNormal();
+    Vec3Df noiseContribution = offset*noise(v);
+    return normal + noiseContribution*2.0 - Vec3Df(1, 1, 1);
 }

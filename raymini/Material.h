@@ -16,17 +16,19 @@
 #include "Light.h"
 #include "Ray.h"
 #include "Texture.h"
+#include "NamedClass.h"
 
 // This model assumes a white specular color (1.0, 1.0, 1.0)
 
 class Controller;
 class Object;
 
-class Material {
+class Material: public NamedClass {
 public:
-    Material(Controller *c, std::string name, const Texture *t);
+    Material(Controller *c, std::string name, const ColorTexture *ct, const NormalTexture *nt);
     Material(Controller *c, std::string name, float diffuse, float specular,
-             const Texture *t, float glossyRatio=0, float alpha = 1.5f);
+             const ColorTexture *ct, const NormalTexture *nt,
+             float glossyRatio=0, float alpha = 1.5f);
 
     virtual ~Material () {}
 
@@ -44,11 +46,10 @@ public:
     inline float getGlossyRatio() const {return glossyRatio;}
     inline bool isGlossy() const {return glossyRatio!=0;}
 
-    inline std::string getName() const {return name;}
-
-    /** Be sure to configure u,v for each vertex of the mesh */
-    inline void setTexture(Texture *t) {texture = t;}
-    inline const Texture *getTexture() const {return texture;}
+    inline void setColorTexture(ColorTexture *t) {colorTexture = t;}
+    inline const ColorTexture *getColorTexture() const {return colorTexture;}
+    inline void setNormalTexture(NormalTexture *t) {normalTexture = t;}
+    inline const NormalTexture *getNormalTexture() const {return normalTexture;}
 
 protected:
     Controller *controller;
@@ -57,19 +58,24 @@ protected:
     float specular;
     float alpha; //for specular computation
     float glossyRatio;
-    std::string name;
-    const Texture *texture;
+    const ColorTexture *colorTexture;
+    const NormalTexture *normalTexture;
 };
 
 class Mirror : public Material {
 public:
-    Mirror(Controller *c, std::string name, const Texture *t) : Material(c, name, 0.5f, 1.f, t, 1.f, 30){}
+    Mirror(Controller *c, std::string name, const ColorTexture *ct, const NormalTexture *nt):
+        Material(c, name, 0.5f, 1.f, ct, nt, 1.f, 30){}
 };
 
 class Glass : public Material {
 public:
-    Glass(Controller *c, std::string name, float coeff, Texture *dummy) :
-        Material(c, name, 1.f, 1.f, dummy), coeff(coeff) {}
+    Glass(Controller *c, std::string name, float coeff,
+          const ColorTexture *ct, const NormalTexture *nt,
+          float alpha=1):
+        Material(c, name, 1.f, 1.f, ct, nt),
+        coeff(coeff),
+        alpha(alpha) {}
 
     virtual ~Glass() {}
 
@@ -79,12 +85,16 @@ public:
 
 private:
     float coeff;
+
+    /** How much glass let light go through */
+    float alpha;
 };
 
 class SkyBoxMaterial: public Material {
 public:
-    SkyBoxMaterial(Controller *c, std::string name, const Texture *t):
-        Material(c, name, 1, 0, t)
+    SkyBoxMaterial(Controller *c, std::string name,
+                   const ColorTexture *ct, const NormalTexture *nt):
+        Material(c, name, 1, 0, ct, nt)
     {}
 
     virtual ~SkyBoxMaterial() {}

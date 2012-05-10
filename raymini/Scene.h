@@ -24,11 +24,12 @@ class Controller;
 class Scene: public Observable {
 public:
     // Flag offsets
-    static const unsigned long OBJECT_CHANGED       = 1<<0;
-    static const unsigned long LIGHT_CHANGED        = 1<<1;
-    static const unsigned long MATERIAL_CHANGED     = 1<<2;
-    static const unsigned long TEXTURE_CHANGED      = 1<<3;
-    static const unsigned long BOUNDING_BOX_CHANGED = 1<<4;
+    static const unsigned long OBJECT_CHANGED              = 1<<0;
+    static const unsigned long LIGHT_CHANGED               = 1<<1;
+    static const unsigned long MATERIAL_CHANGED            = 1<<2;
+    static const unsigned long COLOR_TEXTURE_CHANGED       = 1<<3;
+    static const unsigned long NORMAL_TEXTURE_CHANGED      = 1<<4;
+    static const unsigned long BOUNDING_BOX_CHANGED        = 1<<5;
 
     /** You might have to set OBJECT_CHANGED */
     inline std::vector<Object *> & getObjects () { return objects; }
@@ -42,8 +43,11 @@ public:
     inline std::vector<Material *> &getMaterials() {return materials;}
     inline const std::vector<Material *> &getMaterials() const {return materials;}
 
-    /** You might have to set TEXTURE_CHANGED */
-    inline const std::vector<Texture *> &getTextures() const {return textures;}
+    /** You might have to set COLOR_TEXTURE_CHANGED */
+    inline const std::vector<ColorTexture *> &getColorTextures() const {return colorTextures;}
+
+    /** You might have to set NORMAL_TEXTURE_CHANGED */
+    inline const std::vector<NormalTexture *> &getNormalTextures() const {return normalTextures;}
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
     /** Set BOUNDING_BOX_CHANGED */
@@ -72,8 +76,11 @@ public:
     /** Return the index of the material of an object, -1 if not found */
     unsigned int getObjectMaterialIndex(unsigned int objectIndex) const;
 
-    /** Return the index of the texture of a material, -1 if not found */
-    unsigned int getMaterialTextureIndex(unsigned int materialIndex) const;
+    /** Return the index of the color texture of a material, -1 if not found */
+    unsigned int getMaterialColorTextureIndex(unsigned int materialIndex) const;
+
+    /** Return the index of the normal texture of a material, -1 if not found */
+    unsigned int getMaterialNormalTextureIndex(unsigned int materialIndex) const;
 
 private:
     Material *red, *green, *blue, *white, *black;
@@ -95,9 +102,15 @@ private:
     std::vector<Object *> objects;
     std::vector<Light *> lights;
 
-    NoiseTexture *poolTexture;
-    ColorTexture *whiteTexture;
-    std::vector<Texture *> textures;
+    NoiseColorTexture *poolTexture;
+    SingleColorTexture *whiteTexture;
+    std::vector<ColorTexture *> colorTextures;
+
+    MeshNormalTexture *basicNormal;
+    ImageNormalTexture *swarmNormal;
+    NoiseNormalTexture *perlinNormal;
+    ImageNormalTexture *crossNormal;
+    std::vector<NormalTexture *> normalTextures;
     BoundingBox bbox;
 };
 
