@@ -179,7 +179,7 @@ bool RayTracer::intersect(const Vec3Df & dir,
 Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, bool pathTracing) const {
     Ray bestRay;
     Brdf::Type type = onlyAmbientOcclusion?Brdf::Ambient:Brdf::All;
-    bool useRayTracing = (quality==OPTIMAL) && pathTracing;
+    bool useRayTracing = pathTracing;
     return getColor(dir, camPos, bestRay, useRayTracing?0:depthPathTracing, type);
 }
 
