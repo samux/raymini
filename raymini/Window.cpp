@@ -422,22 +422,43 @@ void Window::updateMaterials(const Observable *observable) {
 
 void Window::updateColorTextures(const Observable *observable) {
     const WindowModel *windowModel = controller->getWindowModel();
+    const Scene *scene = controller->getScene();
 
     int index = windowModel->getSelectedTextureIndex();
+    const ColorTexture *texture = nullptr;
     bool isSelected = index != -1;
+    const ImageColorTexture *imageTexture = nullptr;
+    const NoiseColorTexture *noiseTexture = nullptr;
+    if (isSelected) {
+        texture = scene->getColorTextures()[index];
+        imageTexture = dynamic_cast<const ImageColorTexture*>(texture);
+        noiseTexture = dynamic_cast<const NoiseColorTexture*>(texture);
+    }
     bool selectedTextureChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_TEXTURE_CHANGED);
     if (selectedTextureChanged) {
         colorTexturesList->setCurrentIndex(index+1);
         colorTextureColorButton->setVisible(isSelected);
+        colorTextureTypeLabel->setVisible(isSelected);
+        colorTextureTypeList->setVisible(isSelected);
     }
 
-    const Scene *scene = controller->getScene();
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::COLOR_TEXTURE_CHANGED);
-    if (isSelected && (sceneChanged || selectedTextureChanged)) {
-        const ColorTexture *texture = scene->getColorTextures()[index];
-        colorTextureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
+    if (sceneChanged || selectedTextureChanged) {
+        colorTextureFileButton->setVisible(imageTexture);
+        colorTextureNoiseLabel->setVisible(noiseTexture);
+        colorTextureNoiseList->setVisible(noiseTexture);
+        if (isSelected) {
+            colorTextureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
+            colorTextureTypeList->setCurrentIndex(texture->getType());
+            if (imageTexture) {
+                colorTextureFileButton->setText(QString("file: ")+imageTexture->getImageFileName());
+            }
+            if (noiseTexture) {
+                colorTextureNoiseList->setCurrentIndex(noiseTexture->getPrededefinedIndex());
+            }
+        }
     }
 }
 
@@ -1025,7 +1046,7 @@ void Window::initControlWidget() {
     // SceneGroup: Textures
 
     QWidget *colorTexturesGroupBox = new QWidget(sceneTabs);
-    QVBoxLayout *colorTexturesLayout = new QVBoxLayout(colorTexturesGroupBox);
+    QGridLayout *colorTexturesLayout = new QGridLayout(colorTexturesGroupBox);
 
     colorTexturesList = new QComboBox(colorTexturesGroupBox);
     colorTexturesList->addItem("No color texture selected");
@@ -1034,12 +1055,41 @@ void Window::initControlWidget() {
     }
     connect(colorTexturesList, SIGNAL(activated(int)),
             controller, SLOT(windowSelectTexture(int)));
-    colorTexturesLayout->addWidget(colorTexturesList);
+    colorTexturesLayout->addWidget(colorTexturesList, 0, 0, 1, 2);
 
     colorTextureColorButton = new QPushButton("Base color", colorTexturesGroupBox);
     connect(colorTextureColorButton, SIGNAL(clicked()),
             controller, SLOT(windowSetColorTextureColor()));
-    colorTexturesLayout->addWidget(colorTextureColorButton);
+    colorTexturesLayout->addWidget(colorTextureColorButton, 1, 0, 1, 2);
+
+    colorTextureTypeLabel = new QLabel("Type:", colorTexturesGroupBox);
+    colorTexturesLayout->addWidget(colorTextureTypeLabel, 2, 0);
+    
+    colorTextureTypeList = new QComboBox(colorTexturesGroupBox);
+    colorTextureTypeList->addItem("Single color");
+    colorTextureTypeList->addItem("Checkerboard");
+    colorTextureTypeList->addItem("Noise");
+    colorTextureTypeList->addItem("Image");
+    connect(colorTextureTypeList, SIGNAL(activated(int)),
+            controller, SLOT(windowChangeTextureType(int)));
+    colorTexturesLayout->addWidget(colorTextureTypeList, 2, 1);
+
+    colorTextureFileButton = new QPushButton("File", colorTexturesGroupBox);
+    connect(colorTextureFileButton, SIGNAL(clicked()),
+            controller, SLOT(windowChangeImageFileColorTexture()));
+    colorTexturesLayout->addWidget(colorTextureFileButton, 3, 0, 1, 2);
+
+    colorTextureNoiseLabel = new QLabel("Noise function:", colorTexturesGroupBox);
+    colorTexturesLayout->addWidget(colorTextureNoiseLabel, 4, 0);
+
+    colorTextureNoiseList = new QComboBox(colorTexturesGroupBox);
+    colorTextureNoiseList->addItem("Perlin lines");
+    colorTextureNoiseList->addItem("Perlin marble");
+    colorTextureNoiseList->addItem("Perlin spotted");
+    colorTextureNoiseList->addItem("Perlin clouded");
+    connect(colorTextureNoiseList, SIGNAL(activated(int)),
+            controller, SLOT(windowSetNoiseColorTextureFunction(int)));
+    colorTexturesLayout->addWidget(colorTextureNoiseList, 4, 1);
 
     sceneTabs->addTab(colorTexturesGroupBox, "Textures");
 

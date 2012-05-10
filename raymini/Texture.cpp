@@ -59,12 +59,24 @@ void MappedTexture<T>::adaptUV(float &u, float &v, float uScale, float vScale) {
 /********** IMAGE TEXTURE ***********/
 
 ImageTexture::ImageTexture(const char *fileName):
+    imageFileName("No image loaded"),
     image(nullptr)
 {
-    image = new QImage(fileName);
-    if (!image) {
+    loadImage(fileName);
+}
+
+bool ImageTexture::loadImage(const char *fileName) {
+    auto newImage = new QImage(fileName);
+    if (!newImage) {
         cerr<<__FUNCTION__<<": cannot read image "<<fileName<<endl;
+        return false;
     }
+    if (image) {
+        delete image;
+    }
+    image = newImage;
+    imageFileName = fileName;
+    return true;
 }
 
 ImageTexture::~ImageTexture()
@@ -79,6 +91,10 @@ Vec3Df ImageTexture::getValue(Ray *intersectingRay) const {
 }
 
 Vec3Df ImageTexture::getValue(float x, float y) const{
+    if (!image) {
+        return Vec3Df();
+    }
+
     unsigned int width = image->width();
     unsigned int height = image->height();
 
@@ -112,6 +128,24 @@ Vec3Df ColorTexture::getRepresentativeColor() const {
 
 void ColorTexture::setRepresentativeColor(Vec3Df c) {
     color = c;
+}
+
+ColorTexture::Type ColorTexture::getType() const {
+    // Be careful with inheritance!
+    if (dynamic_cast<const NoiseColorTexture*>(this)) {
+        return Noise;
+    }
+    if (dynamic_cast<const SingleColorTexture*>(this)) {
+        return SingleColor;
+    }
+    if (dynamic_cast<const DebugColorTexture*>(this)) {
+        return Debug;
+    }
+    if (dynamic_cast<const ImageColorTexture*>(this)) {
+        return Image;
+    }
+    cerr<<__FUNCTION__<<": unknown type!\n";
+    return SingleColor;
 }
 
 /******* COLOR MAPPED TEXTURE ******/
@@ -182,9 +216,9 @@ Vec3Df SingleColorTexture::getColor(Ray *) const {
 
 /******** NOISE COLOR TEXTURE **************/
 
-NoiseColorTexture::NoiseColorTexture(Vec3Df color, float (*noise)(const Vertex &), string name):
+NoiseColorTexture::NoiseColorTexture(Vec3Df color, NoiseUser::Predefined p, string name):
     SingleColorTexture(color, name),
-    noise(noise)
+    NoiseUser(p)
 {}
 
 NoiseColorTexture::~NoiseColorTexture() {}
@@ -234,11 +268,11 @@ Vec3Df ImageNormalTexture::getNormal(Ray *ray) const {
 /******* NOISE NORMAL TEXTURE ************/
 
 NoiseNormalTexture::NoiseNormalTexture(
-        float (*noise)(const Vertex &),
+        NoiseUser::Predefined p,
         Vec3Df offset,
         std::string name):
     NormalTexture(name),
-    noise(noise),
+    NoiseUser(p),
     offset(offset)
 {}
 

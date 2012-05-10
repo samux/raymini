@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "Vertex.h"
 #include "NamedClass.h"
+#include "NoiseUser.h"
 
 #include <QImage>
 
@@ -99,8 +100,12 @@ public:
     virtual Vec3Df getValue(Ray *intersectingRay) const;
 
     const QImage *getImage() const {return image;}
+    const char *getImageFileName() const {return imageFileName.c_str();}
+    /** Return true if loading successful */
+    bool loadImage(const char *name);
 
 protected:
+    std::string imageFileName;
     QImage *image;
 
     /** @override */
@@ -126,6 +131,15 @@ public:
 
     Vec3Df getRepresentativeColor() const;
     void setRepresentativeColor(Vec3Df c);
+
+    enum Type {
+        SingleColor,
+        Debug,
+        Noise,
+        Image
+    };
+
+    Type getType() const;
 
 protected:
     /** Representative color for OpenGL */ 
@@ -181,10 +195,10 @@ public:
 };
 
 /** Noise-based color texture */
-class NoiseColorTexture: public SingleColorTexture {
+class NoiseColorTexture: public SingleColorTexture, public NoiseUser {
 public:
     NoiseColorTexture(Vec3Df color,
-                      float (*noise)(const Vertex &),
+                      NoiseUser::Predefined p,
                       std::string name="Noise Texture");
     virtual ~NoiseColorTexture();
 
@@ -194,9 +208,6 @@ public:
      * of the intersected pixel position
      */
     virtual Vec3Df getColor(Ray *) const;
-
-protected:
-    float (*noise)(const Vertex &);
 };
 
 /** Image color texture */
@@ -260,9 +271,9 @@ public:
 /**
  * Normal texture based on noise
  */
-class NoiseNormalTexture: public NormalTexture {
+class NoiseNormalTexture: public NormalTexture, public NoiseUser {
 public:
-    NoiseNormalTexture(float (*noise)(const Vertex &),
+    NoiseNormalTexture(NoiseUser::Predefined p,
                        Vec3Df offset,
                        std::string name="Noise Normal Texture");
     virtual ~NoiseNormalTexture();
@@ -275,6 +286,5 @@ public:
     virtual Vec3Df getNormal(Ray *) const;
 
 protected:
-    float (*noise)(const Vertex &);
     Vec3Df offset;
 };

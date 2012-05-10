@@ -88,6 +88,9 @@ public slots :
     void windowSetMaterialGlassAlpha(double);
     void windowSelectTexture(int);
     void windowSetColorTextureColor();
+    void windowChangeTextureType(int);
+    void windowChangeImageFileColorTexture();
+    void windowSetNoiseColorTextureFunction(int);
     void windowSetRealTime(bool);
     void windowSetDurtiestQuality(int);
     void windowSetQualityDivider(int);

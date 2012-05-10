@@ -12,6 +12,7 @@
 #include "Scene.h"
 
 #include "Noise.h"
+#include "NoiseUser.h"
 
 using namespace std;
 
@@ -45,9 +46,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     crossNormal = new ImageNormalTexture("normals/cross.jpg", "Cross");
     normalTextures.push_back(crossNormal);
     perlinNormal = new NoiseNormalTexture(
-            [](const Vertex & v) -> float {
-                return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
-            },
+            NoiseUser::Predefined::PERLIN_MARBLE,
             {.6f, .6f, .7f},
             "Perlin Normal");
     auto basicTexture = new DebugColorTexture();
@@ -68,18 +67,14 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     colorTextures.push_back(groundTexture);
     auto rhinoTexture = new NoiseColorTexture(
             {.6f, .6f, .7f},
-            [](const Vertex & v) -> float {
-                    return sqrt(fabs(sin(2 * M_PI * Perlin(0.5f, 4, 5)(v.getPos()))));
-                    },
+            NoiseUser::Predefined::PERLIN_MARBLE,
             "Rhino Texture");
     colorTextures.push_back(rhinoTexture);
     auto skyBoxTexture = new ImageColorTexture(SkyBox::textureFileName, "Sky Box");
     colorTextures.push_back(skyBoxTexture);
     poolTexture = new NoiseColorTexture(
             {0.f, .3f, .1f},
-            [](const Vertex & v) -> float {
-                return min(1.f, 0.4f+Perlin(0.5f, 4, 10)(v.getPos()));
-            },
+            NoiseUser::Predefined::PERLIN_SPOTTED,
             "Pool");
     colorTextures.push_back(poolTexture);
 
@@ -101,7 +96,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     materials.push_back(groundMat);
     rhinoMat = new Material(c, "Rhino", 1.f, 0.2f, rhinoTexture, basicNormal);
     materials.push_back(rhinoMat);
-    mirrorMat = new Mirror(c, "Mirror", basicTexture, swarmNormal);
+    mirrorMat = new Mirror(c, "Mirror", basicTexture, basicNormal);
     materials.push_back(mirrorMat);
     glassMat = new Glass(c, "Glass", 1.1f, whiteTexture, swarmNormal);
     materials.push_back(glassMat);
@@ -391,24 +386,12 @@ void Scene::buildMirrorGlass() {
 
     auto wallTexture = new NoiseColorTexture(
             {.3f, .6f, .6f},
-            [](const Vertex & v) -> float {
-                float perturbation = 0.05; // <1
-                float f0 = 4;
-                float lines = 30;
-                double valeur = (1 - cos(lines * 2 * M_PI * ((v.getPos()[0]+v.getPos()[1]) / f0 + perturbation * Perlin(0.5f, 7, f0)(v.getPos())))) / 2;
-                return valeur;
-            },
+            NoiseUser::Predefined::PERLIN_LINES,
             "MG Wall");
     colorTextures.push_back(wallTexture);
 
     auto wallNormal = new NoiseNormalTexture(
-            [](const Vertex & v) -> float {
-                float perturbation = 0.05; // <1
-                float f0 = 4;
-                float lines = 30;
-                double valeur = (1 - cos(lines * 2 * M_PI * ((v.getPos()[0]+v.getPos()[1]) / f0 + perturbation * Perlin(0.5f, 7, f0)(v.getPos())))) / 2;
-                return valeur;
-            },
+            NoiseUser::Predefined::PERLIN_LINES,
             {.3f, .6f, .6f},
             "MG Wall");
     normalTextures.push_back(wallNormal);
@@ -418,9 +401,7 @@ void Scene::buildMirrorGlass() {
 
     auto ramTexture = new NoiseColorTexture(
             Vec3Df(.7f, .4f, .2f),
-            [](const Vertex & v) -> float {
-                return min(1.f, .3f+Perlin(0.5f, 4, 15)(v.getPos()));
-            },
+            NoiseUser::Predefined::PERLIN_CLOUDED,
             "MG Ram");
     colorTextures.push_back(ramTexture);
 
@@ -517,4 +498,13 @@ unsigned int Scene::getMaterialNormalTextureIndex(unsigned int materialIndex) co
         result++;
     }
     return -1;
+}
+
+void Scene::updateMaterialsColorTexture(ColorTexture *oldOne, ColorTexture *newOne) {
+    for (Material *m : materials) {
+        if (m->getColorTexture() == oldOne) {
+            m->setColorTexture(newOne);
+            setChanged(MATERIAL_CHANGED);
+        }
+    }
 }

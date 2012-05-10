@@ -134,6 +134,11 @@ private :
 
     QComboBox *colorTexturesList;
     QPushButton *colorTextureColorButton;
+    QLabel *colorTextureTypeLabel;
+    QComboBox *colorTextureTypeList;
+    QPushButton *colorTextureFileButton;
+    QLabel *colorTextureNoiseLabel;
+    QComboBox *colorTextureNoiseList;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

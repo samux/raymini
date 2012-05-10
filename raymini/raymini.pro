@@ -33,6 +33,7 @@ HEADERS = Window.h \
           RenderThread.h \
           ProgressBar.h \
           NamedClass.h \
+          NoiseUser.h \
           Brdf.h \
           PBGI.h \
           Octree.h

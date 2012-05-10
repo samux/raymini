@@ -44,6 +44,7 @@ public:
     inline const std::vector<Material *> &getMaterials() const {return materials;}
 
     /** You might have to set COLOR_TEXTURE_CHANGED */
+    inline std::vector<ColorTexture *> &getColorTextures() {return colorTextures;}
     inline const std::vector<ColorTexture *> &getColorTextures() const {return colorTextures;}
 
     /** You might have to set NORMAL_TEXTURE_CHANGED */
@@ -81,6 +82,9 @@ public:
 
     /** Return the index of the normal texture of a material, -1 if not found */
     unsigned int getMaterialNormalTextureIndex(unsigned int materialIndex) const;
+
+    /** Change the pointer to the color texture in every single material */
+    void updateMaterialsColorTexture(ColorTexture *oldOne, ColorTexture *newOne);
 
 private:
     Material *red, *green, *blue, *white, *black, *grey;

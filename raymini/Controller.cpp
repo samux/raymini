@@ -4,6 +4,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "NoiseUser.h"
+
 using namespace std;
 
 Controller::Controller(QApplication *r):
@@ -507,6 +509,87 @@ void Controller::windowSetColorTextureColor() {
         renderThread->hasToRedraw();
         notifyAll();
     }
+}
+
+void Controller::windowChangeTextureType(int t) {
+    ensureThreadStopped();
+    int it = windowModel->getSelectedTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    ColorTexture *oldTexture = scene->getColorTextures()[it];
+    Vec3Df color = oldTexture->getRepresentativeColor();
+    string name = oldTexture->getName();
+    ColorTexture *texture = nullptr;
+    auto type = static_cast<ColorTexture::Type>(t);
+    switch (type) {
+        case ColorTexture::Type::SingleColor:
+            texture = new SingleColorTexture(color, name);
+            break;
+        case ColorTexture::Type::Debug:
+            texture = new DebugColorTexture(name);
+            break;
+        case ColorTexture::Type::Noise:
+            texture = new NoiseColorTexture(
+                    color,
+                    NoiseUser::Predefined::PERLIN_MARBLE,
+                    name);
+            break;
+        case ColorTexture::Type::Image:
+            texture = new ImageColorTexture(
+                    "textures/grass.jpg",
+                    name);
+            break;
+    }
+    scene->getColorTextures()[it] = texture;
+    scene->updateMaterialsColorTexture(oldTexture, texture);
+    delete oldTexture;
+    scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowChangeImageFileColorTexture() {
+    int it = windowModel->getSelectedTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    ImageColorTexture *texture = dynamic_cast<ImageColorTexture*>(scene->getColorTextures()[it]);
+    if (!texture) {
+        cerr << __FUNCTION__ << " called even though selected texture is not an ImageColorTexture!\n";
+        return;
+    }
+    QString filename = QFileDialog::getOpenFileName(window,
+                                                    "Open a texture image",
+                                                    ".",
+                                                    "*.jpg *.bmp *.png");
+    if (!filename.isNull()) {
+        ensureThreadStopped();
+        texture->loadImage(filename.toStdString().c_str());
+        scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+        renderThread->hasToRedraw();
+        notifyAll();
+    }
+}
+
+void Controller::windowSetNoiseColorTextureFunction(int ip) {
+    int it = windowModel->getSelectedTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    NoiseColorTexture *texture = dynamic_cast<NoiseColorTexture*>(scene->getColorTextures()[it]);
+    if (!texture) {
+        cerr << __FUNCTION__ << " called even though selected texture is not a NoiseColorTexture!\n";
+        return;
+    }
+    ensureThreadStopped();
+    texture->loadPredefined(static_cast<NoiseUser::Predefined>(ip));
+    scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
 }
 
 void Controller::windowSelectObject(int o) {
