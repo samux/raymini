@@ -57,6 +57,7 @@ void Octree::splitSurfels(const array<BoundingBox, 8> & bBoxes, array<vector<uns
 }
 
 Surfel Octree::getMeanSurfel() const {
+    // TODO fix memory leaks
     Vec3Df p, n, color;
     float radius (0.0);
     auto normalTexture = new MeshNormalTexture();

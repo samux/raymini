@@ -89,7 +89,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     black = new Material(c, "Black", 1, 0.5, blackTexture, basicNormal);
     materials.push_back(black);
     grey = new Material(c, "Grey", 1, 0.5, greyTexture, basicNormal);
-    materials.push_back(black);
+    materials.push_back(grey);
     glossyMat = new Material(c, "Glossy", 1.f, 1.f, redTexture, basicNormal, .1f);
     materials.push_back(glossyMat);
     groundMat = new Material(c, "Ground", 1.f, 0.f, groundTexture, basicNormal);

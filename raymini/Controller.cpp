@@ -73,7 +73,6 @@ void Controller::ensureThreadStopped() {
 
 void Controller::quitProgram() {
     ensureThreadStopped();
-    renderThread->wait();
     raymini->quit();
 }
 
