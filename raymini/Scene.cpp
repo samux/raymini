@@ -62,6 +62,8 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     colorTextures.push_back(whiteTexture);
     auto blackTexture = new SingleColorTexture({0, 0, 0}, "Black");
     colorTextures.push_back(blackTexture);
+    auto greyTexture = new SingleColorTexture({.5, .5, .5}, "Grey");
+    colorTextures.push_back(greyTexture);
     auto groundTexture = new ImageColorTexture("textures/grass.jpg", "Grass Texture");
     colorTextures.push_back(groundTexture);
     auto rhinoTexture = new NoiseColorTexture(
@@ -90,6 +92,8 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     white = new Material(c, "White", 1, 0.5, whiteTexture, swarmNormal);
     materials.push_back(white);
     black = new Material(c, "Black", 1, 0.5, blackTexture, basicNormal);
+    materials.push_back(black);
+    grey = new Material(c, "Grey", 1, 0.5, greyTexture, basicNormal);
     materials.push_back(black);
     glossyMat = new Material(c, "Glossy", 1.f, 1.f, redTexture, basicNormal, .1f);
     materials.push_back(glossyMat);
@@ -358,7 +362,7 @@ void Scene::buildSphere() {
     groundMesh.setSquareTextureMapping();
     groundMesh.scale(2.0);
 
-    objects.push_back(new Object(groundMesh, black, "Ground"));
+    objects.push_back(new Object(groundMesh, grey, "Ground"));
 
     float rayon = 0.5;
 

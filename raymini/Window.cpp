@@ -749,7 +749,7 @@ void Window::initControlWidget() {
     PTIntensitySpinBox = new QDoubleSpinBox(PTGroupBox);
     PTIntensitySpinBox->setPrefix ("Intensity: ");
     PTIntensitySpinBox->setMinimum (0.2);
-    PTIntensitySpinBox->setMaximum (10.0);
+    PTIntensitySpinBox->setMaximum (100.0);
     PTIntensitySpinBox->setSingleStep(0.2);
     connect(PTIntensitySpinBox, SIGNAL(valueChanged(double)), controller, SLOT(windowSetIntensityPathTracing(double)));
     PTLayout->addWidget (PTIntensitySpinBox);

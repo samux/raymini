@@ -83,7 +83,7 @@ public:
     unsigned int getMaterialNormalTextureIndex(unsigned int materialIndex) const;
 
 private:
-    Material *red, *green, *blue, *white, *black;
+    Material *red, *green, *blue, *white, *black, *grey;
     Material *glossyMat, *groundMat, *rhinoMat;
     SkyBoxMaterial *skyBoxMaterial;
     Mirror *mirrorMat;

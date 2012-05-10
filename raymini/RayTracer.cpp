@@ -60,9 +60,9 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
 
     vector<pair<float, float>> singleNulOffset;
     singleNulOffset.push_back(pair<float, float>(0, 0));
-    
+
     int nbRay = max(nbRayAntiAliasing, (depthPathTracing) ? nbRayPathTracing : 0);
-    const vector<pair<float, float>> offsets =  (quality==OPTIMAL) ? 
+    const vector<pair<float, float>> offsets =  (quality==OPTIMAL) ?
                                                 AntiAliasing::generateOffsets(typeAntiAliasing, nbRay) : singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);
 
@@ -188,7 +188,7 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
 
     if(!intersect(dir, camPos, bestRay)) {
         return backgroundColor;
-    } 
+    }
 
     // hit something
     const Material & mat = bestRay.getIntersectedObject()->getMaterial();
@@ -207,11 +207,11 @@ Vec3Df RayTracer::getColor(const Vec3Df & dir, const Vec3Df & camPos, Ray & best
         Vec3Df new_orig = bestRay.getIntersection().getPos();
         Vec3Df new_dir = Vec3Df::getRandomOnHemisphere(bestRay.getIntersection().getNormal());
 
-        Color ptColor = getColor(new_dir, new_orig, bestRay, depth+1, Brdf::Diffuse); 
-        if(!(ptColor() == backgroundColor)) {
+        Vec3Df ptColor = getColor(new_dir, new_orig, bestRay, depth+1, Brdf::Diffuse);
+        if(ptColor != backgroundColor) {
             float coeff = intensityPathTracing/pow(1.0 + bestRay.getIntersectionDistance(), 3*(depth+1));
             ptColor *= coeff;
-            color += ptColor;
+            color += mat.getColorTexture()->getColor(&bestRay)*ptColor;
         }
         if(onlyPathTracing && depth == 0)
             color = ptColor;
