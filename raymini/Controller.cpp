@@ -566,7 +566,7 @@ void Controller::windowChangeColorImageTextureFile() {
     }
     QString filename = QFileDialog::getOpenFileName(window,
                                                     "Open a texture image",
-                                                    ".",
+                                                    "./textures",
                                                     "*.jpg *.bmp *.png");
     if (!filename.isNull()) {
         ensureThreadStopped();
@@ -651,7 +651,7 @@ void Controller::windowChangeNormalImageTextureFile() {
     }
     QString filename = QFileDialog::getOpenFileName(window,
                                                     "Open a texture image",
-                                                    ".",
+                                                    "./normals",
                                                     "*.jpg *.bmp *.png");
     if (!filename.isNull()) {
         ensureThreadStopped();
