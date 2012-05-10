@@ -406,9 +406,15 @@ void Window::updateMaterials(const Observable *observable) {
         materialGlossyRatio->setVisible(dsgVisible);
         materialColorTextureLabel->setVisible(isSelected);
         materialColorTexturesList->setVisible(isSelected);
-        int textureIndex = scene->getMaterialColorTextureIndex(index);
-        if (textureIndex != -1) {
-            materialColorTexturesList->setCurrentIndex(textureIndex);
+        materialNormalTextureLabel->setVisible(isSelected);
+        materialNormalTexturesList->setVisible(isSelected);
+        int colorTextureIndex = scene->getMaterialColorTextureIndex(index);
+        if (colorTextureIndex != -1) {
+            materialColorTexturesList->setCurrentIndex(colorTextureIndex);
+        }
+        int normalTextureIndex = scene->getMaterialNormalTextureIndex(index);
+        if (normalTextureIndex != -1) {
+            materialNormalTexturesList->setCurrentIndex(normalTextureIndex);
         }
         glassAlphaSpinBox->setVisible(isMaterialGlass);
     }
@@ -978,7 +984,7 @@ void Window::initControlWidget() {
 
     QHBoxLayout *materialColorTexturesLayout = new QHBoxLayout;
 
-    materialColorTextureLabel = new QLabel("Texture:", materialsGroupBox);
+    materialColorTextureLabel = new QLabel("Color texture:", materialsGroupBox);
     materialColorTexturesLayout->addWidget(materialColorTextureLabel);
 
     materialColorTexturesList = new QComboBox(materialsGroupBox);
@@ -990,6 +996,21 @@ void Window::initControlWidget() {
     materialColorTexturesLayout->addWidget(materialColorTexturesList);
 
     materialsLayout->addLayout(materialColorTexturesLayout);
+
+    QHBoxLayout *materialNormalTexturesLayout = new QHBoxLayout;
+
+    materialNormalTextureLabel = new QLabel("Normal texture:", materialsGroupBox);
+    materialNormalTexturesLayout->addWidget(materialNormalTextureLabel);
+
+    materialNormalTexturesList = new QComboBox(materialsGroupBox);
+    for (const NormalTexture * t : scene->getNormalTextures()) {
+        materialNormalTexturesList->addItem(t->getName().c_str());
+    }
+    connect(materialNormalTexturesList, SIGNAL(activated(int)),
+            controller, SLOT(windowSetMaterialNormalTexture(int)));
+    materialNormalTexturesLayout->addWidget(materialNormalTexturesList);
+
+    materialsLayout->addLayout(materialNormalTexturesLayout);
 
     glassAlphaSpinBox = new QDoubleSpinBox(materialsGroupBox);
     glassAlphaSpinBox->setMinimum(0);
@@ -1007,7 +1028,7 @@ void Window::initControlWidget() {
     QVBoxLayout *colorTexturesLayout = new QVBoxLayout(colorTexturesGroupBox);
 
     colorTexturesList = new QComboBox(colorTexturesGroupBox);
-    colorTexturesList->addItem("No colorTexture selected");
+    colorTexturesList->addItem("No color texture selected");
     for (const ColorTexture *t : scene->getColorTextures()) {
         colorTexturesList->addItem(t->getName().c_str());
     }

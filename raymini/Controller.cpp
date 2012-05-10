@@ -456,6 +456,19 @@ void Controller::windowSetMaterialColorTexture(int index) {
     notifyAll();
 }
 
+void Controller::windowSetMaterialNormalTexture(int index) {
+    ensureThreadStopped();
+    int o = windowModel->getSelectedMaterialIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[o]->setNormalTexture(scene->getNormalTextures()[index]);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
 void Controller::windowSetMaterialGlassAlpha(double a) {
     ensureThreadStopped();
     int o = windowModel->getSelectedMaterialIndex();
