@@ -253,13 +253,15 @@ void Scene::buildMultiMeshs() {
     groundMesh.setUVScales(5, 5);
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
 
-    Mesh wallMesh;
-    wallMesh.loadOFF("models/wall.off");
+    Mesh wallMesh = Mesh::loadSquare();
     wallMesh.setSquareTextureMapping();
-    objects.push_back(new Object(wallMesh, mirrorMat, "Left wall", {-1.9f, 0.f, 1.5f}));
+    wallMesh.rotate({0, 1, 0}, M_PI/2.0);
+    wallMesh.scale(2.0*1.95251, 1);
+    wallMesh.scale(3, 2);
+    objects.push_back(new Object(wallMesh, mirrorMat, "Left wall", {-1.95251f, 0.f, 1.5}));
 
-    wallMesh.rotate({0.f, 0.f, 1.f}, 3*M_PI/2);
-    objects.push_back(new Object(wallMesh, red, "Back wall", {0.f, 1.9f, 1.5}));
+    wallMesh.rotate({0, 0, 1}, 3.0*M_PI/2.0);
+    objects.push_back(new Object(wallMesh, red, "Back wall", {0.f, 1.95251f, 1.5}));
 
     Mesh ramMesh;
     ramMesh.loadOFF("models/ram.off");

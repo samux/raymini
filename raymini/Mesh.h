@@ -62,6 +62,13 @@ public:
     /** Rotate all vertices */
     void rotate(const Vec3Df &axis, const float &angle);
 
+    /**
+     * Scale object against a given axis
+     * X:0, Y:1, Z:2
+     */
+    void scale(const float &s, unsigned axis);
+
+
     /** Scale object */
     void scale(const float &s);
 
@@ -145,6 +152,11 @@ public:
      *   which has glitches at texture side/black side junction
      */
     void setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels=0, unsigned heightGappedPixels=0);
+
+    /**
+     * Return a square mesh of size 1, centered in 0, horizontal and facing up
+     */
+    static Mesh loadSquare();
 
     /*
      * uScale and vScale can be used to refine a texture, eg a texture will be used two times

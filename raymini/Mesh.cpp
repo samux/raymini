@@ -231,6 +231,12 @@ void Mesh::scale(const float &s) {
     }
 }
 
+void Mesh::scale(const float &s, unsigned axis) {
+    for (Vertex & v : vertices) {
+        v.setPos(v.getPos().scale(s, axis));
+    }
+}
+
 void Mesh::setDefaultTextureMapping(bool useNormals) {
     // See: http://www.mvps.org/directx/articles/spheremap.htm
     for (Triangle &t : triangles) {
@@ -329,6 +335,11 @@ Mesh Mesh::loadCube() {
 }
 
 void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels, unsigned heightGappedPixels) {
+    if (triangles.size() < 12 || vertices.size() < 8) {
+        cerr<<__FUNCTION__<<": mesh is too small!\n";
+        return;
+    }
+
     // Box size in texture space
     float boxWidth = 0.25;
     float boxHeight = 1.0/3.0;
@@ -369,4 +380,21 @@ void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels
             2.0*boxWidth-widthGappedPixels*pixelWidth,
             2.0*boxHeight,
             3.0*boxHeight);
+}
+
+Mesh Mesh::loadSquare() {
+    Mesh square;
+    square.triangles.resize(2);
+    square.vertices.resize(4);
+
+    for (unsigned i=0; i<4;i++) {
+        float x = (i+1)%4 < 2?-0.5:0.5;
+        float y = i<2?0.5:-0.5;
+        square.vertices[i] = Vertex(Vec3Df(x, y, 0));
+    }
+
+    square.triangles[0] = Triangle(0, 2, 1);
+    square.triangles[1] = Triangle(0, 3, 2);
+
+    return square;
 }

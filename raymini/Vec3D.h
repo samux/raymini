@@ -351,6 +351,16 @@ public:
         return result;
     }
 
+    /**
+     * Scale against an axis
+     * X:0, Y:1, Z:2
+     */
+    inline Vec3D scale(const T &s, unsigned int axis) const {
+        Vec3D result = *this;
+        result[axis] *= s;
+        return result;
+    }
+
     inline Vec3D randRotate(const float & maxAngle) const {
         auto random = []() -> T {
             return T(rand())/T(RAND_MAX/2)-1;
