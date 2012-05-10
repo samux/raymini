@@ -583,6 +583,7 @@ void Window::updateMapping(const Observable *observable) {
         mappingVScale->setVisible(isSelected);
         mappingSphericalPushButton->setVisible(isSelected);
         mappingSquarePushButton->setVisible(isSelected);
+        mappingCubePushButton->setVisible(isSelected);
     }
 
     const Scene *scene = controller->getScene();
@@ -921,12 +922,19 @@ void Window::initControlWidget() {
     mappingLayout->addLayout(mappingScaleLayout);
 
     mappingSphericalPushButton = new QPushButton("Sperical mapping", mappingGroupBox);
-    connect(mappingSphericalPushButton, SIGNAL(clicked()), controller, SLOT(windowSetSphericalMapping()));
+    connect(mappingSphericalPushButton, SIGNAL(clicked()),
+            controller, SLOT(windowSetSphericalMapping()));
     mappingLayout->addWidget(mappingSphericalPushButton);
 
     mappingSquarePushButton = new QPushButton("Square mapping", mappingGroupBox);
-    connect(mappingSquarePushButton, SIGNAL(clicked()), controller, SLOT(windowSetSquareMapping()));
+    connect(mappingSquarePushButton, SIGNAL(clicked()),
+            controller, SLOT(windowSetSquareMapping()));
     mappingLayout->addWidget(mappingSquarePushButton);
+
+    mappingCubePushButton = new QPushButton("Cube mapping", mappingGroupBox);
+    connect(mappingCubePushButton, SIGNAL(clicked()),
+            controller, SLOT(windowSetCubicMapping()));
+    mappingLayout->addWidget(mappingCubePushButton);
 
     sceneTabs->addTab(mappingGroupBox, "Texture mapping");
 

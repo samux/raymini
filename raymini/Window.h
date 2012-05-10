@@ -120,6 +120,7 @@ private :
     QDoubleSpinBox *mappingVScale;
     QPushButton *mappingSphericalPushButton;
     QPushButton *mappingSquarePushButton;
+    QPushButton *mappingCubePushButton;
 
     QComboBox *materialsList;
     QDoubleSpinBox *materialDiffuseSpinBox;

@@ -96,6 +96,7 @@ public slots :
     void windowSetVScale(double);
     void windowSetSquareMapping();
     void windowSetSphericalMapping();
+    void windowSetCubicMapping();
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
