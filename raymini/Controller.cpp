@@ -489,13 +489,13 @@ void Controller::windowSetMaterialGlassAlpha(double a) {
     notifyAll();
 }
 
-void Controller::windowSelectTexture(int t) {
-    windowModel->setSelectedTextureIndex(t-1);
+void Controller::windowSelectColorTexture(int t) {
+    windowModel->setSelectedColorTextureIndex(t-1);
     notifyAll();
 }
 
 void Controller::windowSetColorTextureColor() {
-    int t = windowModel->getSelectedTextureIndex();
+    int t = windowModel->getSelectedColorTextureIndex();
     if (t == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
@@ -511,14 +511,17 @@ void Controller::windowSetColorTextureColor() {
     }
 }
 
-void Controller::windowChangeTextureType(int t) {
-    ensureThreadStopped();
-    int it = windowModel->getSelectedTextureIndex();
+void Controller::windowChangeColorTextureType(int t) {
+    int it = windowModel->getSelectedColorTextureIndex();
     if (it == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
     }
     ColorTexture *oldTexture = scene->getColorTextures()[it];
+    if (oldTexture->getType() == static_cast<ColorTexture::Type>(t)) {
+        return;
+    }
+    ensureThreadStopped();
     Vec3Df color = oldTexture->getRepresentativeColor();
     string name = oldTexture->getName();
     ColorTexture *texture = nullptr;
@@ -550,8 +553,8 @@ void Controller::windowChangeTextureType(int t) {
     notifyAll();
 }
 
-void Controller::windowChangeImageFileColorTexture() {
-    int it = windowModel->getSelectedTextureIndex();
+void Controller::windowChangeColorImageTextureFile() {
+    int it = windowModel->getSelectedColorTextureIndex();
     if (it == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
@@ -575,7 +578,7 @@ void Controller::windowChangeImageFileColorTexture() {
 }
 
 void Controller::windowSetNoiseColorTextureFunction(int ip) {
-    int it = windowModel->getSelectedTextureIndex();
+    int it = windowModel->getSelectedColorTextureIndex();
     if (it == -1) {
         cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
         return;
@@ -588,6 +591,110 @@ void Controller::windowSetNoiseColorTextureFunction(int ip) {
     ensureThreadStopped();
     texture->loadPredefined(static_cast<NoiseUser::Predefined>(ip));
     scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowSelectNormalTexture(int t) {
+    windowModel->setSelectedNormalTextureIndex(t-1);
+    notifyAll();
+}
+
+void Controller::windowChangeNormalTextureType(int t) {
+    int it = windowModel->getSelectedNormalTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    NormalTexture *oldTexture = scene->getNormalTextures()[it];
+    if (oldTexture->getType() == static_cast<NormalTexture::Type>(t)) {
+        return;
+    }
+    ensureThreadStopped();
+    string name = oldTexture->getName();
+    NormalTexture *texture = nullptr;
+    auto type = static_cast<NormalTexture::Type>(t);
+    switch (type) {
+        case NormalTexture::Type::Mesh:
+            texture = new MeshNormalTexture(name);
+            break;
+        case NormalTexture::Type::Noise:
+            texture = new NoiseNormalTexture(
+                    NoiseUser::Predefined::PERLIN_MARBLE,
+                    Vec3Df(0.6, 0.6, 0.7),
+                    name);
+            break;
+        case NormalTexture::Type::Image:
+            texture = new ImageNormalTexture(
+                    "normals/swarm.jpg",
+                    name);
+            break;
+    }
+    scene->getNormalTextures()[it] = texture;
+    scene->updateMaterialsNormalTexture(oldTexture, texture);
+    delete oldTexture;
+    scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowChangeNormalImageTextureFile() {
+    int it = windowModel->getSelectedNormalTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    ImageNormalTexture *texture = dynamic_cast<ImageNormalTexture*>(scene->getNormalTextures()[it]);
+    if (!texture) {
+        cerr << __FUNCTION__ << " called even though selected texture is not an ImageNormalTexture!\n";
+        return;
+    }
+    QString filename = QFileDialog::getOpenFileName(window,
+                                                    "Open a texture image",
+                                                    ".",
+                                                    "*.jpg *.bmp *.png");
+    if (!filename.isNull()) {
+        ensureThreadStopped();
+        texture->loadImage(filename.toStdString().c_str());
+        scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
+        renderThread->hasToRedraw();
+        notifyAll();
+    }
+}
+
+void Controller::windowSetNoiseNormalTextureFunction(int ip) {
+    int it = windowModel->getSelectedNormalTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    NoiseNormalTexture *texture = dynamic_cast<NoiseNormalTexture*>(scene->getNormalTextures()[it]);
+    if (!texture) {
+        cerr << __FUNCTION__ << " called even though selected texture is not a NoiseNormalTexture!\n";
+        return;
+    }
+    ensureThreadStopped();
+    texture->loadPredefined(static_cast<NoiseUser::Predefined>(ip));
+    scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowSetNoiseNormalTextureOffset() {
+    int it = windowModel->getSelectedNormalTextureIndex();
+    if (it == -1) {
+        cerr << __FUNCTION__ << " called even though a texture hasn't been selected!\n";
+        return;
+    }
+    NoiseNormalTexture *texture = dynamic_cast<NoiseNormalTexture*>(scene->getNormalTextures()[it]);
+    if (!texture) {
+        cerr << __FUNCTION__ << " called even though selected texture is not a NoiseNormalTexture!\n";
+        return;
+    }
+    ensureThreadStopped();
+    Vec3Df offset = window->getNoiseTextureOffset();
+    texture->setOffset(offset);
+    scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();
 }

@@ -508,3 +508,12 @@ void Scene::updateMaterialsColorTexture(ColorTexture *oldOne, ColorTexture *newO
         }
     }
 }
+
+void Scene::updateMaterialsNormalTexture(NormalTexture *oldOne, NormalTexture *newOne) {
+    for (Material *m : materials) {
+        if (m->getNormalTexture() == oldOne) {
+            m->setNormalTexture(newOne);
+            setChanged(MATERIAL_CHANGED);
+        }
+    }
+}

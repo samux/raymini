@@ -40,6 +40,8 @@ public:
     Vec3Df getObjectPos() const;
     Vec3Df getObjectMobile() const;
 
+    Vec3Df getNoiseTextureOffset() const;
+
     /** Get a program color [0-1] and create a Qt Icon */
     static QIcon createIconFromColor(Vec3Df color);
 
@@ -53,6 +55,7 @@ private :
     void updateObjects(const Observable *);
     void updateMaterials(const Observable *);
     void updateColorTextures(const Observable *);
+    void updateNormalTextures(const Observable *);
     void updateMapping(const Observable *);
     void updateFocus(const Observable *);
     void updateRealTime(const Observable *);
@@ -139,6 +142,15 @@ private :
     QPushButton *colorTextureFileButton;
     QLabel *colorTextureNoiseLabel;
     QComboBox *colorTextureNoiseList;
+
+    QComboBox *normalTexturesList;
+    QLabel *normalTextureTypeLabel;
+    QComboBox *normalTextureTypeList;
+    QPushButton *normalTextureFileButton;
+    QLabel *normalTextureNoiseOffsetLabel;
+    QDoubleSpinBox *normalTextureNoiseOffsetSpinBox[3];
+    QLabel *normalTextureNoiseTypeLabel;
+    QComboBox *normalTextureNoiseTypeList;
 
     QComboBox *lightsList;
     QCheckBox *lightEnableCheckBox;

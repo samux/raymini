@@ -236,6 +236,21 @@ NormalTexture::NormalTexture(string name):
 
 NormalTexture::~NormalTexture() {}
 
+NormalTexture::Type NormalTexture::getType() const {
+    if (dynamic_cast<const NoiseNormalTexture*>(this)) {
+        return Noise;
+    }
+    if (dynamic_cast<const MeshNormalTexture*>(this)) {
+        return Mesh;
+    }
+    if (dynamic_cast<const ImageNormalTexture*>(this)) {
+        return Image;
+    }
+    cerr<<__FUNCTION__<<": unknown type!\n";
+    return Mesh;
+}
+
+
 /******** MESH NORMAL TEXTURE **********/
 
 MeshNormalTexture::MeshNormalTexture(std::string name):

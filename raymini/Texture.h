@@ -236,6 +236,14 @@ public:
      * Will be called whenever a normal is wanted from this texture
      */
     virtual Vec3Df getNormal(Ray *) const = 0;
+
+    enum Type {
+        Mesh,
+        Noise,
+        Image
+    };
+
+    Type getType() const;
 };
 
 /**
@@ -284,6 +292,9 @@ public:
      * of the intersected pixel position
      */
     virtual Vec3Df getNormal(Ray *) const;
+
+    void setOffset(Vec3Df o) {offset=o;}
+    Vec3Df getOffset() const {return offset;}
 
 protected:
     Vec3Df offset;

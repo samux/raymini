@@ -48,6 +48,7 @@ public:
     inline const std::vector<ColorTexture *> &getColorTextures() const {return colorTextures;}
 
     /** You might have to set NORMAL_TEXTURE_CHANGED */
+    inline  std::vector<NormalTexture *> &getNormalTextures()  {return normalTextures;}
     inline const std::vector<NormalTexture *> &getNormalTextures() const {return normalTextures;}
 
     inline const BoundingBox & getBoundingBox () const { return bbox; }
@@ -85,6 +86,9 @@ public:
 
     /** Change the pointer to the color texture in every single material */
     void updateMaterialsColorTexture(ColorTexture *oldOne, ColorTexture *newOne);
+
+    /** Change the pointer to the color texture in every single material */
+    void updateMaterialsNormalTexture(NormalTexture *oldOne, NormalTexture *newOne);
 
 private:
     Material *red, *green, *blue, *white, *black, *grey;

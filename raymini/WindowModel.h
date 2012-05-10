@@ -14,22 +14,23 @@ class Object;
 
 class WindowModel: public Observable {
 public:
-    static const unsigned long SELECTED_LIGHT_CHANGED    = 1<<0;
-    static const unsigned long SELECTED_MATERIAL_CHANGED = 1<<1;
-    static const unsigned long SELECTED_OBJECT_CHANGED   = 1<<2;
-    static const unsigned long SELECTED_TEXTURE_CHANGED  = 1<<3;
-    static const unsigned long WIREFRAME_CHANGED         = 1<<4;
-    static const unsigned long SHOW_SURFELS_CHANGED      = 1<<5;
-    static const unsigned long SHOW_KDTREE_CHANGED       = 1<<6;
-    static const unsigned long RENDERING_MODE_CHANGED    = 1<<7;
-    static const unsigned long DISPLAY_MODE_CHANGED      = 1<<8;
-    static const unsigned long RAY_IMAGE_CHANGED         = 1<<9;
-    static const unsigned long FOCUS_POINT_CHANGED       = 1<<10;
-    static const unsigned long FOCUS_MODE_CHANGED        = 1<<11;
-    static const unsigned long REAL_TIME_CHANGED         = 1<<12;
-    static const unsigned long ELAPSED_TIME_CHANGED      = 1<<13;
-    static const unsigned long DRAGGED_OBJECT_CHANGED    = 1<<14;
-    static const unsigned long DRAG_ENABLED_CHANGED      = 1<<14;
+    static const unsigned long SELECTED_LIGHT_CHANGED           = 1<<0;
+    static const unsigned long SELECTED_MATERIAL_CHANGED        = 1<<1;
+    static const unsigned long SELECTED_OBJECT_CHANGED          = 1<<2;
+    static const unsigned long SELECTED_COLOR_TEXTURE_CHANGED   = 1<<3;
+    static const unsigned long SELECTED_NORMAL_TEXTURE_CHANGED  = 1<<4;
+    static const unsigned long WIREFRAME_CHANGED                = 1<<5;
+    static const unsigned long SHOW_SURFELS_CHANGED             = 1<<6;
+    static const unsigned long SHOW_KDTREE_CHANGED              = 1<<7;
+    static const unsigned long RENDERING_MODE_CHANGED           = 1<<8;
+    static const unsigned long DISPLAY_MODE_CHANGED             = 1<<9;
+    static const unsigned long RAY_IMAGE_CHANGED                = 1<<10;
+    static const unsigned long FOCUS_POINT_CHANGED              = 1<<11;
+    static const unsigned long FOCUS_MODE_CHANGED               = 1<<12;
+    static const unsigned long REAL_TIME_CHANGED                = 1<<13;
+    static const unsigned long ELAPSED_TIME_CHANGED             = 1<<14;
+    static const unsigned long DRAGGED_OBJECT_CHANGED           = 1<<15;
+    static const unsigned long DRAG_ENABLED_CHANGED             = 1<<15;
 
     WindowModel(Controller *);
     ~WindowModel();
@@ -60,11 +61,18 @@ public:
         setChanged(SELECTED_MATERIAL_CHANGED);
     }
 
-    inline int getSelectedTextureIndex() const {return selectedTextureIndex;}
+    inline int getSelectedColorTextureIndex() const {return selectedColorTextureIndex;}
     /** Change SELECTED_TEXTURE_CHANGED */
-    inline void setSelectedTextureIndex(int index) {
-        selectedTextureIndex = index;
-        setChanged(SELECTED_TEXTURE_CHANGED);
+    inline void setSelectedColorTextureIndex(int index) {
+        selectedColorTextureIndex = index;
+        setChanged(SELECTED_COLOR_TEXTURE_CHANGED);
+    }
+
+    inline int getSelectedNormalTextureIndex() const {return selectedNormalTextureIndex;}
+    /** Change SELECTED_TEXTURE_CHANGED */
+    inline void setSelectedNormalTextureIndex(int index) {
+        selectedNormalTextureIndex = index;
+        setChanged(SELECTED_NORMAL_TEXTURE_CHANGED);
     }
 
     inline bool isWireframe() const {return wireframe;}
@@ -166,7 +174,8 @@ private:
     int selectedLightIndex;
     int selectedObjectIndex;
     int selectedMaterialIndex;
-    int selectedTextureIndex;
+    int selectedColorTextureIndex;
+    int selectedNormalTextureIndex;
     bool wireframe;
     bool focusMode;
     bool showSurfels;
