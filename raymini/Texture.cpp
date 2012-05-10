@@ -226,7 +226,9 @@ ImageNormalTexture::~ImageNormalTexture() {}
 Vec3Df ImageNormalTexture::getNormal(Ray *ray) const {
     Vec3Df pointNormal = ray->getIntersection().getNormal();
     Vec3Df color = ImageTexture::getValue(ray);
-    return pointNormal + 2.0*color - Vec3Df(1, 1, 1);
+    pointNormal += 2.0*color - Vec3Df(1, 1, 1);
+    pointNormal.normalize();
+    return pointNormal;
 }
 
 /******* NOISE NORMAL TEXTURE ************/
@@ -246,5 +248,7 @@ Vec3Df NoiseNormalTexture::getNormal(Ray *r) const {
     const Vertex &v = r->getIntersection();
     Vec3Df normal = v.getNormal();
     Vec3Df noiseContribution = offset*noise(v);
-    return normal + noiseContribution*2.0 - Vec3Df(1, 1, 1);
+    normal += noiseContribution*2.0 - Vec3Df(1, 1, 1);
+    normal.normalize();
+    return normal;
 }
