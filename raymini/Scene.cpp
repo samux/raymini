@@ -49,6 +49,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
             NoiseUser::Predefined::PERLIN_MARBLE,
             {.6f, .6f, .7f},
             "Perlin Normal");
+    normalTextures.push_back(perlinNormal);
     auto basicTexture = new DebugColorTexture();
     colorTextures.push_back(basicTexture);
     auto redTexture = new SingleColorTexture({1, 0, 0}, "Red");
