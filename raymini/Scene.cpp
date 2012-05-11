@@ -118,7 +118,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     else if(!id.compare("mg")) buildMirrorGlass();
     else if(!id.compare("sphere")) buildSphere();
     else if(!id.compare("mesh"))
-        buildMesh(meshPath, white);
+        buildMesh(meshPath, grey);
     else printUsage(argv[0]);
 
     updateBoundingBox();
@@ -418,7 +418,7 @@ void Scene::buildMirrorGlass() {
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
 
     groundMesh.rotate({0,1,0}, M_PI);
-    objects.push_back(new Object(groundMesh, white, "Ceiling", {0, 0, 4}));
+    objects.push_back(new Object(groundMesh, grey, "Ceiling", {0, 0, 4}));
 
     groundMesh.rotate({0,1,0}, M_PI/2);
     objects.push_back(new Object(groundMesh, wallMat, "Right Wall", {2, 0, 2}));
@@ -451,7 +451,7 @@ void Scene::buildMirrorGlass() {
     auto glass = new Object(sphereMesh, glassMat, "glass", {1 , 1, 3});
     objects.push_back(glass);
 
-    lights.push_back(new Light({-1.3f, -2.9f, 3.f}, 0.01, {0.f, 0.f, 1.f},
+    lights.push_back(new Light({-1.9f, 0, 2.5f}, 0.5, {1.f, 0.f, 0.f},
                                {1.f, 1.f, 1.f}, .7f));
 }
 
