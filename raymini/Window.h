@@ -78,6 +78,7 @@ private :
     /**
      * Update all fields on a QComboBox
      * Do leave type empty if "no type selected" field not wanted
+     * T has to be NamedClass
      */
     template <typename T>
     static void updateList(QComboBox *, const std::vector<T*>&, int index, QString type=QString());
@@ -149,6 +150,8 @@ private :
     QDoubleSpinBox *glassAlphaSpinBox;
 
     QComboBox *colorTexturesList;
+    QLabel *colorTextureNameLabel;
+    QLineEdit *colorTextureNameEdit;
     QPushButton *colorTextureColorButton;
     QLabel *colorTextureTypeLabel;
     QComboBox *colorTextureTypeList;
@@ -157,6 +160,8 @@ private :
     QComboBox *colorTextureNoiseList;
 
     QComboBox *normalTexturesList;
+    QLabel *normalTextureNameLabel;
+    QLineEdit *normalTextureNameEdit;
     QLabel *normalTextureTypeLabel;
     QComboBox *normalTextureTypeList;
     QPushButton *normalTextureFileButton;

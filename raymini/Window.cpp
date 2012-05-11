@@ -411,6 +411,17 @@ void Window::updateMaterials(const Observable *observable) {
         updateList<Material>(materialsList, scene->getMaterials(), index+1, "material");
     }
 
+    int colorTextureIndex = scene->getMaterialColorTextureIndex(index);
+    if (observable == scene &&
+            scene->isChanged(Scene::COLOR_TEXTURE_CHANGED)) {
+        updateList<ColorTexture>(materialColorTexturesList, scene->getColorTextures(), colorTextureIndex);
+    }
+    int normalTextureIndex = scene->getMaterialNormalTextureIndex(index);
+    if (observable == scene &&
+            scene->isChanged(Scene::NORMAL_TEXTURE_CHANGED)) {
+        updateList<NormalTexture>(materialNormalTexturesList, scene->getNormalTextures(), normalTextureIndex);
+    }
+
     if (isSelected && (sceneChanged || selectedMaterialChanged)) {
         const Material *material = scene->getMaterials()[index];
         materialNameEdit->setText(material->getName().c_str());
@@ -447,11 +458,9 @@ void Window::updateMaterials(const Observable *observable) {
         materialNormalTexturesList->setVisible(isSelected);
         materialNameLabel->setVisible(isSelected);
         materialNameEdit->setVisible(isSelected);
-        int colorTextureIndex = scene->getMaterialColorTextureIndex(index);
         if (colorTextureIndex != -1) {
             materialColorTexturesList->setCurrentIndex(colorTextureIndex);
         }
-        int normalTextureIndex = scene->getMaterialNormalTextureIndex(index);
         if (normalTextureIndex != -1) {
             materialNormalTexturesList->setCurrentIndex(normalTextureIndex);
         }
@@ -484,13 +493,19 @@ void Window::updateColorTextures(const Observable *observable) {
 
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::COLOR_TEXTURE_CHANGED);
+    if (sceneChanged) {
+        updateList<ColorTexture>(colorTexturesList, scene->getColorTextures(), index+1, "color texture");
+    }
     if (sceneChanged || selectedTextureChanged) {
         colorTextureFileButton->setVisible(imageTexture);
         colorTextureNoiseLabel->setVisible(noiseTexture);
         colorTextureNoiseList->setVisible(noiseTexture);
+        colorTextureNameLabel->setVisible(isSelected);
+        colorTextureNameEdit->setVisible(isSelected);
         if (isSelected) {
             colorTextureColorButton->setIcon(createIconFromColor(texture->getRepresentativeColor()));
             colorTextureTypeList->setCurrentIndex(texture->getType());
+            colorTextureNameEdit->setText(texture->getName().c_str());
             if (imageTexture) {
                 colorTextureFileButton->setText(QString("file: ")+imageTexture->getImageFileName());
             }
@@ -525,7 +540,12 @@ void Window::updateNormalTextures(const Observable *observable) {
 
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::NORMAL_TEXTURE_CHANGED);
+    if (sceneChanged) {
+        updateList<NormalTexture>(normalTexturesList, scene->getNormalTextures(), index+1, "normal texture");
+    }
     if (sceneChanged || selectedTextureChanged) {
+        normalTextureNameLabel->setVisible(isSelected);
+        normalTextureNameEdit->setVisible(isSelected);
         normalTextureFileButton->setVisible(imageTexture);
         normalTextureNoiseTypeLabel->setVisible(noiseTexture);
         normalTextureNoiseTypeList->setVisible(noiseTexture);
@@ -535,6 +555,7 @@ void Window::updateNormalTextures(const Observable *observable) {
         }
         if (isSelected) {
             normalTextureTypeList->setCurrentIndex(texture->getType());
+            normalTextureNameEdit->setText(texture->getName().c_str());
             if (imageTexture) {
                 normalTextureFileButton->setText(QString("file: ")+imageTexture->getImageFileName());
             }
@@ -1161,13 +1182,20 @@ void Window::initControlWidget() {
             controller, SLOT(windowSelectColorTexture(int)));
     colorTexturesLayout->addWidget(colorTexturesList, 0, 0, 1, 2);
 
+    colorTextureNameLabel = new QLabel("Name: ", colorTexturesGroupBox);
+    colorTexturesLayout->addWidget(colorTextureNameLabel, 1, 0);
+    colorTextureNameEdit = new QLineEdit(colorTexturesGroupBox);
+    connect(colorTextureNameEdit, SIGNAL(textEdited(QString)),
+            controller, SLOT(windowSetColorTextureName(QString)));
+    colorTexturesLayout->addWidget(colorTextureNameEdit, 1, 1);
+
     colorTextureColorButton = new QPushButton("Base color", colorTexturesGroupBox);
     connect(colorTextureColorButton, SIGNAL(clicked()),
             controller, SLOT(windowSetColorTextureColor()));
-    colorTexturesLayout->addWidget(colorTextureColorButton, 1, 0, 1, 2);
+    colorTexturesLayout->addWidget(colorTextureColorButton, 2, 0, 1, 2);
 
     colorTextureTypeLabel = new QLabel("Type:", colorTexturesGroupBox);
-    colorTexturesLayout->addWidget(colorTextureTypeLabel, 2, 0);
+    colorTexturesLayout->addWidget(colorTextureTypeLabel, 3, 0);
     
     colorTextureTypeList = new QComboBox(colorTexturesGroupBox);
     colorTextureTypeList->addItem("Single color");
@@ -1176,15 +1204,15 @@ void Window::initControlWidget() {
     colorTextureTypeList->addItem("Image");
     connect(colorTextureTypeList, SIGNAL(activated(int)),
             controller, SLOT(windowChangeColorTextureType(int)));
-    colorTexturesLayout->addWidget(colorTextureTypeList, 2, 1);
+    colorTexturesLayout->addWidget(colorTextureTypeList, 3, 1);
 
     colorTextureFileButton = new QPushButton("File", colorTexturesGroupBox);
     connect(colorTextureFileButton, SIGNAL(clicked()),
             controller, SLOT(windowChangeColorImageTextureFile()));
-    colorTexturesLayout->addWidget(colorTextureFileButton, 3, 0, 1, 2);
+    colorTexturesLayout->addWidget(colorTextureFileButton, 4, 0, 1, 2);
 
     colorTextureNoiseLabel = new QLabel("Noise function:", colorTexturesGroupBox);
-    colorTexturesLayout->addWidget(colorTextureNoiseLabel, 4, 0);
+    colorTexturesLayout->addWidget(colorTextureNoiseLabel, 5, 0);
 
     colorTextureNoiseList = new QComboBox(colorTexturesGroupBox);
     colorTextureNoiseList->addItem("Perlin lines");
@@ -1193,7 +1221,7 @@ void Window::initControlWidget() {
     colorTextureNoiseList->addItem("Perlin clouded");
     connect(colorTextureNoiseList, SIGNAL(activated(int)),
             controller, SLOT(windowSetNoiseColorTextureFunction(int)));
-    colorTexturesLayout->addWidget(colorTextureNoiseList, 4, 1);
+    colorTexturesLayout->addWidget(colorTextureNoiseList, 5, 1);
 
     sceneTabs->addTab(colorTexturesGroupBox, "Color textures");
 
@@ -1211,8 +1239,15 @@ void Window::initControlWidget() {
             controller, SLOT(windowSelectNormalTexture(int)));
     normalTexturesLayout->addWidget(normalTexturesList, 0, 0, 1, 4);
 
+    normalTextureNameLabel = new QLabel("Name: ", normalTexturesGroupBox);
+    normalTexturesLayout->addWidget(normalTextureNameLabel, 1, 0);
+    normalTextureNameEdit = new QLineEdit(normalTexturesGroupBox);
+    connect(normalTextureNameEdit, SIGNAL(textEdited(QString)),
+            controller, SLOT(windowSetNormalTextureName(QString)));
+    normalTexturesLayout->addWidget(normalTextureNameEdit, 1, 1, 1, 3);
+
     normalTextureTypeLabel = new QLabel("Type:", normalTexturesGroupBox);
-    normalTexturesLayout->addWidget(normalTextureTypeLabel, 1, 0, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureTypeLabel, 2, 0, 1, 2);
     
     normalTextureTypeList = new QComboBox(normalTexturesGroupBox);
     normalTextureTypeList->addItem("Mesh normal");
@@ -1220,15 +1255,15 @@ void Window::initControlWidget() {
     normalTextureTypeList->addItem("Image");
     connect(normalTextureTypeList, SIGNAL(activated(int)),
             controller, SLOT(windowChangeNormalTextureType(int)));
-    normalTexturesLayout->addWidget(normalTextureTypeList, 1, 2, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureTypeList, 2, 2, 1, 2);
 
     normalTextureFileButton = new QPushButton("File", normalTexturesGroupBox);
     connect(normalTextureFileButton, SIGNAL(clicked()),
             controller, SLOT(windowChangeNormalImageTextureFile()));
-    normalTexturesLayout->addWidget(normalTextureFileButton, 2, 0, 1, 4);
+    normalTexturesLayout->addWidget(normalTextureFileButton, 3, 0, 1, 4);
 
     normalTextureNoiseTypeLabel = new QLabel("Noise function:", normalTexturesGroupBox);
-    normalTexturesLayout->addWidget(normalTextureNoiseTypeLabel, 3, 0, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureNoiseTypeLabel, 4, 0, 1, 2);
 
     normalTextureNoiseTypeList = new QComboBox(normalTexturesGroupBox);
     normalTextureNoiseTypeList->addItem("Perlin lines");
@@ -1237,10 +1272,10 @@ void Window::initControlWidget() {
     normalTextureNoiseTypeList->addItem("Perlin clouded");
     connect(normalTextureNoiseTypeList, SIGNAL(activated(int)),
             controller, SLOT(windowSetNoiseNormalTextureFunction(int)));
-    normalTexturesLayout->addWidget(normalTextureNoiseTypeList, 3, 1, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureNoiseTypeList, 4, 1, 1, 2);
 
     normalTextureNoiseOffsetLabel = new QLabel("Offset:", normalTexturesGroupBox);
-    normalTexturesLayout->addWidget(normalTextureNoiseOffsetLabel, 4, 0);
+    normalTexturesLayout->addWidget(normalTextureNoiseOffsetLabel, 5, 0);
 
     QString offsetNames[3] = {"X:", "Y:", "Z:"};
 
@@ -1252,7 +1287,7 @@ void Window::initControlWidget() {
         normalTextureNoiseOffsetSpinBox[i]->setPrefix(offsetNames[i]);
         connect(normalTextureNoiseOffsetSpinBox[i], SIGNAL(valueChanged(double)),
                 controller, SLOT(windowSetNoiseNormalTextureOffset()));
-        normalTexturesLayout->addWidget(normalTextureNoiseOffsetSpinBox[i], 4, i+1);
+        normalTexturesLayout->addWidget(normalTextureNoiseOffsetSpinBox[i], 5, i+1);
     }
 
     sceneTabs->addTab(normalTexturesGroupBox, "Normal textures");

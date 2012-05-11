@@ -90,10 +90,12 @@ public slots :
     void windowSetMaterialGlassAlpha(double);
     void windowSelectColorTexture(int);
     void windowSetColorTextureColor();
+    void windowSetColorTextureName(const QString &);
     void windowChangeColorTextureType(int);
     void windowChangeColorImageTextureFile();
     void windowSetNoiseColorTextureFunction(int);
     void windowSelectNormalTexture(int);
+    void windowSetNormalTextureName(const QString &);
     void windowChangeNormalTextureType(int);
     void windowChangeNormalImageTextureFile();
     void windowSetNoiseNormalTextureFunction(int);

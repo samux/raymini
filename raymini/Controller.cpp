@@ -408,7 +408,7 @@ void Controller::windowSelectMaterial(int m) {
 void Controller::windowSetMaterialName(const QString &n) {
     int o = windowModel->getSelectedMaterialIndex();
     if (o == -1) {
-        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        cerr << __FUNCTION__ << " called even though a material hasn't been selected!\n";
         return;
     }
     scene->getMaterials()[o]->setName(n.toStdString());
@@ -522,6 +522,17 @@ void Controller::windowSetColorTextureColor() {
     }
 }
 
+void Controller::windowSetColorTextureName(const QString &n) {
+    int o = windowModel->getSelectedColorTextureIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a color texture hasn't been selected!\n";
+        return;
+    }
+    scene->getColorTextures()[o]->setName(n.toStdString());
+    scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+    notifyAll();
+}
+
 void Controller::windowChangeColorTextureType(int t) {
     int it = windowModel->getSelectedColorTextureIndex();
     if (it == -1) {
@@ -608,6 +619,17 @@ void Controller::windowSetNoiseColorTextureFunction(int ip) {
 
 void Controller::windowSelectNormalTexture(int t) {
     windowModel->setSelectedNormalTextureIndex(t-1);
+    notifyAll();
+}
+
+void Controller::windowSetNormalTextureName(const QString &n) {
+    int o = windowModel->getSelectedNormalTextureIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though a color texture hasn't been selected!\n";
+        return;
+    }
+    scene->getNormalTextures()[o]->setName(n.toStdString());
+    scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
     notifyAll();
 }
 
