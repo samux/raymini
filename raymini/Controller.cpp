@@ -1120,6 +1120,7 @@ void Controller::windowMeshLoadSquare() {
     }
     Object *o = scene->getObjects()[io];
     o->getMesh().loadSquare();
+    o->updateKDtree();
     scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();
@@ -1134,6 +1135,7 @@ void Controller::windowMeshLoadCube() {
     }
     Object *o = scene->getObjects()[io];
     o->getMesh().loadCube();
+    o->updateKDtree();
     scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();
