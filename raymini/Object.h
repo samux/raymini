@@ -22,12 +22,6 @@ class Ray;
 
 class Object: public NamedClass {
 public:
-    inline Object(std::string name = "No name"):
-        NamedClass(name),
-        tree(nullptr),
-        enabled(false)
-        {}
-
     Object(const Mesh & mesh, const Material * mat, std::string name="No name",
            const Vec3Df &trans=Vec3Df(), const Vec3Df &mobile=Vec3Df()):
         NamedClass(name),

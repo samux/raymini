@@ -116,6 +116,10 @@ public slots :
     void windowMeshLoadCube();
     void windowMeshScale();
     void windowMeshRotate();
+    void windowAddMaterial();
+    void windowAddColorTexture();
+    void windowAddNormalTexture();
+    void windowAddObject();
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);

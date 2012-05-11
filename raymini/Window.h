@@ -125,6 +125,7 @@ private :
     QCheckBox *AOOnlyCheckBox;
 
     QComboBox *objectsList;
+    QPushButton *objectAddButton;
     QCheckBox *objectEnableCheckBox;
     QLabel *objectNameLabel;
     QLineEdit *objectNameEdit;
@@ -157,6 +158,7 @@ private :
     QPushButton *mappingCubePushButton;
 
     QComboBox *materialsList;
+    QPushButton *materialAddButton;
     QLabel *materialNameLabel;
     QLineEdit *materialNameEdit;
     QDoubleSpinBox *materialDiffuseSpinBox;
@@ -169,6 +171,7 @@ private :
     QDoubleSpinBox *glassAlphaSpinBox;
 
     QComboBox *colorTexturesList;
+    QPushButton *colorTextureAddButton;
     QLabel *colorTextureNameLabel;
     QLineEdit *colorTextureNameEdit;
     QPushButton *colorTextureColorButton;
@@ -179,6 +182,7 @@ private :
     QComboBox *colorTextureNoiseList;
 
     QComboBox *normalTexturesList;
+    QPushButton *normalTextureAddButton;
     QLabel *normalTextureNameLabel;
     QLineEdit *normalTextureNameEdit;
     QLabel *normalTextureTypeLabel;

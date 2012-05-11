@@ -1029,9 +1029,15 @@ void Window::initControlWidget() {
     QWidget *objectsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
 
+    QHBoxLayout *objectListLayout = new QHBoxLayout;
     objectsList = new QComboBox(objectsGroupBox);
     connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
-    objectsLayout->addWidget(objectsList);
+    objectListLayout->addWidget(objectsList);
+    objectAddButton = new QPushButton("New", objectsGroupBox);
+    connect(objectAddButton, SIGNAL(clicked()),
+            controller, SLOT(windowAddObject()));
+    objectListLayout->addWidget(objectAddButton);
+    objectsLayout->addLayout(objectListLayout);
 
     objectEnableCheckBox = new QCheckBox("Enable");
     connect(objectEnableCheckBox, SIGNAL(clicked(bool)),
@@ -1224,13 +1230,19 @@ void Window::initControlWidget() {
     QWidget *materialsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *materialsLayout = new QVBoxLayout(materialsGroupBox);
 
+    QHBoxLayout *materialListLayout = new QHBoxLayout;
     materialsList = new QComboBox(materialsGroupBox);
     materialsList->addItem("No material selected");
     for (const Material *material : scene->getMaterials()) {
         materialsList->addItem(QString(material->getName().c_str()));
     }
     connect(materialsList, SIGNAL(activated(int)), controller, SLOT(windowSelectMaterial(int)));
-    materialsLayout->addWidget(materialsList);
+    materialListLayout->addWidget(materialsList);
+    materialAddButton = new QPushButton("New", materialsGroupBox);
+    connect(materialAddButton, SIGNAL(clicked()),
+            controller, SLOT(windowAddMaterial()));
+    materialListLayout->addWidget(materialAddButton);
+    materialsLayout->addLayout(materialListLayout);
 
     QHBoxLayout *materialNameLayout = new QHBoxLayout;
     materialNameLabel = new QLabel("Name: ", materialsGroupBox);
@@ -1318,7 +1330,12 @@ void Window::initControlWidget() {
     }
     connect(colorTexturesList, SIGNAL(activated(int)),
             controller, SLOT(windowSelectColorTexture(int)));
-    colorTexturesLayout->addWidget(colorTexturesList, 0, 0, 1, 2);
+    colorTexturesLayout->addWidget(colorTexturesList, 0, 0);
+
+    colorTextureAddButton = new QPushButton("New", colorTexturesGroupBox);
+    connect(colorTextureAddButton, SIGNAL(clicked()),
+            controller, SLOT(windowAddColorTexture()));
+    colorTexturesLayout->addWidget(colorTextureAddButton, 0, 1);
 
     colorTextureNameLabel = new QLabel("Name: ", colorTexturesGroupBox);
     colorTexturesLayout->addWidget(colorTextureNameLabel, 1, 0);
@@ -1375,7 +1392,12 @@ void Window::initControlWidget() {
     }
     connect(normalTexturesList, SIGNAL(activated(int)),
             controller, SLOT(windowSelectNormalTexture(int)));
-    normalTexturesLayout->addWidget(normalTexturesList, 0, 0, 1, 4);
+    normalTexturesLayout->addWidget(normalTexturesList, 0, 0, 1, 3);
+
+    normalTextureAddButton = new QPushButton("New", normalTexturesGroupBox);
+    connect(normalTextureAddButton, SIGNAL(clicked()),
+            controller, SLOT(windowAddNormalTexture()));
+    normalTexturesLayout->addWidget(normalTextureAddButton, 0, 3);
 
     normalTextureNameLabel = new QLabel("Name: ", normalTexturesGroupBox);
     normalTexturesLayout->addWidget(normalTextureNameLabel, 1, 0);
@@ -1393,7 +1415,7 @@ void Window::initControlWidget() {
     normalTextureTypeList->addItem("Image");
     connect(normalTextureTypeList, SIGNAL(activated(int)),
             controller, SLOT(windowChangeNormalTextureType(int)));
-    normalTexturesLayout->addWidget(normalTextureTypeList, 2, 2, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureTypeList, 2, 1, 1, 3);
 
     normalTextureFileButton = new QPushButton("File", normalTexturesGroupBox);
     connect(normalTextureFileButton, SIGNAL(clicked()),
@@ -1410,7 +1432,7 @@ void Window::initControlWidget() {
     normalTextureNoiseTypeList->addItem("Perlin clouded");
     connect(normalTextureNoiseTypeList, SIGNAL(activated(int)),
             controller, SLOT(windowSetNoiseNormalTextureFunction(int)));
-    normalTexturesLayout->addWidget(normalTextureNoiseTypeList, 4, 1, 1, 2);
+    normalTexturesLayout->addWidget(normalTextureNoiseTypeList, 4, 1, 1, 3);
 
     normalTextureNoiseOffsetLabel = new QLabel("Offset:", normalTexturesGroupBox);
     normalTexturesLayout->addWidget(normalTextureNoiseOffsetLabel, 5, 0);

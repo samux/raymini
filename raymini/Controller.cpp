@@ -836,6 +836,52 @@ void Controller::windowAddLight() {
     notifyAll();
 }
 
+void Controller::windowAddMaterial() {
+    ensureThreadStopped();
+    int nb = scene->getMaterials().size();
+    auto n = new Material(this, "New material", scene->getColorTextures()[0], scene->getNormalTextures()[0]);
+    scene->getMaterials().push_back(n);
+    scene->setChanged(Scene::MATERIAL_CHANGED);
+    windowModel->setSelectedMaterialIndex(nb);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowAddColorTexture() {
+    ensureThreadStopped();
+    int nb = scene->getColorTextures().size();
+    auto n = new DebugColorTexture("New color texture");
+    scene->getColorTextures().push_back(n);
+    scene->setChanged(Scene::COLOR_TEXTURE_CHANGED);
+    windowModel->setSelectedColorTextureIndex(nb);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowAddNormalTexture() {
+    ensureThreadStopped();
+    int nb = scene->getNormalTextures().size();
+    auto n = new MeshNormalTexture("New normal texture");
+    scene->getNormalTextures().push_back(n);
+    scene->setChanged(Scene::NORMAL_TEXTURE_CHANGED);
+    windowModel->setSelectedNormalTextureIndex(nb);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowAddObject() {
+    ensureThreadStopped();
+    int nb = scene->getObjects().size();
+    Mesh m;
+    m.loadCube();
+    auto n = new Object(m, scene->getMaterials()[0], "New object");
+    scene->getObjects().push_back(n);
+    scene->setChanged(Scene::OBJECT_CHANGED);
+    windowModel->setSelectedObjectIndex(nb);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
 void Controller::windowEnableLight(bool enabled) {
     ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();
@@ -1058,6 +1104,7 @@ void Controller::windowMeshLoadOff() {
         ensureThreadStopped();
         Object *o = scene->getObjects()[io];
         o->getMesh().loadOFF(filename.toStdString().c_str());
+        o->updateKDtree();
         scene->setChanged(Scene::OBJECT_CHANGED);
         renderThread->hasToRedraw();
         notifyAll();
