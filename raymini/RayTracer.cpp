@@ -27,7 +27,7 @@ inline int clamp (float f) {
 RayTracer::RayTracer(Controller *c):
     mode(Mode::PATH_TRACING_MODE),
     depthPathTracing(0), nbRayPathTracing(50),
-    intensityPathTracing(2.0f), onlyPathTracing(false),
+    intensityPathTracing(6.0f), onlyPathTracing(false),
     radiusAmbientOcclusion(2), nbRayAmbientOcclusion(0), maxAngleAmbientOcclusion(M_PI/3),
     intensityAmbientOcclusion(1/5.f), onlyAmbientOcclusion(false),
     typeAntiAliasing(AntiAliasing::NONE), nbRayAntiAliasing(4),
@@ -51,17 +51,24 @@ QImage RayTracer::RayTracer::render (const Vec3Df & camPos,
                                      unsigned int screenWidth,
                                      unsigned int screenHeight) const {
     const Scene *scene = controller->getScene();
-    vector<Color> buffer;
     int qualityDivider = quality==ONE_OVER_X?this->qualityDivider:1;
     // To avoid black pixels on the top of the screen
     unsigned int computedScreenWidth = ceil((float)screenWidth/(float)qualityDivider);
     unsigned int computedScreenHeight = ceil((float)screenHeight/(float)qualityDivider);
+ 
+    static vector<Color> buffer;
     buffer.resize(computedScreenHeight*computedScreenWidth);
+
+    bool raf_PT = quality == OPTIMAL && depthPathTracing && controller->getWindowModel()->isRealTime();
+
+    if(!raf_PT)
+        buffer.clear();
 
     vector<pair<float, float>> singleNulOffset;
     singleNulOffset.push_back(pair<float, float>(0, 0));
 
     int nbRay = max(nbRayAntiAliasing, (depthPathTracing) ? nbRayPathTracing : 0);
+    nbRay = (raf_PT) ? 1 : nbRay;
     const vector<pair<float, float>> offsets =  (quality==OPTIMAL) ?
                                                 AntiAliasing::generateOffsets(typeAntiAliasing, nbRay) : singleNulOffset;
     const vector<pair<float, float>> offsets_focus = Focus::generateOffsets(typeFocus, apertureFocus, nbRayFocus);

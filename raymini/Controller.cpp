@@ -140,6 +140,10 @@ void Controller::threadSetDurtiestRenderingQuality() {
 }
 
 bool Controller::threadImproveRenderingQuality() {
+    // if in PT mode and OPTIMAL Quality, loop to refine PT
+    if(rayTracer->getQuality() == RayTracer::Quality::OPTIMAL && rayTracer->getDepthPathTracing()) {
+        return false;
+    }
     if (rayTracer->getQuality() == RayTracer::Quality::OPTIMAL) {
         return true;
     }
