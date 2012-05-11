@@ -63,8 +63,18 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     colorTextures.push_back(blackTexture);
     auto greyTexture = new SingleColorTexture({.5, .5, .5}, "Grey");
     colorTextures.push_back(greyTexture);
-    auto groundTexture = new ImageColorTexture("textures/grass.jpg", "Grass Texture");
-    colorTextures.push_back(groundTexture);
+    auto grassTexture = new ImageColorTexture("textures/grass.jpg", "Grass Texture");
+    colorTextures.push_back(grassTexture);
+    auto barkTexture = new ImageColorTexture("textures/bark.jpg", "Bark Texture");
+    colorTextures.push_back(barkTexture);
+    auto brickTexture = new ImageColorTexture("textures/brick.jpg", "Brick Texture");
+    colorTextures.push_back(brickTexture);
+    auto concreteTexture = new ImageColorTexture("textures/concrete.jpg", "Concrete Texture");
+    colorTextures.push_back(concreteTexture);
+    auto metalTexture = new ImageColorTexture("textures/metal.jpg", "Metal Texture");
+    colorTextures.push_back(metalTexture);
+    auto stoneTexture = new ImageColorTexture("textures/stone.jpg", "Stone Texture");
+    colorTextures.push_back(stoneTexture);
     auto rhinoTexture = new NoiseColorTexture(
             {.6f, .6f, .7f},
             NoiseUser::Predefined::PERLIN_MARBLE,
@@ -92,7 +102,7 @@ Scene::Scene(Controller *c, int argc, char **argv) :
     materials.push_back(grey);
     glossyMat = new Material(c, "Glossy", 1.f, 1.f, redTexture, basicNormal, .1f);
     materials.push_back(glossyMat);
-    groundMat = new Material(c, "Ground", 1.f, 0.f, groundTexture, basicNormal);
+    groundMat = new Material(c, "Ground", 1.f, 0.f, grassTexture, basicNormal);
     materials.push_back(groundMat);
     rhinoMat = new Material(c, "Rhino", 1.f, 0.2f, rhinoTexture, basicNormal);
     materials.push_back(rhinoMat);
