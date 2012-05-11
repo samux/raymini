@@ -874,6 +874,8 @@ void Controller::windowAddObject() {
     int nb = scene->getObjects().size();
     Mesh m;
     m.loadCube();
+    // Same glass/mirror hack
+    m.rotate(Vec3Df(0, 0, 1), M_PI/3.0);
     auto n = new Object(m, scene->getMaterials()[0], "New object");
     scene->getObjects().push_back(n);
     scene->setChanged(Scene::OBJECT_CHANGED);
