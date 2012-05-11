@@ -477,3 +477,55 @@ void GLViewer::draw() {
         }
     }
 }
+
+MiniGLViewer::MiniGLViewer(Controller *c):
+    controller(c),
+    isWireframe(true)
+{
+    setAxisIsDrawn(true);
+    setGridIsDrawn(true);
+}
+
+MiniGLViewer::~MiniGLViewer() {}
+
+void MiniGLViewer::init() {
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    setBackgroundColor(QColor(0, 0, 0));
+    glDisable(GL_LIGHTING);
+    glColor3f(1, 0, 0);
+}
+
+void MiniGLViewer::update(const Observable *o) {
+    bool windowModelChanged = o == controller->getWindowModel() &&
+        (o->isChanged(WindowModel::SELECTED_OBJECT_CHANGED));
+    const Scene *scene = controller->getScene();
+    bool sceneChanged = o == scene &&
+        (o->isChanged(Scene::OBJECT_CHANGED));
+    if (windowModelChanged || sceneChanged) {
+        const BoundingBox & sceneBBox = scene->getBoundingBox();
+        Vec3Df c = sceneBBox.getCenter();
+        float r = sceneBBox.getRadius();
+        setSceneCenter(qglviewer::Vec(c[0], c[1], c[2]));
+        setSceneRadius(r);
+        showEntireScene();
+        updateGL();
+    }
+}
+
+void MiniGLViewer::draw() {
+    int index = controller->getWindowModel()->getSelectedObjectIndex();
+    if (index != -1) {
+        if (isWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        } else {
+            glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+        }
+        const Object *o = controller->getScene()->getObjects()[index];
+        o->getMesh().renderGL(true);
+    }
+}
+
+void MiniGLViewer::mouseDoubleClickEvent(QMouseEvent *) {
+    isWireframe = !isWireframe;
+}

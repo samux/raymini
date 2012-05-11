@@ -305,33 +305,30 @@ void Mesh::setSquareTextureMapping(unsigned indexTriangle0,
     triangle1.setUV(3-commonIndexes1[0]-commonIndexes1[1], uMax, vMin);
 }
 
-Mesh Mesh::loadCube() {
-    Mesh cube;
-    cube.vertices.resize(8);
-    cube.triangles.resize(12);
+void Mesh::loadCube() {
+    vertices.resize(8);
+    triangles.resize(12);
 
     for (unsigned int i=0; i<8; i++) {
         float x = (i%4)<2?-0.5:0.5;
         float y = ((i+1)%4)<2?0.5:-0.5;
         float z = i<4?0.5:-0.5;
-        cube.vertices[i] = Vertex(Vec3Df(x, y, z));
+        vertices[i] = Vertex(Vec3Df(x, y, z));
     }
 
     // Top
-    cube.triangles[8] = Triangle(0, 1, 2);
-    cube.triangles[9] = Triangle(0, 2, 3);
+    triangles[8] = Triangle(0, 1, 2);
+    triangles[9] = Triangle(0, 2, 3);
 
     // Bottom
-    cube.triangles[10] = Triangle(5, 4, 7);
-    cube.triangles[11] = Triangle(5, 7, 6);
+    triangles[10] = Triangle(5, 4, 7);
+    triangles[11] = Triangle(5, 7, 6);
 
     // Sides
     for (unsigned i=0; i<4; i++) {
-        cube.triangles[2*i] = Triangle(i, i+4, ((i+1)%4)+4);
-        cube.triangles[2*i+1] = Triangle(i, ((i+1)%4)+4, (i+1)%4);
+        triangles[2*i] = Triangle(i, i+4, ((i+1)%4)+4);
+        triangles[2*i+1] = Triangle(i, ((i+1)%4)+4, (i+1)%4);
     }
-
-    return cube;
 }
 
 void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels, unsigned heightGappedPixels) {
@@ -382,19 +379,16 @@ void Mesh::setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels
             3.0*boxHeight);
 }
 
-Mesh Mesh::loadSquare() {
-    Mesh square;
-    square.triangles.resize(2);
-    square.vertices.resize(4);
+void Mesh::loadSquare() {
+    triangles.resize(2);
+    vertices.resize(4);
 
     for (unsigned i=0; i<4;i++) {
         float x = (i+1)%4 < 2?-0.5:0.5;
         float y = i<2?0.5:-0.5;
-        square.vertices[i] = Vertex(Vec3Df(x, y, 0));
+        vertices[i] = Vertex(Vec3Df(x, y, 0));
     }
 
-    square.triangles[0] = Triangle(0, 2, 1);
-    square.triangles[1] = Triangle(0, 3, 2);
-
-    return square;
+    triangles[0] = Triangle(0, 2, 1);
+    triangles[1] = Triangle(0, 3, 2);
 }

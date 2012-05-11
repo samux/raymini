@@ -33,7 +33,10 @@ void Controller::initAll(int argc, char **argv) {
     pbgi = new PBGI(this);
     models.push_back(pbgi);
 
-    window = new Window(this);
+    meshViewer = new MiniGLViewer(this);
+    views.push_back(meshViewer);
+
+    window = new Window(this, meshViewer);
     window->setWindowTitle("RayMini: A minimal raytracer.");
     connect(raymini, SIGNAL(lastWindowClosed()), this, SLOT(quitProgram()));
     views.push_back(window);
@@ -1036,6 +1039,54 @@ void Controller::windowSetCubicMapping() {
     }
     Object *o = scene->getObjects()[io];
     o->getMesh().setCubeTextureMapping(&o->getMaterial(), 3, 3);
+    scene->setChanged(Scene::OBJECT_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowMeshLoadOff() {
+    int io = windowModel->getSelectedObjectIndex();
+    if (io == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    QString filename = QFileDialog::getOpenFileName(window,
+                                                    "Open a mesh file",
+                                                    "./models",
+                                                    "*.off");
+    if (!filename.isNull()) {
+        ensureThreadStopped();
+        Object *o = scene->getObjects()[io];
+        o->getMesh().loadOFF(filename.toStdString().c_str());
+        scene->setChanged(Scene::OBJECT_CHANGED);
+        renderThread->hasToRedraw();
+        notifyAll();
+    }
+}
+
+void Controller::windowMeshLoadSquare() {
+    ensureThreadStopped();
+    int io = windowModel->getSelectedObjectIndex();
+    if (io == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    Object *o = scene->getObjects()[io];
+    o->getMesh().loadSquare();
+    scene->setChanged(Scene::OBJECT_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowMeshLoadCube() {
+    ensureThreadStopped();
+    int io = windowModel->getSelectedObjectIndex();
+    if (io == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    Object *o = scene->getObjects()[io];
+    o->getMesh().loadCube();
     scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
     notifyAll();

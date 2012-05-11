@@ -45,7 +45,11 @@ const char * ICON = "textures/icon.png";
 
 using namespace std;
 
-Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
+Window::Window (Controller *c, MiniGLViewer *v):
+    QMainWindow (NULL),
+    controller(c),
+    meshViewer(v)
+{
     QDockWidget * controlDockWidget = new QDockWidget (this);
     initControlWidget ();
 
@@ -59,9 +63,7 @@ Window::Window (Controller *c) : QMainWindow (NULL), controller(c) {
     controlDockWidget->setWindowIcon(QIcon(ICON));
 }
 
-Window::~Window () {
-
-}
+Window::~Window () {}
 
 Vec3Df Window::getObjectPos() const {
     Vec3Df newPos;
@@ -111,6 +113,7 @@ void Window::updateList(QComboBox *c, const std::vector<T*>&v, int index, QStrin
 void Window::update(const Observable *observable) {
     updateLights(observable);
     updateObjects(observable);
+    updateMesh(observable);
     updateMaterials(observable);
     updateColorTextures(observable);
     updateNormalTextures(observable);
@@ -349,6 +352,29 @@ void Window::updateFocus(const Observable *observable) {
     }
 }
 
+void Window::updateMesh(const Observable *observable) {
+    auto windowModel = controller->getWindowModel();
+    auto scene = controller->getScene();
+    bool hasIndexChanged = observable == windowModel &&
+            observable->isChanged(WindowModel::SELECTED_OBJECT_CHANGED) ;
+    bool hasObjectChanged = observable == scene &&
+        observable->isChanged(Scene::OBJECT_CHANGED);
+    int index = windowModel->getSelectedObjectIndex();
+
+    if (hasObjectChanged) {
+        updateList<Object>(meshesList, scene->getObjects(), index+1, "object");
+    }
+
+    if (hasIndexChanged) {
+        bool isSelected(index != -1);
+        meshLoadOffButton->setVisible(isSelected);
+        meshLoadSquareButton->setVisible(isSelected);
+        meshLoadCubeButton->setVisible(isSelected);
+        meshViewerLabel->setVisible(isSelected);
+        meshViewer->setVisible(isSelected);
+    }
+}
+
 void Window::updateObjects(const Observable *observable) {
     const Scene *scene = controller->getScene();
     const WindowModel *windowModel = controller->getWindowModel();
@@ -359,21 +385,6 @@ void Window::updateObjects(const Observable *observable) {
     bool selectedObjectChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED);
     int materialIndex = scene->getObjectMaterialIndex(index);
-    if (selectedObjectChanged) {
-        objectEnableCheckBox->setVisible(isSelected);
-        objectNameLabel->setVisible(isSelected);
-        objectNameEdit->setVisible(isSelected);
-        objectMobileLabel->setVisible(isSelected);
-        for (unsigned int i=0; i<3; i++) {
-            objectPosSpinBoxes[i]->setVisible(isSelected);
-            objectMobileSpinBoxes[i]->setVisible(isSelected);
-        }
-        objectMaterialLabel->setVisible(isSelected);
-        objectMaterialsList->setVisible(isSelected);
-        if (materialIndex != -1) {
-            objectMaterialsList->setCurrentIndex(materialIndex);
-        }
-    }
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::OBJECT_CHANGED);
     if (sceneChanged) {
@@ -383,9 +394,10 @@ void Window::updateObjects(const Observable *observable) {
             scene->isChanged(Scene::MATERIAL_CHANGED)) {
         updateList<Material>(objectMaterialsList, scene->getMaterials(), materialIndex);
     }
+    bool isEnabled = false;
     if (isSelected && (selectedObjectChanged || sceneChanged)) {
         const Object *object = scene->getObjects()[index];
-        bool isEnabled = object->isEnabled();
+        isEnabled = object->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
         objectNameEdit->setText(object->getName().c_str());
         for (unsigned int i=0; i<3; i++) {
@@ -398,6 +410,25 @@ void Window::updateObjects(const Observable *observable) {
             connect(objectMobileSpinBoxes[i], SIGNAL(valueChanged(double)),
                     controller, SLOT(windowSetObjectMobile()));
         }
+    }
+    if (selectedObjectChanged) {
+        if (materialIndex != -1) {
+            objectMaterialsList->setCurrentIndex(materialIndex);
+        }
+    }
+
+    if (selectedObjectChanged || sceneChanged) {
+        objectEnableCheckBox->setVisible(isSelected);
+        bool showAttributes = isSelected && isEnabled;
+        objectNameLabel->setVisible(showAttributes);
+        objectNameEdit->setVisible(showAttributes);
+        objectMobileLabel->setVisible(showAttributes);
+        for (unsigned int i=0; i<3; i++) {
+            objectPosSpinBoxes[i]->setVisible(showAttributes);
+            objectMobileSpinBoxes[i]->setVisible(showAttributes);
+        }
+        objectMaterialLabel->setVisible(showAttributes);
+        objectMaterialsList->setVisible(showAttributes);
     }
 }
 
@@ -1036,6 +1067,36 @@ void Window::initControlWidget() {
 
     sceneTabs->addTab(objectsGroupBox, "Objects");
 
+    //  SceneGroup: meshes
+    auto meshesGroupBox = new QWidget(sceneTabs);
+    auto meshesLayout = new QGridLayout(meshesGroupBox);
+
+    int meshesLayoutRowIndex = 0;
+
+    meshesList = new QComboBox(meshesGroupBox);
+    connect(meshesList, SIGNAL(activated(int)),
+            controller, SLOT(windowSelectObject(int)));
+    meshesLayout->addWidget(meshesList, meshesLayoutRowIndex++, 0, 1, 2);
+
+    meshLoadOffButton = new QPushButton("Load .off file", meshesGroupBox);
+    connect(meshLoadOffButton, SIGNAL(clicked()),
+            controller, SLOT(windowMeshLoadOff()));
+    meshesLayout->addWidget(meshLoadOffButton, meshesLayoutRowIndex++, 0, 1, 2);
+    meshLoadSquareButton = new QPushButton("Load square", meshesGroupBox);
+    connect(meshLoadSquareButton, SIGNAL(clicked()),
+            controller, SLOT(windowMeshLoadSquare()));
+    meshesLayout->addWidget(meshLoadSquareButton, meshesLayoutRowIndex, 0);
+    meshLoadCubeButton = new QPushButton("Load cube", meshesGroupBox);
+    connect(meshLoadCubeButton, SIGNAL(clicked()),
+            controller, SLOT(windowMeshLoadCube()));
+    meshesLayout->addWidget(meshLoadCubeButton, meshesLayoutRowIndex++, 1);
+
+    meshViewerLabel = new QLabel("Mesh preview: (double clic to toggle wireframe)",
+            meshesGroupBox);
+    meshesLayout->addWidget(meshViewerLabel, meshesLayoutRowIndex++, 0, 1, 2);
+    meshesLayout->addWidget(meshViewer, meshesLayoutRowIndex++, 0, 1, 2);
+
+    sceneTabs->addTab(meshesGroupBox, "Meshes");
 
     //  SceneGroup: Mapping
     QWidget *mappingGroupBox = new QWidget(sceneTabs);

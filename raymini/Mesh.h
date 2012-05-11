@@ -106,7 +106,7 @@ public:
     inline void setUV(unsigned int t, unsigned int i, float u, float v) {triangles[t].setUV(i, u, v);}
 
     /**
-     * Return a cube with those attributes:
+     * Load a cube with those attributes:
      *
      * - centered in 0,0,0
      *
@@ -132,7 +132,7 @@ public:
      *       |10\11|
      *       -------
      */
-    static Mesh loadCube();
+    void loadCube();
 
     /**
      * Set texture mapping for a cube
@@ -154,9 +154,9 @@ public:
     void setCubeTextureMapping(const Material *mat, unsigned widthGappedPixels=0, unsigned heightGappedPixels=0);
 
     /**
-     * Return a square mesh of size 1, centered in 0, horizontal and facing up
+     * Load a square mesh of size 1, centered in 0, horizontal and facing up
      */
-    static Mesh loadSquare();
+    void loadSquare();
 
     /*
      * uScale and vScale can be used to refine a texture, eg a texture will be used two times

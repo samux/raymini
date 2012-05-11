@@ -111,6 +111,9 @@ public slots :
     void windowSetSquareMapping();
     void windowSetSphericalMapping();
     void windowSetCubicMapping();
+    void windowMeshLoadOff();
+    void windowMeshLoadSquare();
+    void windowMeshLoadCube();
 
     void viewerSetWireframe(bool b);
     void viewerSetRenderingMode(WindowModel::RenderingMode m);
@@ -167,6 +170,7 @@ private:
     std::vector<Observer*> views;
     Window *window;
     GLViewer *viewer;
+    MiniGLViewer *meshViewer;
 
     // Models
     std::vector<Observable*> models;

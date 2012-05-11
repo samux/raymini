@@ -25,7 +25,8 @@ BoundingBox Object::computeBoundingBox(const Mesh & mesh) {
 }
 
 SkyBox *SkyBox::generateSkyBox(const SkyBoxMaterial *m, string name) {
-    Mesh mesh = Mesh::loadCube();
+    Mesh mesh;
+    mesh.loadCube();
     mesh.returnAllTriangles();
     mesh.scale(20);
     mesh.setCubeTextureMapping(m, 2, 2);

@@ -30,7 +30,7 @@ class Controller;
 class Window : public QMainWindow, public Observer {
     Q_OBJECT
 public:
-    Window(Controller *);
+    Window(Controller *, MiniGLViewer *);
     virtual ~Window();
 
     static void showStatusMessage (const QString & msg);
@@ -55,6 +55,7 @@ private :
     // Update functions
     void updateLights(const Observable *);
     void updateObjects(const Observable *);
+    void updateMesh(const Observable *);
     void updateMaterials(const Observable *);
     void updateColorTextures(const Observable *);
     void updateNormalTextures(const Observable *);
@@ -129,6 +130,13 @@ private :
     QDoubleSpinBox *objectMobileSpinBoxes[3];
     QLabel *objectMaterialLabel;
     QComboBox *objectMaterialsList;
+
+    QComboBox *meshesList;
+    QLabel *meshViewerLabel;
+    MiniGLViewer *meshViewer;
+    QPushButton *meshLoadOffButton;
+    QPushButton *meshLoadSquareButton;
+    QPushButton *meshLoadCubeButton;
 
     QComboBox *mappingObjectsList;
     QDoubleSpinBox *mappingUScale;

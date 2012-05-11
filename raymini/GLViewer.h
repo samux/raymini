@@ -78,9 +78,20 @@ private:
     static int constexpr msBetweenAnimation = 500;
 };
 
-// Some Emacs-Hints -- please don't remove:
-//
-//  Local Variables:
-//  mode:C++
-//  tab-width:4
-//  End:
+/**
+ * Small mesh viewer
+ */
+class MiniGLViewer: public QGLViewer, public Observer {
+    Q_OBJECT
+public:
+    MiniGLViewer(Controller *);
+    virtual ~MiniGLViewer();
+    virtual void update(const Observable *);
+protected:
+    void init();
+    void draw();
+    virtual void mouseDoubleClickEvent(QMouseEvent *);
+private:
+    Controller *controller;
+    bool isWireframe;
+};

@@ -252,7 +252,8 @@ void Scene::buildMultiMeshs() {
     groundMesh.setUVScales(5, 5);
     objects.push_back(new Object(groundMesh, groundMat, "Ground"));
 
-    Mesh wallMesh = Mesh::loadSquare();
+    Mesh wallMesh;
+    wallMesh.loadSquare();
     wallMesh.setSquareTextureMapping();
     wallMesh.rotate({0, 1, 0}, M_PI/2.0);
     wallMesh.scale(2.0*1.95251, 1);
