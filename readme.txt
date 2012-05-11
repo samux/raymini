@@ -39,7 +39,6 @@ Features
 
 - Basic ray tracing with material-specific BRDF
 - KDTrees are used to optimize intersection tests
-- User friendly GUI using MVC design pattern
 - Anti aliasing
 - Hard and soft shadows
 - Ambient occlusion
@@ -48,3 +47,7 @@ Features
 - Path tracing and Point-Based Global Illumination
 - Motion blur
 - Focal effect
+- texture and normal mapping
+- real-time on CPU
+- mesh transformation (translation, rotation, scale)
+- User friendly GUI using MVC design pattern
