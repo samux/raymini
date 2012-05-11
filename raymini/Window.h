@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QProgressBar>
+#include <QLineEdit>
 
 #include <vector>
 #include <string>
@@ -22,6 +23,7 @@
 #include "QTUtils.h"
 #include "Observer.h"
 #include "Vec3D.h"
+#include "NamedClass.h"
 
 class Controller;
 
@@ -73,6 +75,13 @@ private :
     QGroupBox * controlWidget;
     QString currentDirectory;
 
+    /**
+     * Update all fields on a QComboBox
+     * Do leave type empty if "no type selected" field not wanted
+     */
+    template <typename T>
+    static void updateList(QComboBox *, const std::vector<T*>&, int index, QString type=QString());
+
     // Needed for further actions
 
     QTabWidget *rayTabs;
@@ -112,6 +121,8 @@ private :
 
     QComboBox *objectsList;
     QCheckBox *objectEnableCheckBox;
+    QLabel *objectNameLabel;
+    QLineEdit *objectNameEdit;
     QDoubleSpinBox *objectPosSpinBoxes[3];
     QLabel *objectMobileLabel;
     QDoubleSpinBox *objectMobileSpinBoxes[3];
@@ -126,6 +137,8 @@ private :
     QPushButton *mappingCubePushButton;
 
     QComboBox *materialsList;
+    QLabel *materialNameLabel;
+    QLineEdit *materialNameEdit;
     QDoubleSpinBox *materialDiffuseSpinBox;
     QDoubleSpinBox *materialSpecularSpinBox;
     QDoubleSpinBox *materialGlossyRatio;

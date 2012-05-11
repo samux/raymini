@@ -405,6 +405,18 @@ void Controller::windowSelectMaterial(int m) {
     notifyAll();
 }
 
+void Controller::windowSetMaterialName(const QString &n) {
+    int o = windowModel->getSelectedMaterialIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getMaterials()[o]->setName(n.toStdString());
+    scene->setChanged(Scene::MATERIAL_CHANGED);
+    notifyAll();
+}
+
+
 void Controller::windowSetMaterialDiffuse(double d) {
     ensureThreadStopped();
     int m = windowModel->getSelectedMaterialIndex();
@@ -717,6 +729,17 @@ void Controller::windowEnableObject(bool enabled) {
     scene->setChanged(Scene::OBJECT_CHANGED);
     scene->updateBoundingBox();
     renderThread->hasToRedraw();
+    notifyAll();
+}
+
+void Controller::windowSetObjectName(const QString &n) {
+    int o = windowModel->getSelectedObjectIndex();
+    if (o == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    scene->getObjects()[o]->setName(n.toStdString());
+    scene->setChanged(Scene::OBJECT_CHANGED);
     notifyAll();
 }
 

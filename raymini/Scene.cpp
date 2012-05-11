@@ -431,7 +431,6 @@ void Scene::buildMirrorGlass() {
 
     groundMesh.rotate({0,0,1}, M_PI/2);
     objects.push_back(new Object(groundMesh, mirrorMat, "Mirror Wall", {0, -2, 2}));
-    materials.push_back(mirrorMat);
 
     Mesh sphereMesh;
     sphereMesh.loadOFF("models/sphere.off");

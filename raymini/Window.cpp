@@ -95,6 +95,19 @@ Vec3Df Window::getLightPos() const {
     return newPos;
 }
 
+template <typename T>
+void Window::updateList(QComboBox *c, const std::vector<T*>&v, int index, QString type) {
+    c->clear();
+    if (!type.isNull()) {
+        c->addItem(QString("No ")+type+QString(" selected"));
+    }
+    for (const NamedClass * o : v) {
+        QString name = QString::fromStdString(o->getName());
+        c->addItem(name);
+    }
+    c->setCurrentIndex(index);
+}
+
 void Window::update(const Observable *observable) {
     updateLights(observable);
     updateObjects(observable);
@@ -332,8 +345,11 @@ void Window::updateObjects(const Observable *observable) {
     bool isSelected = index != -1;
     bool selectedObjectChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_OBJECT_CHANGED);
+    int materialIndex = scene->getObjectMaterialIndex(index);
     if (selectedObjectChanged) {
         objectEnableCheckBox->setVisible(isSelected);
+        objectNameLabel->setVisible(isSelected);
+        objectNameEdit->setVisible(isSelected);
         objectMobileLabel->setVisible(isSelected);
         for (unsigned int i=0; i<3; i++) {
             objectPosSpinBoxes[i]->setVisible(isSelected);
@@ -341,17 +357,24 @@ void Window::updateObjects(const Observable *observable) {
         }
         objectMaterialLabel->setVisible(isSelected);
         objectMaterialsList->setVisible(isSelected);
-        int materialIndex = scene->getObjectMaterialIndex(index);
         if (materialIndex != -1) {
             objectMaterialsList->setCurrentIndex(materialIndex);
         }
     }
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::OBJECT_CHANGED);
+    if (sceneChanged) {
+        updateList<Object>(objectsList, scene->getObjects(), index+1, "object");
+    }
+    if (observable == scene &&
+            scene->isChanged(Scene::MATERIAL_CHANGED)) {
+        updateList<Material>(objectMaterialsList, scene->getMaterials(), materialIndex);
+    }
     if (isSelected && (selectedObjectChanged || sceneChanged)) {
         const Object *object = scene->getObjects()[index];
         bool isEnabled = object->isEnabled();
         objectEnableCheckBox->setChecked(isEnabled);
+        objectNameEdit->setText(object->getName().c_str());
         for (unsigned int i=0; i<3; i++) {
             objectPosSpinBoxes[i]->disconnect();
             objectPosSpinBoxes[i]->setValue(object->getTrans()[i]);
@@ -384,8 +407,13 @@ void Window::updateMaterials(const Observable *observable) {
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::MATERIAL_CHANGED);
 
+    if (sceneChanged) {
+        updateList<Material>(materialsList, scene->getMaterials(), index+1, "material");
+    }
+
     if (isSelected && (sceneChanged || selectedMaterialChanged)) {
         const Material *material = scene->getMaterials()[index];
+        materialNameEdit->setText(material->getName().c_str());
         materialDiffuseSpinBox->disconnect();
         materialDiffuseSpinBox->setValue(material->getDiffuse());
         connect(materialDiffuseSpinBox, SIGNAL(valueChanged(double)),
@@ -417,6 +445,8 @@ void Window::updateMaterials(const Observable *observable) {
         materialColorTexturesList->setVisible(isSelected);
         materialNormalTextureLabel->setVisible(isSelected);
         materialNormalTexturesList->setVisible(isSelected);
+        materialNameLabel->setVisible(isSelected);
+        materialNameEdit->setVisible(isSelected);
         int colorTextureIndex = scene->getMaterialColorTextureIndex(index);
         if (colorTextureIndex != -1) {
             materialColorTexturesList->setCurrentIndex(colorTextureIndex);
@@ -673,6 +703,9 @@ void Window::updateMapping(const Observable *observable) {
     const Scene *scene = controller->getScene();
     bool sceneChanged = observable == scene &&
             scene->isChanged(Scene::OBJECT_CHANGED);
+    if (sceneChanged) {
+        updateList<Object>(mappingObjectsList, scene->getObjects(), index+1, "object");
+    }
     if (isSelected && (selectedObjectChanged || sceneChanged)) {
         const Mesh &mesh = scene->getObjects()[index]->getMesh();
         mappingUScale->disconnect();
@@ -908,17 +941,22 @@ void Window::initControlWidget() {
     QVBoxLayout *objectsLayout = new QVBoxLayout(objectsGroupBox);
 
     objectsList = new QComboBox(objectsGroupBox);
-    objectsList->addItem("No object selected");
-    for (const Object * o : scene->getObjects()) {
-        QString name = QString::fromStdString(o->getName());
-        objectsList->addItem(name);
-    }
     connect(objectsList, SIGNAL(activated(int)), controller, SLOT(windowSelectObject(int)));
     objectsLayout->addWidget(objectsList);
 
     objectEnableCheckBox = new QCheckBox("Enable");
-    connect(objectEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableObject(bool)));
+    connect(objectEnableCheckBox, SIGNAL(clicked(bool)),
+            controller, SLOT(windowEnableObject(bool)));
     objectsLayout->addWidget(objectEnableCheckBox);
+
+    QHBoxLayout *objectNameLayout = new QHBoxLayout;
+    objectNameLabel = new QLabel("Name: ", objectsGroupBox);
+    objectNameLayout->addWidget(objectNameLabel);
+    objectNameEdit = new QLineEdit(objectsGroupBox);
+    connect(objectNameEdit, SIGNAL(textEdited(QString)),
+            controller, SLOT(windowSetObjectName(QString)));
+    objectNameLayout->addWidget(objectNameEdit);
+    objectsLayout->addLayout(objectNameLayout);
 
     QHBoxLayout *objectPosLayout = new QHBoxLayout;
     QString objectPosNames[3] = {"X: ", "Y: ", "Z: "};
@@ -1034,6 +1072,15 @@ void Window::initControlWidget() {
     }
     connect(materialsList, SIGNAL(activated(int)), controller, SLOT(windowSelectMaterial(int)));
     materialsLayout->addWidget(materialsList);
+
+    QHBoxLayout *materialNameLayout = new QHBoxLayout;
+    materialNameLabel = new QLabel("Name: ", materialsGroupBox);
+    materialNameLayout->addWidget(materialNameLabel);
+    materialNameEdit = new QLineEdit(materialsGroupBox);
+    connect(materialNameEdit, SIGNAL(textEdited(QString)),
+            controller, SLOT(windowSetMaterialName(QString)));
+    materialNameLayout->addWidget(materialNameEdit);
+    materialsLayout->addLayout(materialNameLayout);
 
     materialDiffuseSpinBox = new QDoubleSpinBox(materialsGroupBox);
     materialDiffuseSpinBox->setPrefix("Diffuse: ");

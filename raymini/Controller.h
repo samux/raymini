@@ -76,10 +76,12 @@ public slots :
     void windowSetLightColor();
     void windowSelectObject(int);
     void windowEnableObject(bool);
+    void windowSetObjectName(const QString &);
     void windowSetObjectPos();
     void windowSetObjectMobile();
     void windowSetObjectMaterial(int);
     void windowSelectMaterial(int);
+    void windowSetMaterialName(const QString &);
     void windowSetMaterialDiffuse(double);
     void windowSetMaterialSpecular(double);
     void windowSetMaterialGlossyRatio(double);
