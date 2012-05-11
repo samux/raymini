@@ -1135,6 +1135,8 @@ void Controller::windowMeshLoadCube() {
     }
     Object *o = scene->getObjects()[io];
     o->getMesh().loadCube();
+    // Hack: segfault if cube is in glass and in front of a mirror
+    o->getMesh().rotate(Vec3Df(0, 0, 1), M_PI/3.0);
     o->updateKDtree();
     scene->setChanged(Scene::OBJECT_CHANGED);
     renderThread->hasToRedraw();
