@@ -171,6 +171,7 @@ private :
     QComboBox *normalTextureNoiseTypeList;
 
     QComboBox *lightsList;
+    QPushButton *lightAddButton;
     QCheckBox *lightEnableCheckBox;
     QDoubleSpinBox *lightPosSpinBoxes[3];
     QPushButton *lightColorButton;

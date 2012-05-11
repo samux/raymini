@@ -262,22 +262,23 @@ void Window::updateLights(const Observable *observable) {
     bool isLightSelected = lightIndex != -1;
     bool selectedLightChanged = observable == windowModel &&
             windowModel->isChanged(WindowModel::SELECTED_LIGHT_CHANGED);
-    if (selectedLightChanged) {
-        lightsList->setCurrentIndex(lightIndex+1);
-        lightEnableCheckBox->setVisible(isLightSelected);
-        bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
-        for (int i=0; i<3; i++) {
-            lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+
+    bool sceneUpdated = (observable == scene) &&
+            scene->isChanged(Scene::LIGHT_CHANGED);
+
+    if (sceneUpdated) {
+        lightsList->clear();
+        lightsList->addItem("No light selected");
+        for (unsigned int i=0; i<scene->getLights().size(); i++) {
+            QString name;
+            name = QString("Light #%1").arg(i);
+            lightsList->addItem(name);
         }
-        lightColorButton->setVisible(isLightEnabled);
-        lightRadiusSpinBox->setVisible(isLightEnabled);
-        lightIntensitySpinBox->setVisible(isLightEnabled);
+        lightsList->setCurrentIndex(lightIndex+1);
     }
 
-    bool sceneUpdated = (observable != scene) ||
-            (!scene->isChanged(Scene::LIGHT_CHANGED));
-
     if (isLightSelected && (selectedLightChanged || sceneUpdated)) {
+        lightAddButton->setEnabled(scene->getLights().size() < 8);
         const Light * l = scene->getLights()[lightIndex];
         bool isLightEnabled = l->isEnabled();
         lightEnableCheckBox->setChecked(isLightEnabled);
@@ -300,6 +301,18 @@ void Window::updateLights(const Observable *observable) {
         lightRadiusSpinBox->setValue(radius);
         connect(lightRadiusSpinBox, SIGNAL(valueChanged(double)),
                 controller, SLOT(windowSetLightRadius(double)));
+    }
+
+    if (selectedLightChanged || sceneUpdated) {
+        lightsList->setCurrentIndex(lightIndex+1);
+        lightEnableCheckBox->setVisible(isLightSelected);
+        bool isLightEnabled = isLightSelected && scene->getLights()[lightIndex]->isEnabled();
+        for (int i=0; i<3; i++) {
+            lightPosSpinBoxes[i]->setVisible(isLightEnabled);
+        }
+        lightColorButton->setVisible(isLightEnabled);
+        lightRadiusSpinBox->setVisible(isLightEnabled);
+        lightIntensitySpinBox->setVisible(isLightEnabled);
     }
 }
 
@@ -1296,15 +1309,15 @@ void Window::initControlWidget() {
     QWidget *lightsGroupBox = new QWidget(sceneTabs);
     QVBoxLayout *lightsLayout = new QVBoxLayout(lightsGroupBox);
 
+    QHBoxLayout *lightListLayout = new QHBoxLayout;
     lightsList = new QComboBox(lightsGroupBox);
-    lightsList->addItem("No light selected");
-    for (unsigned int i=0; i<scene->getLights().size(); i++) {
-        QString name;
-        name = QString("Light #%1").arg(i);
-        lightsList->addItem(name);
-    }
     connect(lightsList, SIGNAL(activated(int)), controller, SLOT(windowSelectLight(int)));
-    lightsLayout->addWidget(lightsList);
+    lightListLayout->addWidget(lightsList);
+    lightAddButton = new QPushButton("New", lightsGroupBox);
+    connect(lightAddButton, SIGNAL(clicked()),
+            controller, SLOT(windowAddLight()));
+    lightListLayout->addWidget(lightAddButton);
+    lightsLayout->addLayout(lightListLayout);
 
     lightEnableCheckBox = new QCheckBox("Enable");
     connect(lightEnableCheckBox, SIGNAL(clicked(bool)), controller, SLOT(windowEnableLight(bool)));

@@ -810,6 +810,25 @@ void Controller::windowSelectLight(int l) {
     notifyAll();
 }
 
+void Controller::windowAddLight() {
+    ensureThreadStopped();
+    int nbLights = scene->getLights().size();
+    if (nbLights >= 8) {
+        cerr << __FUNCTION__ << " called even though there are enough lights!\n";
+        return;
+    }
+    if (!windowModel->isRealTime()) {
+        windowModel->setDisplayMode(WindowModel::OpenGLDisplayMode);
+    }
+    Light *newLight = new Light();
+    newLight->setEnabled(false);
+    scene->getLights().push_back(newLight);
+    scene->setChanged(Scene::LIGHT_CHANGED);
+    windowModel->setSelectedLightIndex(nbLights);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
 void Controller::windowEnableLight(bool enabled) {
     ensureThreadStopped();
     int l = windowModel->getSelectedLightIndex();

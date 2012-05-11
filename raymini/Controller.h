@@ -69,6 +69,7 @@ public slots :
     void windowSetOnlyPT(bool);
     void windowSetNbImagesSpinBox(int);
     void windowSelectLight(int);
+    void windowAddLight();
     void windowEnableLight(bool);
     void windowSetLightRadius(double);
     void windowSetLightIntensity(double);
