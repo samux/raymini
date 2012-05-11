@@ -1115,6 +1115,24 @@ void Controller::windowMeshScale() {
     notifyAll();
 }
 
+void Controller::windowMeshRotate() {
+    ensureThreadStopped();
+    int io = windowModel->getSelectedObjectIndex();
+    if (io == -1) {
+        cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
+        return;
+    }
+    Object *o = scene->getObjects()[io];
+    Vec3Df axis;
+    float angle = 0;
+    window->getMeshRotateOptions(axis, angle);
+    o->getMesh().rotate(axis, angle);
+    o->updateKDtree();
+    scene->setChanged(Scene::OBJECT_CHANGED);
+    renderThread->hasToRedraw();
+    notifyAll();
+}
+
 void Controller::viewerStartsDragging(Object *o, Vec3Df i, QPoint p, float r) {
     windowModel->setDraggedObject(o, i, p, r);
     windowModel->setSelectedObject(o);

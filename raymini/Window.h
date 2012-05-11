@@ -45,6 +45,7 @@ public:
     Vec3Df getNoiseTextureOffset() const;
 
     void getMeshScaleOptions(unsigned &axis, float &ratio) const;
+    void getMeshRotateOptions(Vec3Df &axis, float &angle) const;
 
     /** Get a program color [0-1] and create a Qt Icon */
     static QIcon createIconFromColor(Vec3Df color);
@@ -136,12 +137,17 @@ private :
     QComboBox *meshesList;
     QLabel *meshViewerLabel;
     MiniGLViewer *meshViewer;
+    QLabel *meshLoadLabel;
     QPushButton *meshLoadOffButton;
     QPushButton *meshLoadSquareButton;
     QPushButton *meshLoadCubeButton;
     QComboBox *meshScaleAxisList;
+    QLabel *meshScaleLabel;
     QDoubleSpinBox *meshScaleSpinBox;
     QPushButton *meshScaleButton;
+    QDoubleSpinBox *meshRotateAxisSpinBox[3];
+    QSpinBox *meshRotateAngleSpinBox;
+    QPushButton *meshRotateButton;
 
     QComboBox *mappingObjectsList;
     QDoubleSpinBox *mappingUScale;
