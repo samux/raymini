@@ -37,7 +37,7 @@ void Controller::initAll(int argc, char **argv) {
     views.push_back(meshViewer);
 
     window = new Window(this, meshViewer);
-    window->setWindowTitle("RayMini: A minimal raytracer.");
+    window->setWindowTitle("RayMini Enhanced");
     connect(raymini, SIGNAL(lastWindowClosed()), this, SLOT(quitProgram()));
     views.push_back(window);
 
