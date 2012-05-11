@@ -30,7 +30,7 @@ void printUsage(char * name) {
          << "\toutdoor: rhino in front of a mirror + sky box" << endl
          << "\tpool : pool table" << endl
          << "\tmg : mirror and glass" << endl
-         << "\tsphere : 3 spheres and black ground (PT)" << endl
+         << "\tsphere : 3 spheres and grey ground (PT)" << endl
          << "\tmesh <mesh_path>" << endl
          << endl;
     exit(1);

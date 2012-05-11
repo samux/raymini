@@ -17,7 +17,22 @@ Edit the file raymini.pro to adapt it to your configuration (has been tested und
 On linux: 
  qmake raymini.pro
  make -j9
- ./raymini
+ ./raymini <scene>
+
+ scenes available: 
+    room: simple room
+    rs: room with sphere
+    rsm: room with mirror sphere
+    rsglas: room with glass sphere
+    rsglos: room with glossy sphere
+    lights: severals light and a ram
+    meshs: severals meshs and a light (moving ram)
+    outdoor: rhino in front of a mirror + sky box
+    pool : pool table
+    mg : mirror and glass
+    sphere : 3 spheres and grey ground (PT)
+    mesh <mesh_path>
+
 
 Features
 --------
