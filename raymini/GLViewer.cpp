@@ -497,18 +497,24 @@ void MiniGLViewer::init() {
 }
 
 void MiniGLViewer::update(const Observable *o) {
-    bool windowModelChanged = o == controller->getWindowModel() &&
+    auto windowModel = controller->getWindowModel();
+    bool windowModelChanged = o == windowModel &&
         (o->isChanged(WindowModel::SELECTED_OBJECT_CHANGED));
-    const Scene *scene = controller->getScene();
+    auto scene = controller->getScene();
     bool sceneChanged = o == scene &&
         (o->isChanged(Scene::OBJECT_CHANGED));
-    if (windowModelChanged || sceneChanged) {
+    int oi = windowModel->getSelectedObjectIndex();
+    if (oi != -1 && (windowModelChanged || sceneChanged)) {
         const BoundingBox & sceneBBox = scene->getBoundingBox();
         Vec3Df c = sceneBBox.getCenter();
         float r = sceneBBox.getRadius();
         setSceneCenter(qglviewer::Vec(c[0], c[1], c[2]));
         setSceneRadius(r);
-        showEntireScene();
+        // Move camera in order to see at least a polygon
+        Vec3Df n = scene->getObjects()[oi]->getMesh().getVertices()[0].getNormal();
+        camera()->setPosition(qglviewer::Vec(n[0], n[1], n[2]));
+        camera()->lookAt(qglviewer::Vec(0, 0, 0));
+        camera()->fitSphere(camera()->sceneCenter(), camera()->sceneRadius());
         updateGL();
     }
 }

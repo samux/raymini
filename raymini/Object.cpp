@@ -24,6 +24,14 @@ BoundingBox Object::computeBoundingBox(const Mesh & mesh) {
     return bbox;
 }
 
+void Object::updateKDtree() {
+    updateBoundingBox();
+    if (tree) {
+        delete tree;
+    }
+    tree = new KDtree(*this);
+}
+
 SkyBox *SkyBox::generateSkyBox(const SkyBoxMaterial *m, string name) {
     Mesh mesh;
     mesh.loadCube();

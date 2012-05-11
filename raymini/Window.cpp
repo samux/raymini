@@ -97,6 +97,11 @@ Vec3Df Window::getLightPos() const {
     return newPos;
 }
 
+void Window::getMeshScaleOptions(unsigned &axis, float &ratio) const {
+    axis = meshScaleAxisList->currentIndex();
+    ratio = meshScaleSpinBox->value();
+}
+
 template <typename T>
 void Window::updateList(QComboBox *c, const std::vector<T*>&v, int index, QString type) {
     c->clear();
@@ -372,6 +377,9 @@ void Window::updateMesh(const Observable *observable) {
         meshLoadCubeButton->setVisible(isSelected);
         meshViewerLabel->setVisible(isSelected);
         meshViewer->setVisible(isSelected);
+        meshScaleButton->setVisible(isSelected);
+        meshScaleAxisList->setVisible(isSelected);
+        meshScaleSpinBox->setVisible(isSelected);
     }
 }
 
@@ -1076,25 +1084,41 @@ void Window::initControlWidget() {
     meshesList = new QComboBox(meshesGroupBox);
     connect(meshesList, SIGNAL(activated(int)),
             controller, SLOT(windowSelectObject(int)));
-    meshesLayout->addWidget(meshesList, meshesLayoutRowIndex++, 0, 1, 2);
+    meshesLayout->addWidget(meshesList, meshesLayoutRowIndex++, 0, 1, 3);
 
     meshLoadOffButton = new QPushButton("Load .off file", meshesGroupBox);
     connect(meshLoadOffButton, SIGNAL(clicked()),
             controller, SLOT(windowMeshLoadOff()));
-    meshesLayout->addWidget(meshLoadOffButton, meshesLayoutRowIndex++, 0, 1, 2);
+    meshesLayout->addWidget(meshLoadOffButton, meshesLayoutRowIndex, 0);
     meshLoadSquareButton = new QPushButton("Load square", meshesGroupBox);
     connect(meshLoadSquareButton, SIGNAL(clicked()),
             controller, SLOT(windowMeshLoadSquare()));
-    meshesLayout->addWidget(meshLoadSquareButton, meshesLayoutRowIndex, 0);
+    meshesLayout->addWidget(meshLoadSquareButton, meshesLayoutRowIndex, 1);
     meshLoadCubeButton = new QPushButton("Load cube", meshesGroupBox);
     connect(meshLoadCubeButton, SIGNAL(clicked()),
             controller, SLOT(windowMeshLoadCube()));
-    meshesLayout->addWidget(meshLoadCubeButton, meshesLayoutRowIndex++, 1);
+    meshesLayout->addWidget(meshLoadCubeButton, meshesLayoutRowIndex++, 2);
+
+    meshScaleAxisList = new QComboBox(meshesGroupBox);
+    QString meshAxisNames[4] = {"X", "Y", "Z", "All"};
+    for (unsigned i=0; i<4; i++) {
+        meshScaleAxisList->addItem(meshAxisNames[i]);
+    }
+    meshesLayout->addWidget(meshScaleAxisList, meshesLayoutRowIndex, 0);
+    meshScaleSpinBox = new QDoubleSpinBox(meshesGroupBox);
+    meshScaleSpinBox->setMinimum(0.01);
+    meshScaleSpinBox->setMaximum(100);
+    meshScaleSpinBox->setSingleStep(0.1);
+    meshesLayout->addWidget(meshScaleSpinBox, meshesLayoutRowIndex, 1);
+    meshScaleButton = new QPushButton("Scale", meshesGroupBox);
+    connect(meshScaleButton, SIGNAL(clicked()),
+            controller, SLOT(windowMeshScale()));
+    meshesLayout->addWidget(meshScaleButton, meshesLayoutRowIndex++, 2);
 
     meshViewerLabel = new QLabel("Mesh preview: (double clic to toggle wireframe)",
             meshesGroupBox);
-    meshesLayout->addWidget(meshViewerLabel, meshesLayoutRowIndex++, 0, 1, 2);
-    meshesLayout->addWidget(meshViewer, meshesLayoutRowIndex++, 0, 1, 2);
+    meshesLayout->addWidget(meshViewerLabel, meshesLayoutRowIndex++, 0, 1, 3);
+    meshesLayout->addWidget(meshViewer, meshesLayoutRowIndex++, 0, 1, 3);
 
     sceneTabs->addTab(meshesGroupBox, "Meshes");
 

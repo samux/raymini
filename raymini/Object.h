@@ -69,6 +69,8 @@ public:
     void updateBoundingBox () { bbox = computeBoundingBox(mesh); }
     static BoundingBox computeBoundingBox(const Mesh & mesh);
 
+    void updateKDtree();
+
 protected:
     Mesh mesh;
     const Material * mat;

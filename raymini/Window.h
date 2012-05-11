@@ -44,6 +44,8 @@ public:
 
     Vec3Df getNoiseTextureOffset() const;
 
+    void getMeshScaleOptions(unsigned &axis, float &ratio) const;
+
     /** Get a program color [0-1] and create a Qt Icon */
     static QIcon createIconFromColor(Vec3Df color);
 
@@ -137,6 +139,9 @@ private :
     QPushButton *meshLoadOffButton;
     QPushButton *meshLoadSquareButton;
     QPushButton *meshLoadCubeButton;
+    QComboBox *meshScaleAxisList;
+    QDoubleSpinBox *meshScaleSpinBox;
+    QPushButton *meshScaleButton;
 
     QComboBox *mappingObjectsList;
     QDoubleSpinBox *mappingUScale;
