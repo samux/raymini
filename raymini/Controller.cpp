@@ -1091,6 +1091,7 @@ void Controller::windowSetCubicMapping() {
 }
 
 void Controller::windowMeshLoadOff() {
+    ensureThreadStopped();
     int io = windowModel->getSelectedObjectIndex();
     if (io == -1) {
         cerr << __FUNCTION__ << " called even though an object hasn't been selected!\n";
@@ -1101,7 +1102,6 @@ void Controller::windowMeshLoadOff() {
                                                     "./models",
                                                     "*.off");
     if (!filename.isNull()) {
-        ensureThreadStopped();
         Object *o = scene->getObjects()[io];
         o->getMesh().loadOFF(filename.toStdString().c_str());
         o->updateKDtree();
