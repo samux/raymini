@@ -273,11 +273,14 @@ ImageNormalTexture::ImageNormalTexture(const char *fileName, string name):
 ImageNormalTexture::~ImageNormalTexture() {}
 
 Vec3Df ImageNormalTexture::getNormal(Ray *ray) const {
+    Vec3Df textureNormal(0, 0, 1);
     Vec3Df pointNormal = ray->getIntersection().getNormal();
-    Vec3Df color = ImageTexture::getValue(ray);
-    pointNormal += 2.0*color - Vec3Df(1, 1, 1);
-    pointNormal.normalize();
-    return pointNormal;
+    Vec3Df color = 2.0*ImageTexture::getValue(ray)-Vec3Df(1, 1, 1);
+    Vec3Df axis = Vec3Df::crossProduct(textureNormal, pointNormal);
+    float angle = asin(axis.getLength());
+    Vec3Df normal = color.rotate(axis, angle);
+    normal.normalize();
+    return normal;
 }
 
 /******* NOISE NORMAL TEXTURE ************/
