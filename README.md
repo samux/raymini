@@ -4,10 +4,10 @@ RayMini ENHANCED
 Authors
 -------
 
-Tamy Boubekeur (tamy.boubekeur@telecom-paristech.fr)
-Bertrand Chazot (bertrand.chazot@gmail.com)
-Samuel Mokrani (samuel.mokrani@gmail.com)
-Axel Schumacher (axel.schumacher@gmail.com)
+- Tamy Boubekeur (tamy.boubekeur@telecom-paristech.fr)
+- Bertrand Chazot (bertrand.chazot@gmail.com)
+- Samuel Mokrani (samuel.mokrani@gmail.com)
+- Axel Schumacher (axel.schumacher@gmail.com)
 
 Compiling
 ----------
@@ -15,23 +15,23 @@ Required library: GCC >v4, OpenGL, QT >v4.4, libQGLViewer and GLEW (for GPU exte
 Edit the file raymini.pro to adapt it to your configuration (has been tested under Linux Ubuntu).
 
 On linux: 
- qmake raymini.pro
- make -j9
- ./raymini <scene>
+- qmake raymini.pro
+- make -j9
+- ./raymini <scene>
 
- scenes available: 
-    room: simple room
-    rs: room with sphere
-    rsm: room with mirror sphere
-    rsglas: room with glass sphere
-    rsglos: room with glossy sphere
-    lights: severals light and a ram
-    meshs: severals meshs and a light (moving ram)
-    outdoor: rhino in front of a mirror + sky box
-    pool : pool table
-    mg : mirror and glass
-    sphere : 3 spheres and grey ground (PT)
-    mesh <mesh_path>
+Available scenes: 
+-    room: simple room
+-    rs: room with sphere
+-    rsm: room with mirror sphere
+-    rsglas: room with glass sphere
+-    rsglos: room with glossy sphere
+-    lights: severals light and a ram
+-    meshs: severals meshes and a light (moving ram)
+-    outdoor: rhino in front of a mirror + sky box
+-    pool : pool table
+-    mg : mirror and glass
+-    sphere : 3 spheres and grey ground (PT)
+-    mesh <mesh_path>
 
 
 Features
